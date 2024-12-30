@@ -1,3 +1,6 @@
+const sequelize = require('../config/database');
+
+// Import models
 const Tour = require('./Tour');
 const TourDay = require('./TourDay');
 const TourService = require('./TourService');
@@ -9,18 +12,8 @@ const ServiceCategory = require('./ServiceCategory');
 const Translation = require('./Translation');
 const DayTemplate = require('./DayTemplate');
 
-// Relationships
-Tour.hasMany(TourDay, { foreignKey: 'tourId' });
-TourDay.belongsTo(Tour, { foreignKey: 'tourId' });
-
-TourDay.hasMany(TourService, { foreignKey: 'tourDayId' });
-TourService.belongsTo(TourDay, { foreignKey: 'tourDayId' });
-
-Tour.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
-TourService.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
-
-// Export all models
-module.exports = {
+// Define models object
+const models = {
     Tour,
     TourDay,
     TourService,
@@ -33,9 +26,25 @@ module.exports = {
     DayTemplate
 };
 
-// Call associations AFTER exporting all models
-Object.values(module.exports).forEach((model) => {
+// Basic relationships - nên chuyển vào từng model tương ứng
+Tour.hasMany(TourDay, { foreignKey: 'tourId' });
+TourDay.belongsTo(Tour, { foreignKey: 'tourId' });
+
+TourDay.hasMany(TourService, { foreignKey: 'tourDayId' });
+TourService.belongsTo(TourDay, { foreignKey: 'tourDayId' });
+
+Tour.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+TourService.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+
+// Setup model associations
+Object.values(models).forEach((model) => {
     if (model.associate) {
-        model.associate(module.exports);
+        model.associate(models);
     }
 });
+
+// Export cả models và sequelize
+module.exports = {
+    ...models,
+    sequelize
+};
