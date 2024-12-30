@@ -1,4 +1,3 @@
-// src/index.js
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,6 +5,7 @@ const morgan = require('morgan');
 const compression = require('compression');
 const sequelize = require('./config/database');
 const seedAdmin = require('./database/seeders/adminSeed');
+const basicDataSeed = require('./database/seeders/basicDataSeed');
 const { connectRedis, setCache, getCache } = require('./config/redis');
 
 
@@ -34,7 +34,9 @@ sequelize.sync({ force: true }) // Use { force: true } in development only
     .then(async () => {
         console.log('Database synced');
         // Seed admin user
-        await seedAdmin();
+        await seedAdmin(); 
+        await basicDataSeed();
+        console.log('All seeds completed');
     })
     .catch(err => {
         console.error('Error syncing database:', err);
