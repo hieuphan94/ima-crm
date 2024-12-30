@@ -42,11 +42,13 @@ sequelize.sync({ force: true }) // Use { force: true } in development only
 
 
 // Welcome route
-app.get('/', (req, res) => {
-    res.json({ 
-        message: 'Welcome to IMA CRM API',
-        version: '1.0.0',
-        docs: '/api-docs' // Future Swagger/OpenAPI docs
+app.get('/api', (req, res) => {
+    res.json({
+      message: 'IMA CRM API',
+      endpoints: {
+        users: '/api/users',
+        tours: '/api/tours'
+      }
     });
 });
 

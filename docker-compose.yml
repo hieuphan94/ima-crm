@@ -44,6 +44,15 @@ services:
     volumes:
       - redisdata:/data
 
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./services/nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend
+
 volumes:
   pgdata:
   redisdata:
