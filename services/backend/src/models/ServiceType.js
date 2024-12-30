@@ -22,7 +22,12 @@ const ServiceType = sequelize.define('ServiceType', {
         allowNull: false,
         unique: true,
         set(value) {
-            const id = value.toLowerCase().slice(0, 3);
+            let id;
+            if (value === 'CAMPERVAN') {
+                id = 'cpv';
+            } else {
+                id = value.toLowerCase().slice(0, 3);
+            }
             this.setDataValue('id', id);
             this.setDataValue('name', value);
         }

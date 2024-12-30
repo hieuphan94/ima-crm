@@ -3,16 +3,18 @@ const sequelize = require('../config/database');
 
 const Language = sequelize.define('Language', {
     id: {
-        type: DataTypes.STRING(10),
-        primaryKey: true,
-        allowNull: false
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
     name: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    code: {
+        type: DataTypes.STRING(2),
         allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+        unique: true
     },
     isDefault: {
         type: DataTypes.BOOLEAN,
@@ -30,11 +32,8 @@ const Language = sequelize.define('Language', {
             fields: ['isActive']
         },
         {
-            unique: true,
-            fields: ['isDefault'],
-            where: {
-                isDefault: true
-            }
+            fields: ['code'],
+            unique: true
         }
     ]
 });
@@ -46,4 +45,4 @@ Language.associate = (models) => {
     });
 };
 
-module.exports = Language; 
+module.exports = Language;
