@@ -18,13 +18,7 @@ TourService.belongsTo(TourDay, { foreignKey: 'tourDayId' });
 Tour.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 TourService.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
 
-// Call all model associations
-[Language, Location, ServiceType, ServiceCategory, Translation].forEach((model) => {
-    if (model.associate) {
-        model.associate(module.exports);
-    }
-});
-
+// Export all models
 module.exports = {
     Tour,
     TourDay,
@@ -36,3 +30,10 @@ module.exports = {
     ServiceCategory,
     Translation
 };
+
+// Call associations AFTER exporting all models
+Object.values(module.exports).forEach((model) => {
+    if (model.associate) {
+        model.associate(module.exports);
+    }
+});
