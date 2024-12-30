@@ -7,6 +7,7 @@ const Location = require('./Location');
 const ServiceType = require('./ServiceType');
 const ServiceCategory = require('./ServiceCategory');
 const Translation = require('./Translation');
+const DayTemplate = require('./DayTemplate');
 
 // Relationships
 Tour.hasMany(TourDay, { foreignKey: 'tourId' });
@@ -28,7 +29,8 @@ module.exports = {
     Location,
     ServiceType,
     ServiceCategory,
-    Translation
+    Translation,
+    DayTemplate
 };
 
 // Call associations AFTER exporting all models

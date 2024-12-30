@@ -12,11 +12,8 @@ const Translation = sequelize.define('Translation', {
         allowNull: false
     },
     entityType: {
-        type: DataTypes.ENUM('location', 'service_category'),
-        allowNull: false,
-        validate: {
-            isIn: [['location', 'service_category']]
-        }
+        type: DataTypes.ENUM('location', 'service_category', 'day_template'),
+        allowNull: false
     },
     languageId: {
         type: DataTypes.STRING(10),
