@@ -1,4 +1,4 @@
-const { ServiceCategory, Translation } = require('../models');
+const { ServiceCategory, Translation, Language } = require('../models');
 
 class ServiceCategoryController {
     // Get all services with pagination
@@ -99,59 +99,86 @@ class ServiceCategoryController {
     // Update service
     async update(req, res) {
         try {
-            // Kiểm tra department
-            if (req.user.role !== 'admin' && req.user.department !== 'sales') {
-                return res.status(403).json({ message: 'Permission denied' });
-            }
-
             const { id } = req.params;
-            const { name, typeId, locationId, stars, description, website, translations } = req.body;
+            const { website, stars, translations } = req.body;
 
-            // Find service
-            const service = await ServiceCategory.findOne({
-                where: { 
-                    id,
-                    isActive: true
-                }
-            });
-
+            // 1. Tìm service
+            const service = await ServiceCategory.findByPk(id);
             if (!service) {
                 return res.status(404).json({ message: 'Service not found' });
             }
 
-            // Update service
+            // 2. Update thông tin cơ bản
             await service.update({
-                name: name || service.name,
-                typeId: typeId || service.typeId,
-                locationId: locationId || service.locationId,
-                stars: stars !== undefined ? stars : service.stars,
-                description: description !== undefined ? description : service.description,
-                website: website !== undefined ? website : service.website,
+                website,
+                stars,
                 updatedBy: req.user.id
             });
 
-            // Update translations if provided
-            if (translations) {
-                await Translation.destroy({
+            // 3. Xử lý translations
+            if (translations && translations.length > 0) {
+                // Tìm ngôn ngữ mặc định
+                const defaultLanguage = await Language.findOne({
+                    where: { isDefault: true }
+                });
+
+                // Lấy tất cả translations hiện tại
+                const currentTranslations = await Translation.findAll({
                     where: {
                         entityId: id,
                         entityType: 'service_category'
                     }
                 });
 
-                if (translations.length > 0) {
-                    await Translation.bulkCreate(
-                        translations.map(t => ({
-                            ...t,
+                // Tạo map từ translations hiện tại
+                const translationsMap = currentTranslations.reduce((acc, trans) => {
+                    acc[trans.languageId] = trans;
+                    return acc;
+                }, {});
+
+                // Xử lý từng translation mới
+                for (const trans of translations) {
+                    if (translationsMap[trans.languageId]) {
+                        // Update translation hiện có
+                        await Translation.update(
+                            {
+                                name: trans.name,
+                                description: trans.description,
+                                updatedBy: req.user.id
+                            },
+                            {
+                                where: {
+                                    entityId: id,
+                                    entityType: 'service_category',
+                                    languageId: trans.languageId
+                                }
+                            }
+                        );
+                    } else {
+                        // Tạo translation mới
+                        await Translation.create({
+                            ...trans,
                             entityId: id,
                             entityType: 'service_category',
                             createdBy: req.user.id
-                        }))
-                    );
+                        });
+                    }
+                }
+
+                // Update service chính nếu có bản dịch mặc định
+                const defaultTranslation = translations.find(
+                    t => t.languageId === defaultLanguage.id
+                );
+
+                if (defaultTranslation) {
+                    await service.update({
+                        name: defaultTranslation.name,
+                        description: defaultTranslation.description
+                    });
                 }
             }
 
-            // Return updated data
+            // 4. Trả về kết quả
             const result = await ServiceCategory.findByPk(id, {
                 include: ['translations']
             });

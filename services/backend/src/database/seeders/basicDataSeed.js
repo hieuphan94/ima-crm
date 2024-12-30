@@ -10,17 +10,26 @@ async function seedBasicData() {
                 id: uuidv4(),
                 name: 'English',
                 code: 'en',
-                isDefault: true
+                isDefault: true,
+                isActive: true
             },
             {
                 id: uuidv4(),
                 name: 'French',
                 code: 'fr',
-                isDefault: false
+                isDefault: false,
+                isActive: true
             }
         ];
 
+        // Đảm bảo chỉ có 1 ngôn ngữ mặc định
         for (const lang of languages) {
+            if (lang.isDefault) {
+                await Language.update(
+                    { isDefault: false },
+                    { where: {} }
+                );
+            }
             await Language.findOrCreate({
                 where: { code: lang.code },
                 defaults: lang
