@@ -42,6 +42,15 @@ const ServiceCategory = sequelize.define('ServiceCategory', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    website: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isUrl: {
+                msg: "Website must be a valid URL"
+            }
+        }
+    },
     isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
