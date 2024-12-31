@@ -1,10 +1,11 @@
-const { Location, ServiceType, Language } = require('../../models');
+const { Location, ServiceType, ServiceCategory, Language, DayTemplate } = require('../../models');
 const { v4: uuidv4 } = require('uuid');
 const slugify = require('slugify');
 
 async function seedBasicData() {
     try {
-        // 1. Seed Languages (UUID + code)
+        // 1. Seed Languages
+        console.log('Seeding languages...');
         const languages = [
             {
                 id: uuidv4(),
@@ -19,25 +20,30 @@ async function seedBasicData() {
                 code: 'fr',
                 isDefault: false,
                 isActive: true
+            },
+            {
+                id: uuidv4(),
+                name: 'Vietnamese',
+                code: 'vi',
+                isDefault: false,
+                isActive: true
             }
         ];
 
         // Đảm bảo chỉ có 1 ngôn ngữ mặc định
         for (const lang of languages) {
             if (lang.isDefault) {
-                await Language.update(
-                    { isDefault: false },
-                    { where: {} }
-                );
+                await Language.update({ isDefault: false }, { where: {} });
             }
             await Language.findOrCreate({
                 where: { code: lang.code },
                 defaults: lang
             });
         }
-        console.log('Languages seeded successfully');
+        console.log('✓ Languages seeded');
 
-        // 2. Seed Locations (UUID + auto code from name)
+        // 2. Seed Locations
+        console.log('Seeding locations...');
         const locations = [
             {
                 id: uuidv4(),
@@ -48,8 +54,8 @@ async function seedBasicData() {
             },
             {
                 id: uuidv4(),
-                name: 'Hạ Long',
-                code: slugify('Hạ Long', { lower: true }),
+                name: 'Vịnh Hạ Long',
+                code: slugify('Vịnh Hạ Long', { lower: true }),
                 country: 'Vietnam',
                 coordinates: { lat: 20.9598, lng: 107.0480 }
             },
@@ -59,63 +65,32 @@ async function seedBasicData() {
                 code: slugify('Sapa', { lower: true }),
                 country: 'Vietnam',
                 coordinates: { lat: 22.3364, lng: 103.8438 }
-            },
-            {
-                id: uuidv4(),
-                name: 'Hội An',
-                code: slugify('Hội An', { lower: true }),
-                country: 'Vietnam',
-                coordinates: { lat: 15.8801, lng: 108.3380 }
-            },
-            {
-                id: uuidv4(),
-                name: 'Đà Nẵng',
-                code: slugify('Đà Nẵng', { lower: true }),
-                country: 'Vietnam',
-                coordinates: { lat: 16.0544, lng: 108.2022 }
-            },
-            {
-                id: uuidv4(),
-                name: 'Nha Trang',
-                code: slugify('Nha Trang', { lower: true }),
-                country: 'Vietnam',
-                coordinates: { lat: 12.2388, lng: 109.1967 }
-            },
-            {
-                id: uuidv4(),
-                name: 'Đà Lạt',
-                code: slugify('Đà Lạt', { lower: true }),
-                country: 'Vietnam',
-                coordinates: { lat: 11.9404, lng: 108.4583 }
-            },
-            {
-                id: uuidv4(),
-                name: 'Phú Quốc',
-                code: slugify('Phú Quốc', { lower: true }),
-                country: 'Vietnam',
-                coordinates: { lat: 10.2896, lng: 103.9829 }
             }
         ];
 
+        // Seed từng location và lưu lại reference
+        const locationRefs = {};
         for (const loc of locations) {
-            await Location.findOrCreate({
+            const [location] = await Location.findOrCreate({
                 where: { code: loc.code },
                 defaults: loc
             });
+            locationRefs[loc.name] = location;  // Lưu reference để dùng sau
         }
-        console.log('Locations seeded successfully');
+        console.log('✓ Locations seeded');
 
-        // 3. Seed Service Types (ID tự động từ name)
+        // 3. Seed Service Types
+        console.log('Seeding service types...');
         const serviceTypes = [
-            { name: 'HOTEL' },       // -> id: 'hot'
-            { name: 'CAMPING' },     // -> id: 'cam'
-            { name: 'BED_BREAKFAST' },// -> id: 'bed'
-            { name: 'CRUISE' },      // -> id: 'cru'
-            { name: 'LODGE' },       // -> id: 'lod'
-            { name: 'UNUSUAL' },     // -> id: 'unu'
-            { name: 'BIVOUAC' },     // -> id: 'biv'
-            { name: 'CAMPERVAN' },   // -> id: 'cam'
-            { name: 'TRAIN_CRUISE' } // -> id: 'tra'
+            { name: 'HOTEL' },          // -> id: 'hot'
+            { name: 'CAMPING' },        // -> id: 'cam'
+            { name: 'BED_BREAKFAST' },  // -> id: 'bed'
+            { name: 'CRUISE' },         // -> id: 'cru'
+            { name: 'LODGE' },          // -> id: 'lod'
+            { name: 'UNUSUAL' },        // -> id: 'unu'
+            { name: 'BIVOUAC' },        // -> id: 'biv'
+            { name: 'CAMPERVAN' },      // -> id: 'cpv'
+            { name: 'TRAIN_CRUISE' }    // -> id: 'tra'
         ];
 
         for (const type of serviceTypes) {
@@ -124,11 +99,137 @@ async function seedBasicData() {
                 defaults: type
             });
         }
-        console.log('Service Types seeded successfully');
+        console.log('✓ Service Types seeded');
+
+        // 4. Seed Service Categories
+        console.log('Seeding service categories...');
+        
+        // Lấy locations đã seed để có ID thực
+        const hanoiLocation = await Location.findOne({ 
+            where: { code: slugify('Hà Nội', { lower: true }) }
+        });
+        const halongLocation = await Location.findOne({ 
+            where: { code: slugify('Vịnh Hạ Long', { lower: true }) }
+        });
+
+        const serviceCategories = [
+            {
+                id: uuidv4(),
+                typeId: 'hot',
+                name: 'Khách sạn 5 sao Hà Nội',
+                description: 'Các khách sạn 5 sao tại Hà Nội',
+                locationId: hanoiLocation?.id,
+                stars: 5,
+                website: 'https://example.com',
+                isActive: true
+            },
+            {
+                id: uuidv4(),
+                typeId: 'hot',
+                name: 'Khách sạn 4 sao Hà Nội',
+                description: 'Các khách sạn 4 sao tại Hà Nội',
+                locationId: hanoiLocation?.id,
+                stars: 4,
+                website: 'https://example.com',
+                isActive: true
+            },
+            {
+                id: uuidv4(),
+                typeId: 'cru',
+                name: 'Du thuyền Hạ Long Premium',
+                description: 'Du thuyền cao cấp tại Vịnh Hạ Long',
+                locationId: halongLocation?.id,
+                stars: 5,
+                website: 'https://example.com',
+                isActive: true
+            },
+            {
+                id: uuidv4(),
+                typeId: 'cru',
+                name: 'Du thuyền Hạ Long Deluxe',
+                description: 'Du thuyền tiêu chuẩn tại Vịnh Hạ Long',
+                locationId: halongLocation?.id,
+                stars: 4,
+                website: 'https://example.com',
+                isActive: true
+            }
+        ];
+
+        // Chỉ seed các categories có locationId hợp lệ
+        for (const category of serviceCategories) {
+            if (category.locationId) {
+                await ServiceCategory.findOrCreate({
+                    where: { name: category.name },
+                    defaults: category
+                });
+            }
+        }
+        console.log('✓ Service Categories seeded');
+
+        // 5. Seed Day Templates
+        console.log('Seeding day templates...');
+
+        const dayTemplates = [
+            {
+                id: uuidv4(),
+                name: 'Hà Nội - Hạ Long Classic',
+                description: 'Tour kết hợp Hà Nội và Vịnh Hạ Long',
+                locations: [
+                    {
+                        id: locationRefs['Hà Nội']?.id,
+                        name: 'Hà Nội',
+                        coordinates: { lat: 21.0285, lng: 105.8542 }
+                    },
+                    {
+                        id: locationRefs['Vịnh Hạ Long']?.id,
+                        name: 'Vịnh Hạ Long',
+                        coordinates: { lat: 20.9598, lng: 107.0480 }
+                    }
+                ],
+                images: [
+                    'hanoi-halong-1.jpg',
+                    'hanoi-halong-2.jpg'
+                ],
+                isActive: true
+            },
+            {
+                id: uuidv4(),
+                name: 'Hà Nội - Sapa Adventure',
+                description: 'Tour khám phá Hà Nội và Sapa',
+                locations: [
+                    {
+                        id: locationRefs['Hà Nội']?.id,
+                        name: 'Hà Nội',
+                        coordinates: { lat: 21.0285, lng: 105.8542 }
+                    },
+                    {
+                        id: locationRefs['Sapa']?.id,
+                        name: 'Sapa',
+                        coordinates: { lat: 22.3364, lng: 103.8438 }
+                    }
+                ],
+                images: [
+                    'hanoi-sapa-1.jpg',
+                    'hanoi-sapa-2.jpg'
+                ],
+                isActive: true
+            }
+        ];
+
+        // Seed day templates
+        for (const template of dayTemplates) {
+            await DayTemplate.findOrCreate({
+                where: { name: template.name },
+                defaults: template
+            });
+        }
+        console.log('✓ Day Templates seeded');
+
+        console.log('✓ All basic data seeded successfully');
 
     } catch (error) {
         console.error('Error seeding basic data:', error);
-        throw error; // Để xem lỗi chi tiết
+        throw error;
     }
 }
 
