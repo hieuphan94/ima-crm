@@ -1,4 +1,5 @@
 const { User } = require('../../models');
+const { v4: uuidv4 } = require('uuid');
 
 async function seedAdmin() {
     try {
@@ -8,8 +9,9 @@ async function seedAdmin() {
         });
 
         if (!existingAdmin) {
-            // Tạo admin user
+            // Tạo admin user với UUID
             await User.create({
+                id: uuidv4(), // Thêm UUID
                 username: 'admin',
                 email: 'admin@example.com',
                 password: 'admin123', // Nên thay đổi password này

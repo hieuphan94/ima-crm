@@ -1,292 +1,363 @@
-// src/controllers/tourController.js
-const { Tour, TourDay, TourService, User } = require('../models');
-const { Op } = require('sequelize');
+// src/controllers/TourController.js
+const { Tour, TourDay, Translation, Language, User } = require('../models');
+const sequelize = require('../config/database');
 
 class TourController {
-    // 1. Tạo tour mới
-    static async createTour(req, res) {
+    // Get all with pagination
+    async getAll(req, res) {
         try {
-            const tourData = {
-                name: req.body.name,
-                description: req.body.description,
-                startDate: req.body.startDate,
-                endDate: req.body.endDate,
-                location: req.body.location,
-                createdBy: req.user.id,
-                status: 'draft',
-                currentDepartment: 'sales'
-            };
-
-            // Tạo tour
-            const tour = await Tour.create(tourData);
-
-            // Tạo các ngày tour
-            if (req.body.days && req.body.days.length > 0) {
-                const tourDays = req.body.days.map(day => ({
-                    ...day,
-                    tourId: tour.id
-                }));
-                await TourDay.bulkCreate(tourDays);
-            }
-
-            // Lấy tour đầy đủ thông tin
-            const fullTour = await Tour.findByPk(tour.id, {
-                include: [{
-                    model: TourDay,
-                    include: [TourService]
-                }]
-            });
-
-            res.status(201).json({
-                message: 'Tour created successfully',
-                tour: fullTour
-            });
-
-        } catch (error) {
-            console.error('Create tour error:', error);
-            res.status(500).json({
-                message: 'Error creating tour',
-                error: error.message
-            });
-        }
-    }
-
-    // 2. Lấy danh sách tours
-    static async getTours(req, res) {
-        try {
-            const { 
-                page = 1, 
-                limit = 10, 
-                search = '',
-                status,
-                department,
-                startDate,
-                endDate
-            } = req.query;
-            
+            const { page = 1, limit = 10 } = req.query;
             const offset = (page - 1) * limit;
-            
-            // Xây dựng where clause
-            let whereClause = {};
-            
-            if (search) {
-                whereClause[Op.or] = [
-                    { name: { [Op.iLike]: `%${search}%` } },
-                    { description: { [Op.iLike]: `%${search}%` } },
-                    { location: { [Op.iLike]: `%${search}%` } }
-                ];
-            }
-            
-            if (status) {
-                whereClause.status = status;
-            }
-            
-            if (department) {
-                whereClause.currentDepartment = department;
-            }
-            
-            if (startDate && endDate) {
-                whereClause.startDate = {
-                    [Op.between]: [new Date(startDate), new Date(endDate)]
-                };
-            }
 
             const tours = await Tour.findAndCountAll({
-                where: whereClause,
-                include: [
-                    {
-                        model: TourDay,
-                        include: [TourService]
-                    },
-                    {
-                        model: User,
-                        as: 'creator',
-                        attributes: ['id', 'username', 'fullName']
-                    }
-                ],
-                limit: parseInt(limit),
-                offset: parseInt(offset),
-                order: [['createdAt', 'DESC']]
+                where: { isActive: true },
+                include: ['translations'],
+                limit,
+                offset,
+                order: [['createdAt', 'DESC']],
+                distinct: true
             });
 
-            res.json({
-                message: 'Tours retrieved successfully',
-                data: {
-                    tours: tours.rows,
-                    total: tours.count,
-                    totalPages: Math.ceil(tours.count / limit),
-                    currentPage: parseInt(page)
-                }
-            });
+            // Add duration for each tour
+            const toursWithDuration = await Promise.all(
+                tours.rows.map(async (tour) => {
+                    const daysCount = await TourDay.count({
+                        where: { tourId: tour.id }
+                    });
+                    const tourData = tour.toJSON();
+                    tourData.duration = daysCount;
+                    return tourData;
+                })
+            );
 
+            return res.json({
+                total: tours.count,
+                totalPages: Math.ceil(tours.count / limit),
+                currentPage: parseInt(page),
+                tours: toursWithDuration
+            });
         } catch (error) {
-            console.error('Get tours error:', error);
-            res.status(500).json({
-                message: 'Error retrieving tours',
-                error: error.message
-            });
+            return res.status(500).json({ message: error.message });
         }
     }
 
-    // 3. Lấy chi tiết tour
-    static async getTour(req, res) {
+    // Get one
+    async getOne(req, res) {
         try {
-            const { id } = req.params;
-
-            const tour = await Tour.findByPk(id, {
+            const tour = await Tour.findOne({
+                where: {
+                    id: req.params.id,
+                    isActive: true
+                },
                 include: [
+                    'translations',
                     {
                         model: TourDay,
-                        include: [TourService]
-                    },
-                    {
-                        model: User,
-                        as: 'creator',
-                        attributes: ['id', 'username', 'fullName']
+                        as: 'days',
+                        include: ['services'],
+                        order: [['dayNumber', 'ASC']]
                     }
                 ]
             });
 
             if (!tour) {
-                return res.status(404).json({
-                    message: 'Tour not found'
-                });
+                return res.status(404).json({ message: 'Tour not found' });
             }
 
-            res.json({
-                message: 'Tour retrieved successfully',
-                tour
-            });
+            const tourData = tour.toJSON();
+            tourData.duration = tourData.days?.length || 0;
 
+            return res.json(tourData);
         } catch (error) {
-            console.error('Get tour error:', error);
-            res.status(500).json({
-                message: 'Error retrieving tour',
-                error: error.message
-            });
+            return res.status(500).json({ message: error.message });
         }
     }
 
-    // 4. Cập nhật tour
-    static async updateTour(req, res) {
+    // Create
+    async create(req, res) {
+        const transaction = await sequelize.transaction();
         try {
-            const { id } = req.params;
-            const updateData = req.body;
+            const { name, description, code, price = 1.00, currency, translations } = req.body;
 
-            // Kiểm tra tour tồn tại
-            const tour = await Tour.findByPk(id);
-            if (!tour) {
-                return res.status(404).json({
-                    message: 'Tour not found'
+            // Chỉ validate code
+            if (!code) {
+                return res.status(400).json({ 
+                    message: 'Tour code is required' 
                 });
             }
 
-            // Cập nhật thông tin tour
-            await tour.update(updateData);
-
-            // Cập nhật các ngày tour nếu có
-            if (updateData.days) {
-                // Xóa các ngày cũ
-                await TourDay.destroy({
-                    where: { tourId: id }
+            // Check if code exists
+            const existingTour = await Tour.findOne({ 
+                where: { code } 
+            });
+            if (existingTour) {
+                return res.status(400).json({ 
+                    message: 'Tour code already exists' 
                 });
-
-                // Tạo các ngày mới
-                const tourDays = updateData.days.map(day => ({
-                    ...day,
-                    tourId: id
-                }));
-                await TourDay.bulkCreate(tourDays);
             }
 
-            // Lấy tour đã cập nhật
-            const updatedTour = await Tour.findByPk(id, {
-                include: [{
-                    model: TourDay,
-                    include: [TourService]
-                }]
+            // Create tour with default price if not provided
+            const tour = await Tour.create({
+                name,
+                description,
+                code,
+                price,  // sẽ dùng giá trị mặc định 1.00 nếu không có
+                currency,
+                createdBy: req.user.id
+            }, { transaction });
+
+            // Handle translations if provided
+            if (translations?.length > 0) {
+                const defaultLanguage = await Language.findOne({
+                    where: { isDefault: true }
+                });
+
+                await Translation.bulkCreate(
+                    translations.map(t => ({
+                        ...t,
+                        entityId: tour.id,
+                        entityType: 'tour',
+                        createdBy: req.user.id
+                    })),
+                    { transaction }
+                );
+
+                // Update tour with default translation
+                const defaultTranslation = translations.find(
+                    t => t.languageId === defaultLanguage.id
+                );
+                if (defaultTranslation) {
+                    await tour.update({
+                        name: defaultTranslation.name,
+                        description: defaultTranslation.description
+                    }, { transaction });
+                }
+            }
+
+            await transaction.commit();
+
+            // Return created tour
+            const result = await Tour.findByPk(tour.id, {
+                include: ['translations']
             });
 
-            res.json({
-                message: 'Tour updated successfully',
-                tour: updatedTour
-            });
-
+            return res.status(201).json(result);
         } catch (error) {
-            console.error('Update tour error:', error);
-            res.status(500).json({
-                message: 'Error updating tour',
-                error: error.message
-            });
+            await transaction.rollback();
+            return res.status(500).json({ message: error.message });
         }
     }
 
-    // 5. Xóa tour
-    static async deleteTour(req, res) {
+    // Update
+    async update(req, res) {
+        const transaction = await sequelize.transaction();
         try {
             const { id } = req.params;
+            const { name, description, code, price, currency, status, translations } = req.body;
 
-            // Kiểm tra tour tồn tại
+            // Find tour
             const tour = await Tour.findByPk(id);
             if (!tour) {
-                return res.status(404).json({
-                    message: 'Tour not found'
-                });
+                return res.status(404).json({ message: 'Tour not found' });
             }
 
-            // Xóa các ngày và dịch vụ liên quan
-            await TourDay.destroy({
-                where: { tourId: id }
+            // Check code if changed
+            if (code && code !== tour.code) {
+                const existingTour = await Tour.findOne({ where: { code } });
+                if (existingTour) {
+                    return res.status(400).json({ message: 'Tour code already exists' });
+                }
+            }
+
+            // Update tour
+            await tour.update({
+                code,
+                price,
+                currency,
+                status,
+                updatedBy: req.user.id
+            }, { transaction });
+
+            // Handle translations if provided
+            if (translations?.length > 0) {
+                const defaultLanguage = await Language.findOne({
+                    where: { isDefault: true }
+                });
+
+                // Get current translations
+                const currentTranslations = await Translation.findAll({
+                    where: {
+                        entityId: id,
+                        entityType: 'tour'
+                    }
+                });
+
+                // Create map of current translations
+                const translationsMap = currentTranslations.reduce((acc, trans) => {
+                    acc[trans.languageId] = trans;
+                    return acc;
+                }, {});
+
+                // Update or create translations
+                for (const trans of translations) {
+                    if (translationsMap[trans.languageId]) {
+                        await Translation.update(
+                            {
+                                name: trans.name,
+                                description: trans.description,
+                                updatedBy: req.user.id
+                            },
+                            {
+                                where: {
+                                    entityId: id,
+                                    entityType: 'tour',
+                                    languageId: trans.languageId
+                                },
+                                transaction
+                            }
+                        );
+                    } else {
+                        await Translation.create(
+                            {
+                                ...trans,
+                                entityId: id,
+                                entityType: 'tour',
+                                createdBy: req.user.id
+                            },
+                            { transaction }
+                        );
+                    }
+                }
+
+                // Update tour with default translation
+                const defaultTranslation = translations.find(
+                    t => t.languageId === defaultLanguage.id
+                );
+                if (defaultTranslation) {
+                    await tour.update({
+                        name: defaultTranslation.name,
+                        description: defaultTranslation.description
+                    }, { transaction });
+                }
+            }
+
+            await transaction.commit();
+
+            // Return updated tour
+            const result = await Tour.findByPk(id, {
+                include: [
+                    'translations',
+                    {
+                        model: TourDay,
+                        as: 'days',
+                        include: ['services'],
+                        order: [['dayNumber', 'ASC']]
+                    }
+                ]
             });
 
-            // Xóa tour
-            await tour.destroy();
+            const tourData = result.toJSON();
+            tourData.duration = tourData.days?.length || 0;
 
-            res.json({
-                message: 'Tour deleted successfully'
-            });
-
+            return res.json(tourData);
         } catch (error) {
-            console.error('Delete tour error:', error);
-            res.status(500).json({
-                message: 'Error deleting tour',
-                error: error.message
-            });
+            await transaction.rollback();
+            return res.status(500).json({ message: error.message });
         }
     }
 
-    // 6. Cập nhật trạng thái tour
-    static async updateTourStatus(req, res) {
+    // Delete (soft delete)
+    async delete(req, res) {
+        const transaction = await sequelize.transaction();
         try {
             const { id } = req.params;
-            const { status, currentDepartment } = req.body;
 
             const tour = await Tour.findByPk(id);
             if (!tour) {
-                return res.status(404).json({
-                    message: 'Tour not found'
+                return res.status(404).json({ message: 'Tour not found' });
+            }
+
+            // Check if tour can be deleted (e.g., not published)
+            if (tour.status === 'published') {
+                return res.status(400).json({
+                    message: 'Cannot delete a published tour'
                 });
             }
 
             await tour.update({
-                status,
-                currentDepartment,
-                updatedAt: new Date()
-            });
+                isActive: false,
+                updatedBy: req.user.id
+            }, { transaction });
 
-            res.json({
-                message: 'Tour status updated successfully',
-                tour
-            });
-
+            await transaction.commit();
+            return res.json({ message: 'Tour deleted successfully' });
         } catch (error) {
-            console.error('Update tour status error:', error);
-            res.status(500).json({
-                message: 'Error updating tour status',
-                error: error.message
+            await transaction.rollback();
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
+    // Restore
+    async restore(req, res) {
+        const transaction = await sequelize.transaction();
+        try {
+            const { id } = req.params;
+
+            const tour = await Tour.findByPk(id);
+            if (!tour) {
+                return res.status(404).json({ message: 'Tour not found' });
+            }
+
+            await tour.update({
+                isActive: true,
+                updatedBy: req.user.id
+            }, { transaction });
+
+            await transaction.commit();
+            return res.json({ message: 'Tour restored successfully' });
+        } catch (error) {
+            await transaction.rollback();
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
+    // Update status
+    async updateStatus(req, res) {
+        const transaction = await sequelize.transaction();
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+
+            const tour = await Tour.findByPk(id, {
+                include: ['days']
             });
+
+            if (!tour) {
+                return res.status(404).json({ message: 'Tour not found' });
+            }
+
+            // Validate status change
+            if (status === 'published') {
+                // Check if tour has days
+                if (!tour.days || tour.days.length === 0) {
+                    return res.status(400).json({
+                        message: 'Cannot publish tour without days'
+                    });
+                }
+            }
+
+            await tour.update({
+                status,
+                updatedBy: req.user.id
+            }, { transaction });
+
+            await transaction.commit();
+            return res.json({ message: 'Tour status updated successfully' });
+        } catch (error) {
+            await transaction.rollback();
+            return res.status(500).json({ message: error.message });
         }
     }
 }
 
-module.exports = TourController;
+module.exports = new TourController();

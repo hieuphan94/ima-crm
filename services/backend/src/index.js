@@ -6,51 +6,31 @@ const compression = require('compression');
 const sequelize = require('./config/database');
 const seedAdmin = require('./database/seeders/adminSeed');
 const basicDataSeed = require('./database/seeders/basicDataSeed');
-const { connectRedis, setCache, getCache } = require('./config/redis');
-
-
+const { connectRedis } = require('./config/redis');
 const routes = require('./routes');
-
-
-
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(helmet()); // Security headers
-app.use(morgan('dev')); // Logging
-app.use(compression()); // Compress responses
+app.use(helmet());
+app.use(morgan('dev'));
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Kết nối Redis khi khởi động
+// Kết nối Redis
 connectRedis();
-
-
-// Sync all models
-sequelize.sync({ force: true }) // Use { force: true } in development only
-    .then(async () => {
-        console.log('Database synced');
-        // Seed admin user
-        await seedAdmin(); 
-        await basicDataSeed();
-        console.log('All seeds completed');
-    })
-    .catch(err => {
-        console.error('Error syncing database:', err);
-    });
-
 
 // Welcome route
 app.get('/api', (req, res) => {
     res.json({
-      message: 'IMA CRM API',
-      endpoints: {
-        users: '/api/users',
-        tours: '/api/tours'
-      }
+        message: 'IMA CRM API',
+        endpoints: {
+            users: '/api/users',
+            tours: '/api/tours'
+        }
     });
 });
 
@@ -74,10 +54,31 @@ app.use((req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Sync và seed theo thứ tự
+async function initializeDatabase() {
+    try {
+        // 1. Sync database
+        await sequelize.sync({ force: true });
+        console.log('Database synced');
+
+        // 2. Run seeders
+        await seedAdmin();
+        await basicDataSeed();
+        console.log('All seeds completed');
+
+        // 3. Start server
+        app.listen(port, () => {
+            console.log(`Server is running on port ${port}`);
+            console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+        });
+    } catch (error) {
+        console.error('Error initializing database:', error);
+        process.exit(1);
+    }
+}
+
+// Chạy initialization
+initializeDatabase();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

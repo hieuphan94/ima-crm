@@ -1,4 +1,6 @@
-const { ServiceCategory, Translation, Language } = require('../models');
+const { ServiceCategory, Translation, Language, Location } = require('../models');
+const { slugify } = require('slugify');
+const { v4: uuidv4 } = require('uuid');
 
 class ServiceCategoryController {
     // Get all services with pagination
@@ -55,18 +57,53 @@ class ServiceCategoryController {
                 return res.status(403).json({ message: 'Permission denied' });
             }
 
-            const { name, typeId, locationId, stars, description, website, translations } = req.body;
+            const { 
+                name, 
+                typeId, 
+                locationId,
+                locationName,  // Thêm locationName
+                stars, 
+                description, 
+                website, 
+                translations 
+            } = req.body;
 
             // Validate required fields
-            if (!name || !typeId || !locationId) {
-                return res.status(400).json({ message: 'Name, type and location are required' });
+            if (!name || !typeId) {
+                return res.status(400).json({ message: 'Name and type are required' });
+            }
+
+            let finalLocationId = locationId;
+
+            // Xử lý location
+            if (!locationId && locationName) {
+                // Tìm hoặc tạo location mới
+                const [location] = await Location.findOrCreate({
+                    where: { 
+                        code: slugify(locationName, { lower: true })
+                    },
+                    defaults: {
+                        id: uuidv4(),
+                        name: locationName,
+                        code: slugify(locationName, { lower: true }),
+                        country: 'Vietnam'
+                    }
+                });
+                finalLocationId = location.id;
+            }
+
+            // Validate final locationId
+            if (!finalLocationId) {
+                return res.status(400).json({ 
+                    message: 'Location ID or location name is required' 
+                });
             }
 
             // Create service
             const service = await ServiceCategory.create({
                 name,
                 typeId,
-                locationId,
+                locationId: finalLocationId,
                 stars: stars || null,
                 description: description || null,
                 website: website || null,
@@ -100,7 +137,13 @@ class ServiceCategoryController {
     async update(req, res) {
         try {
             const { id } = req.params;
-            const { website, stars, translations } = req.body;
+            const { 
+                locationId,
+                locationName,  // Thêm locationName
+                website, 
+                stars, 
+                translations 
+            } = req.body;
 
             // 1. Tìm service
             const service = await ServiceCategory.findByPk(id);
@@ -108,14 +151,33 @@ class ServiceCategoryController {
                 return res.status(404).json({ message: 'Service not found' });
             }
 
-            // 2. Update thông tin cơ bản
+            // 2. Xử lý location nếu có thay đổi
+            let finalLocationId = locationId;
+            if (!locationId && locationName) {
+                // Tìm hoặc tạo location mới
+                const [location] = await Location.findOrCreate({
+                    where: { 
+                        code: slugify(locationName, { lower: true })
+                    },
+                    defaults: {
+                        id: uuidv4(),
+                        name: locationName,
+                        code: slugify(locationName, { lower: true }),
+                        country: 'Vietnam'
+                    }
+                });
+                finalLocationId = location.id;
+            }
+
+            // 3. Update thông tin cơ bản
             await service.update({
+                locationId: finalLocationId || service.locationId, // Giữ nguyên nếu không có thay đổi
                 website,
                 stars,
                 updatedBy: req.user.id
             });
 
-            // 3. Xử lý translations
+            // 4. Xử lý translations
             if (translations && translations.length > 0) {
                 // Tìm ngôn ngữ mặc định
                 const defaultLanguage = await Language.findOne({
@@ -178,7 +240,7 @@ class ServiceCategoryController {
                 }
             }
 
-            // 4. Trả về kết quả
+            // 5. Trả về kết quả
             const result = await ServiceCategory.findByPk(id, {
                 include: ['translations']
             });

@@ -1,49 +1,33 @@
 const express = require('express');
-const TourController = require('../controllers/tourController');
-const { auth } = require('../middleware/auth');
-
 const router = express.Router();
+const TourController = require('../controllers/TourController');
+const TourDayController = require('../controllers/TourDayController');
+const { auth, isAdmin } = require('../middleware/auth');
 
-/**
- * @route   POST /api/tours
- * @desc    Create a new tour
- * @access  Private
- */
-router.post('/', auth, TourController.createTour);
+// Tour routes
+router.get('/', auth, TourController.getAll);
 
-/**
- * @route   GET /api/tours
- * @desc    Get all tours with filters and pagination
- * @access  Private
- */
-router.get('/', auth, TourController.getTours);
+router.get('/:id', auth, TourController.getOne);
 
-/**
- * @route   GET /api/tours/:id
- * @desc    Get single tour by ID
- * @access  Private
- */
-router.get('/:id', auth, TourController.getTour);
+router.post('/', auth, isAdmin, TourController.create);
 
-/**
- * @route   PUT /api/tours/:id
- * @desc    Update tour
- * @access  Private
- */
-router.put('/:id', auth, TourController.updateTour);
+router.put('/:id', auth, isAdmin, TourController.update);
 
-/**
- * @route   DELETE /api/tours/:id
- * @desc    Delete tour
- * @access  Private
- */
-router.delete('/:id', auth, TourController.deleteTour);
+router.delete('/:id', auth, isAdmin, TourController.delete);
 
-/**
- * @route   PUT /api/tours/:id/status
- * @desc    Update tour status
- * @access  Private
- */
-router.put('/:id/status', auth, TourController.updateTourStatus);
+router.patch('/:id/restore', auth, isAdmin, TourController.restore);
+
+router.patch('/:id/status', auth, isAdmin, TourController.updateStatus);
+
+// Tour day routes (nested under tours)
+router.get('/:tourId/days', auth, TourDayController.getDays);
+
+router.post('/:tourId/days', auth, isAdmin, TourDayController.create);
+
+router.put('/:tourId/days/:dayId', auth, isAdmin, TourDayController.update);
+
+router.delete('/:tourId/days/:dayId', auth, isAdmin, TourDayController.delete);
+
+router.patch('/:tourId/days/reorder', auth, isAdmin, TourDayController.reorder);
 
 module.exports = router;
