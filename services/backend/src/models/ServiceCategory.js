@@ -54,6 +54,23 @@ const ServiceCategory = sequelize.define('ServiceCategory', {
     isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true
+    },
+    images: {
+        type: DataTypes.JSONB,
+        allowNull: true,
+        defaultValue: [],
+        validate: {
+            isValidImages(value) {
+                if (!Array.isArray(value)) {
+                    throw new Error('Images must be an array');
+                }
+                value.forEach(img => {
+                    if (typeof img !== 'string') {
+                        throw new Error('Each image must be a string URL');
+                    }
+                });
+            }
+        }
     }
 }, {
     timestamps: true,

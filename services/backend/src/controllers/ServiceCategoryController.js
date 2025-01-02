@@ -10,6 +10,12 @@ class ServiceCategoryController {
             const offset = (page - 1) * limit;
 
             const services = await ServiceCategory.findAndCountAll({
+                attributes: [
+                    'id', 'name', 'typeId', 'locationId', 
+                    'stars', 'description', 'website', 
+                    'images', 'isActive', // Add images
+                    'createdAt', 'updatedAt'
+                ],
                 where: { isActive: true },
                 include: ['translations'],
                 limit,
@@ -64,20 +70,22 @@ class ServiceCategoryController {
                 locationName,  // Thêm locationName
                 stars, 
                 description, 
-                website, 
+                website,
+                images,
                 translations 
             } = req.body;
 
             // Validate required fields
-            if (!name || !typeId) {
-                return res.status(400).json({ message: 'Name and type are required' });
+            if (!name || !typeId || (!locationId && !locationName)) {
+                return res.status(400).json({ 
+                    message: 'Name, type and location (ID or name) are required' 
+                });
             }
 
             let finalLocationId = locationId;
 
-            // Xử lý location
+            // Xử lý location nếu không có locationId
             if (!locationId && locationName) {
-                // Tìm hoặc tạo location mới
                 const [location] = await Location.findOrCreate({
                     where: { 
                         code: slugify(locationName, { lower: true })
@@ -92,13 +100,6 @@ class ServiceCategoryController {
                 finalLocationId = location.id;
             }
 
-            // Validate final locationId
-            if (!finalLocationId) {
-                return res.status(400).json({ 
-                    message: 'Location ID or location name is required' 
-                });
-            }
-
             // Create service
             const service = await ServiceCategory.create({
                 name,
@@ -107,6 +108,7 @@ class ServiceCategoryController {
                 stars: stars || null,
                 description: description || null,
                 website: website || null,
+                images: images || [],
                 createdBy: req.user.id
             });
 
@@ -141,7 +143,8 @@ class ServiceCategoryController {
                 locationId,
                 locationName,  // Thêm locationName
                 website, 
-                stars, 
+                stars,
+                images,
                 translations 
             } = req.body;
 
@@ -151,10 +154,10 @@ class ServiceCategoryController {
                 return res.status(404).json({ message: 'Service not found' });
             }
 
-            // 2. Xử lý location nếu có thay đổi
             let finalLocationId = locationId;
+
+            // Xử lý location nếu có locationName mới
             if (!locationId && locationName) {
-                // Tìm hoặc tạo location mới
                 const [location] = await Location.findOrCreate({
                     where: { 
                         code: slugify(locationName, { lower: true })
@@ -171,9 +174,10 @@ class ServiceCategoryController {
 
             // 3. Update thông tin cơ bản
             await service.update({
-                locationId: finalLocationId || service.locationId, // Giữ nguyên nếu không có thay đổi
+                locationId: finalLocationId || service.locationId,
                 website,
                 stars,
+                images: images || service.images,
                 updatedBy: req.user.id
             });
 
