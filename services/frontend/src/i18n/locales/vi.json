@@ -1,0 +1,13 @@
+{
+  "common": {
+    "dashboard": "Tổng quan",
+    "customers": "Khách hàng",
+    "tours": "Tours",
+    "settings": "Cài đặt"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "register": "Đăng ký"
+  }
+}

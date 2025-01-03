@@ -1,0 +1,13 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "customers": "Customers",
+    "tours": "Tours",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register"
+  }
+}
