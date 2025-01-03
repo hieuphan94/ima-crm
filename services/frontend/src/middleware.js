@@ -1,35 +1,28 @@
 import { NextResponse } from 'next/server';
 
-// Các routes không cần auth
-const publicRoutes = ['/login', '/register'];
-
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
+  // Chỉ kiểm tra token từ cookies, không dùng localStorage
   const token = request.cookies.get('token');
-
-  // Cho phép truy cập public routes
-  if (publicRoutes.includes(pathname)) {
-    return NextResponse.next();
+  
+  // Log để debug
+  console.log('Middleware check:', {
+    path: request.nextUrl.pathname,
+    hasToken: !!token
+  });
+  
+  // Nếu không có token và cố truy cập dashboard
+  if (!token && request.nextUrl.pathname.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Kiểm tra auth cho các routes khác
-  if (!token && !publicRoutes.includes(pathname)) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  // Nếu có token và cố truy cập login
+  if (token && request.nextUrl.pathname === '/login') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();
 }
 
-// Cấu hình các routes cần apply middleware
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/dashboard/:path*', '/login']
 }; 

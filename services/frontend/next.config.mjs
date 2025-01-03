@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@ant-design'],
+  reactStrictMode: true,
 };
 
 export default nextConfig;

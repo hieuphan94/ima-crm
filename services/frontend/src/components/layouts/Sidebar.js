@@ -1,35 +1,55 @@
 'use client';
-import { Layout, Menu } from 'antd';
-import {
-  DashboardOutlined,
-  TeamOutlined,
-  CalendarOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
-
-const { Sider } = Layout;
+import { 
+  Listbox, 
+  ListboxItem,
+  ListboxSection 
+} from "@nextui-org/react";
+import { useRouter } from 'next/navigation';
 
 export default function Sidebar() {
+  const router = useRouter();
+
+  const menuItems = [
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      href: '/dashboard'
+    },
+    {
+      key: 'customers',
+      label: 'Khách hàng',
+      href: '/customers'
+    },
+    {
+      key: 'tours',
+      label: 'Tours',
+      href: '/tours'
+    },
+    {
+      key: 'settings',
+      label: 'Cài đặt',
+      href: '/settings'
+    }
+  ];
+
   return (
-    <Sider width={200} style={{ background: '#fff' }}>
-      <Menu
-        mode="inline"
-        defaultSelectedKeys={['1']}
-        style={{ height: '100%', borderRight: 0 }}
+    <div className="w-64 h-screen bg-white border-r">
+      <Listbox 
+        aria-label="Menu"
+        className="p-0"
+        onAction={(key) => {
+          const item = menuItems.find(item => item.key === key);
+          if (item) {
+            router.push(item.href);
+          }
+        }}
       >
-        <Menu.Item key="1" icon={<DashboardOutlined />}>
-          Dashboard
-        </Menu.Item>
-        <Menu.Item key="2" icon={<TeamOutlined />}>
-          Khách hàng
-        </Menu.Item>
-        <Menu.Item key="3" icon={<CalendarOutlined />}>
-          Tours
-        </Menu.Item>
-        <Menu.Item key="4" icon={<SettingOutlined />}>
-          Cài đặt
-        </Menu.Item>
-      </Menu>
-    </Sider>
+        {menuItems.map((item) => (
+          <ListboxItem key={item.key}>
+            {item.label}
+          </ListboxItem>
+        ))}
+      </Listbox>
+    </div>
   );
 }

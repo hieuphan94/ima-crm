@@ -1,6 +1,6 @@
 'use client';
 import { Component } from 'react';
-import { Button, Result } from 'antd';
+import { Button } from "@nextui-org/react";
 
 /**
  * ErrorBoundary Component để bắt lỗi trong React tree
@@ -45,20 +45,16 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <Result
-          status="error"
-          title="Đã có lỗi xảy ra"
-          subTitle="Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại."
-          extra={[
-            <Button 
-              key="reload" 
-              type="primary" 
-              onClick={this.handleReset}
-            >
-              Tải lại trang
-            </Button>
-          ]}
-        />
+        <div className="min-h-screen flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold mb-4">Đã có lỗi xảy ra</h1>
+          <p className="mb-8">Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.</p>
+          <Button 
+            color="primary"
+            onClick={this.handleReset}
+          >
+            Tải lại trang
+          </Button>
+        </div>
       );
     }
 

@@ -1,6 +1,8 @@
+import { Inter } from 'next/font/google';
 import Providers from './providers';
-import 'antd/dist/reset.css';
 import '@/styles/globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'IMA CRM',
@@ -9,8 +11,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+    <html lang="vi" className="light" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

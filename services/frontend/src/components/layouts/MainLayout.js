@@ -1,29 +1,18 @@
 'use client';
-import { Layout } from 'antd';
-import Header from './Header';
-import Sidebar from './Sidebar';
 
-const { Content } = Layout;
+import { AppHeader } from '@/components/common/AppHeader';
+// import { Sidebar } from '@/components/common/Sidebar';
 
 export default function MainLayout({ children }) {
   return (
-    <Layout>
-      <Header />
-      <Layout>
-        <Sidebar />
-        <Layout style={{ padding: '24px' }}>
-          <Content
-            style={{
-              padding: 24,
-              margin: 0,
-              minHeight: 280,
-              background: '#fff',
-            }}
-          >
-            {children}
-          </Content>
-        </Layout>
-      </Layout>
-    </Layout>
+    <div className="min-h-screen">
+      <AppHeader />
+      <div className="flex">
+        {/* <Sidebar /> */}
+        <main className="flex-grow p-6">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

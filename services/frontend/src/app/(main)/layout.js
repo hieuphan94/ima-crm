@@ -1,11 +1,13 @@
 'use client';
-import ProtectedRoute from '@/components/common/ProtectedRoute';
+import Providers from '@/app/providers';
 import MainLayout from '@/components/layouts/MainLayout';
 
-export default function MainLayoutWrapper({ children }) {
+export default function MainAppLayout({ children }) {
   return (
-    <ProtectedRoute>
-      <MainLayout>{children}</MainLayout>
-    </ProtectedRoute>
+    <Providers>
+      <MainLayout>
+        {children}
+      </MainLayout>
+    </Providers>
   );
 } 

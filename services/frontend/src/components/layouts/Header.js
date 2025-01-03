@@ -1,33 +1,63 @@
 'use client';
-import { Layout, Menu, Dropdown, Space } from 'antd';
-import { UserOutlined, GlobalOutlined } from '@ant-design/icons';
 
-const { Header } = Layout;
+import { useEffect, useState } from 'react';
+import { 
+  Navbar, 
+  NavbarBrand, 
+  NavbarContent, 
+  NavbarItem, 
+  Link,
+  Dropdown, 
+  DropdownTrigger, 
+  DropdownMenu, 
+  DropdownItem,
+  Button
+} from "@nextui-org/react";
 
 export default function AppHeader() {
-  const languageMenu = {
-    items: [
-      { key: 'vi', label: 'Tiếng Việt' },
-      { key: 'en', label: 'English' },
-    ],
-  };
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
-    <Header className="header">
-      <div className="logo" />
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
-          <Menu.Item key="1">Trang chủ</Menu.Item>
-          <Menu.Item key="2">Tours</Menu.Item>
-          <Menu.Item key="3">Dịch vụ</Menu.Item>
-        </Menu>
-        <Space>
-          <Dropdown menu={languageMenu}>
-            <GlobalOutlined style={{ color: 'white', fontSize: '18px' }} />
-          </Dropdown>
-          <UserOutlined style={{ color: 'white', fontSize: '18px' }} />
-        </Space>
-      </div>
-    </Header>
+    <Navbar>
+      <NavbarBrand>
+        <p className="font-bold text-inherit">IMA CRM</p>
+      </NavbarBrand>
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        <NavbarItem>
+          <Link color="foreground" href="#">
+            Trang chủ
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link color="foreground" href="#">
+            Tours
+          </Link>
+        </NavbarItem>
+        <NavbarItem>
+          <Link color="foreground" href="#">
+            Dịch vụ
+          </Link>
+        </NavbarItem>
+      </NavbarContent>
+      <NavbarContent justify="end">
+        <Dropdown>
+          <DropdownTrigger>
+            <Button variant="light">
+              Ngôn ngữ
+            </Button>
+          </DropdownTrigger>
+          <DropdownMenu>
+            <DropdownItem key="vi">Tiếng Việt</DropdownItem>
+            <DropdownItem key="en">English</DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
+      </NavbarContent>
+    </Navbar>
   );
 }

@@ -1,14 +1,10 @@
-import { Spin } from 'antd';
+'use client';
+import { Spinner } from "@nextui-org/react";
 
 export default function Loading() {
   return (
-    <div style={{ 
-      height: '100vh',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center' 
-    }}>
-      <Spin size="large" />
+    <div className="fixed inset-0 flex items-center justify-center">
+      <Spinner size="lg" />
     </div>
   );
 } 
