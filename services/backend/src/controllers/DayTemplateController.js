@@ -1,4 +1,4 @@
-const { DayTemplate, Translation, Location, Language } = require('../models');
+const { DayTemplate, Translation, Language } = require('../models');
 
 class DayTemplateController {
     // Get all templates with pagination

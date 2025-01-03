@@ -1,31 +1,36 @@
+// models/index.js
 const sequelize = require('../config/database');
 
-// 1. Basic models (không phụ thuộc model khác)
-const User = require('./User');
-const Language = require('./Language');
-const Location = require('./Location');
-const ServiceType = require('./ServiceType');
-const ServiceCategory = require('./ServiceCategory');
-const Translation = require('./Translation');
-const DayTemplate = require('./DayTemplate');
+// Import auth models
+const User = require('./auth/User');
 
-// 2. Tour và các model liên quan (phụ thuộc các model cơ bản)
-const Tour = require('./Tour');
-const TourDay = require('./TourDay');
-const TourDayService = require('./TourDayService');
+// Import core models
+const Language = require('./core/Language');
+const Location = require('./core/Location');
+const Translation = require('./core/Translation');
+
+// Import tour models
+const ServiceType = require('./tour/ServiceType');
+const ServiceCategory = require('./tour/ServiceCategory');
+const DayTemplate = require('./tour/DayTemplate');
+const Tour = require('./tour/Tour');
+const TourDay = require('./tour/TourDay');
+const TourDayService = require('./tour/TourDayService');
 
 // Define models object theo thứ tự dependencies
 const models = {
-    // Basic models
+    // Auth
     User,
+
+    // Core
     Language,
     Location,
+    Translation,
+
+    // Tour
     ServiceType,
     ServiceCategory,
-    Translation,
     DayTemplate,
-    
-    // Tour related models
     Tour,
     TourDay,
     TourDayService
