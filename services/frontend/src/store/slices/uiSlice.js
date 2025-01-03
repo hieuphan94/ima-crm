@@ -1,29 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
-  isLoading: false,
-  toast: {
-    open: false,
-    message: '',
-    type: 'info', // 'success' | 'error' | 'info' | 'warning'
-  },
-};
-
-export const uiSlice = createSlice({
+const uiSlice = createSlice({
   name: 'ui',
-  initialState,
+  initialState: {
+    loading: false,
+    error: null,
+  },
   reducers: {
     setLoading: (state, action) => {
-      state.isLoading = action.payload;
+      state.loading = action.payload;
     },
-    showToast: (state, action) => {
-      state.toast = { ...action.payload, open: true };
-    },
-    hideToast: (state) => {
-      state.toast.open = false;
+    setError: (state, action) => {
+      state.error = action.payload;
     },
   },
 });
 
-export const { setLoading, showToast, hideToast } = uiSlice.actions;
+export const { setLoading, setError } = uiSlice.actions;
 export default uiSlice.reducer;

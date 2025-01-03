@@ -1,4 +1,5 @@
-import { Providers } from './providers';
+import Providers from './providers';
+import 'antd/dist/reset.css';
 import '@/styles/globals.css';
 
 export const metadata = {
@@ -8,8 +9,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>
