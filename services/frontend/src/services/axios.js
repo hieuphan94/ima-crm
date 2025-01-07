@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { store } from '@/store';
-import { setError } from '@/store/slices/uiSlice';
 import { logout } from '@/store/slices/authSlice';
+import { showNotification } from '@/store/slices/uiSlice';
+import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -34,9 +34,9 @@ axiosInstance.interceptors.response.use(
     }
 
     store.dispatch(
-      setError({
+      showNotification({
         message: error.response?.data?.message || 'An error occurred',
-        status: error.response?.status,
+        type: 'error',
       })
     );
 

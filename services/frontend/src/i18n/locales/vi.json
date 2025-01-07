@@ -46,16 +46,16 @@
   },
   "sidebar": {
     "dashboard": "Tổng quan",
-    "users": "Quản lý Users",
-    "tours": "Quản lý Tours",
+    "users": "Thành viên",
+    "tours": "Chuyến đi",
     "library": "Thư viện",
-    "settings": "Cài đặt hệ thống",
+    "settings": "Cài đặt",
     "profile": "Thông tin cá nhân",
     "myTours": "Tours của tôi",
-    "sales": "Quản lý bán hàng",
+    "sales": "Sales",
     "tourManagement": "Điều hành Tour",
     "schedules": "Lịch trình",
-    "finance": "Quản lý tài chính",
+    "finance": "Tài chính",
     "reports": "Báo cáo"
   }
 }

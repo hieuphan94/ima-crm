@@ -1,10 +1,10 @@
 'use client';
 
+import { getMenuItems } from '@/configs/menuItems';
+import { useAuth } from '@/hooks/useAuth';
 import { Listbox, ListboxItem } from '@nextui-org/react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
-import { getMenuItems } from '@/configs/menuItems';
 
 export default function Sidebar() {
   const router = useRouter();
@@ -12,11 +12,9 @@ export default function Sidebar() {
   const { user } = useAuth();
   const { t } = useTranslation();
 
-  // Lấy menu items dựa theo role
   const allMenuItems = getMenuItems(t);
   const menuItems = user ? allMenuItems[user.role] || allMenuItems.user : [];
 
-  // Loading state
   if (!user) {
     return null;
   }
@@ -24,7 +22,7 @@ export default function Sidebar() {
   return (
     <div className="bg-white border-r">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-48 min-h-screen">
+      <div className="hidden md:block w-36 min-h-screen">
         <Listbox
           aria-label="Menu"
           className="p-2 gap-1"
@@ -43,7 +41,7 @@ export default function Sidebar() {
                 key={item.key}
                 startContent={<Icon className="w-5 h-5" />}
                 className={`${
-                  pathname === item.href ? 'bg-primary/10 text-primary' : 'text-gray-600'
+                  pathname === item.href ? 'bg-green-100 text-green-600' : 'text-gray-600'
                 } rounded-lg`}
               >
                 {item.label}
@@ -63,7 +61,7 @@ export default function Sidebar() {
                 key={item.key}
                 onClick={() => router.push(item.href)}
                 className={`p-2 rounded-full ${
-                  pathname === item.href ? 'text-primary bg-primary/10' : 'text-gray-600'
+                  pathname === item.href ? 'text-green-600 bg-green-50' : 'text-gray-600'
                 }`}
               >
                 <Icon className="w-6 h-6" />

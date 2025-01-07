@@ -3,10 +3,12 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardBody, CardHeader } from '@nextui-org/react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardPage() {
   const { user, getUserFromToken } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const initializeDashboard = async () => {
@@ -38,7 +40,7 @@ export default function DashboardPage() {
 
   return (
     <div className="relative overflow-auto space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold">{t('sidebar.dashboard')}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
