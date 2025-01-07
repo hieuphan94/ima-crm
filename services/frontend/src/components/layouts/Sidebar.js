@@ -2,15 +2,18 @@
 
 import { getMenuItems } from '@/configs/menuItems';
 import { useAuth } from '@/hooks/useAuth';
+import { useUI } from '@/hooks/useUI';
 import { Listbox, ListboxItem } from '@nextui-org/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
+import { FiChevronLeft } from 'react-icons/fi';
 
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
   const { t } = useTranslation();
+  const { sidebarOpen, toggleSidebar } = useUI();
 
   const allMenuItems = getMenuItems(t);
   const menuItems = user ? allMenuItems[user.role] || allMenuItems.user : [];
@@ -20,12 +23,29 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="bg-white border-r">
+    <div className="bg-white border-r relative">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-36 min-h-screen">
+      <div
+        className={`hidden md:block min-h-screen transition-all duration-300 ease-in-out ${
+          sidebarOpen ? 'w-48' : 'w-14'
+        }`}
+      >
+        {/* Toggle Button */}
+        <button
+          onClick={toggleSidebar}
+          className="absolute -right-4 top-8 bg-orange-50 border-orange-200 border rounded-full p-2 shadow-lg hover:bg-orange-100 cursor-pointer z-50 text-orange-500"
+          aria-label="Toggle Sidebar"
+        >
+          <FiChevronLeft
+            className={`w-5 h-5 transition-transform duration-300 ${
+              !sidebarOpen ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
+
         <Listbox
           aria-label="Menu"
-          className="p-2 gap-1"
+          className="p-3 gap-2"
           onAction={(key) => {
             const item = menuItems.find((item) => item.key === key);
             if (item) {
@@ -39,12 +59,12 @@ export default function Sidebar() {
             return (
               <ListboxItem
                 key={item.key}
-                startContent={<Icon className="w-5 h-5" />}
+                startContent={<Icon className={`w-5 h-5 ${!sidebarOpen ? 'mx-auto' : 'mr-2'}`} />}
                 className={`${
                   pathname === item.href ? 'bg-green-100 text-green-600' : 'text-gray-600'
-                } rounded-lg`}
+                } rounded-lg hover:bg-gray-100 ${!sidebarOpen ? 'justify-center px-0' : 'px-3'}`}
               >
-                {item.label}
+                {sidebarOpen && <span className="truncate">{item.label}</span>}
               </ListboxItem>
             );
           })}
