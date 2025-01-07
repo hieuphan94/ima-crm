@@ -3,19 +3,40 @@ import {
   setLoading,
   showNotification,
   clearNotification,
-  toggleTheme,
-  toggleSidebar,
+  toggleTheme,toggleSidebar,
   openModal,
-  closeModal
+  closeModal,
 } from '@/store/slices/uiSlice';
 
 export const useUI = () => {
   const dispatch = useDispatch();
   const ui = useSelector((state) => state.ui);
 
+  if (!ui) {
+    return {
+      isLoading: false,notification: null,
+      theme: 'light',
+      sidebarOpen: true,
+      modal: { isOpen: false, type: null, data: null },
+      setLoading: () => {},
+      notify: () => {},
+      clearNotification: () => {},
+      toggleTheme: () => {},
+      toggleSidebar: () => {},
+      openModal: () => {},
+      closeModal: () => {},
+    };
+  }
+
   const notify = (message, type = 'info') => {
-    console.log('Showing notification:', { message, type }); // Debug log
-    dispatch(showNotification({ message, type }));
+    dispatch(
+      showNotification({
+        message,
+        type,
+        id: Date.now(),
+        duration: 3000,
+      })
+    );
   };
 
   return {
@@ -29,10 +50,14 @@ export const useUI = () => {
     // Actions
     setLoading: (loading) => dispatch(setLoading(loading)),
     notify,
+    notifySuccess: (message) => notify(message, 'success'),
+    notifyError: (message) => notify(message, 'error'),
+    notifyInfo: (message) => notify(message, 'info'),
+    notifyWarning: (message) => notify(message, 'warning'),
     clearNotification: () => dispatch(clearNotification()),
     toggleTheme: () => dispatch(toggleTheme()),
     toggleSidebar: () => dispatch(toggleSidebar()),
     openModal: (type, data) => dispatch(openModal({ type, data })),
-    closeModal: () => dispatch(closeModal())
+    closeModal: () => dispatch(closeModal()),
   };
-}; 
+};

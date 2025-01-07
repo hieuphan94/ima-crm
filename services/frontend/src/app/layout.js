@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google';
 import Providers from './providers';
+import { Toast } from '@/components/common/Toast'; // Import named
 import '@/styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -12,8 +13,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="vi" className="light" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <Providers>{children}</Providers>
+      <body className={`${inter.className} relative min-h-screen`} suppressHydrationWarning>
+        <Providers>
+          <Toast />
+          {children}
+        </Providers>
       </body>
     </html>
   );

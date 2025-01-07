@@ -32,14 +32,14 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       store.dispatch(logout());
     }
-    
+
     store.dispatch(
       setError({
         message: error.response?.data?.message || 'An error occurred',
         status: error.response?.status,
       })
     );
-    
+
     return Promise.reject(error);
   }
 );

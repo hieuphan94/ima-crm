@@ -1,17 +1,15 @@
 'use client';
 
-import { AppHeader } from '@/components/common/AppHeader';
-// import { Sidebar } from '@/components/common/Sidebar';
+import AppHeader from './Header';
+import Sidebar from './Sidebar';
 
 export default function MainLayout({ children }) {
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <AppHeader />
       <div className="flex">
-        {/* <Sidebar /> */}
-        <main className="flex-grow p-6">
-          {children}
-        </main>
+        <Sidebar />
+        <main className="relative flex-grow p-6 bg-gray-50">{children}</main>
       </div>
     </div>
   );

@@ -3,18 +3,16 @@ import { initReactI18next } from 'react-i18next';
 import viTranslations from './locales/vi.json';
 import enTranslations from './locales/en.json';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      vi: { translation: viTranslations },
-      en: { translation: enTranslations }
-    },
-    lng: 'vi',
-    fallbackLng: 'vi',
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18n.use(initReactI18next).init({
+  resources: {
+    vi: { translation: viTranslations },
+    en: { translation: enTranslations },
+  },
+  lng: 'vi',
+  fallbackLng: 'vi',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
-export default i18n; 
+export default i18n;

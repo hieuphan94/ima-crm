@@ -1,17 +1,69 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { persistStore, persistReducer, createTransform } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
 
+let persistStorage;
+
+// Xử lý SSR
+if (typeof window === 'undefined') {
+  const createNoopStorage = () => {
+    return {
+      getItem() {
+        return Promise.resolve(null);
+      },
+      setItem() {
+        return Promise.resolve();
+      },
+      removeItem() {
+        return Promise.resolve();
+      },
+    };
+  };
+  persistStorage = createNoopStorage();
+} else {
+  persistStorage = storage;
+}
+
+// Transform để xử lý dữ liệu trước khi persist
+const persistTransform = createTransform(
+  // transform state on its way to being serialized and persisted.
+  (inboundState) => {
+    return inboundState;
+  },
+  // transform state being rehydrated
+  (outboundState) => {
+    return outboundState;
+  }
+);
+
+const authPersistConfig = {
+  key: 'auth',
+  storage: persistStorage,
+  whitelist: ['user', 'token', 'isAuthenticated'],
+  transforms: [persistTransform],
+};
+
+const uiPersistConfig = {
+  key: 'ui',
+  storage: persistStorage,
+  whitelist: ['theme', 'sidebarOpen'],
+  transforms: [persistTransform],
+};
+
+const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
+const persistedUiReducer = persistReducer(uiPersistConfig, uiReducer);
+
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
-    ui: uiReducer
+    auth: persistedAuthReducer,
+    ui: persistedUiReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat((store) => (next) => (action) => {
-      console.log('Dispatching:', action);
-      return next(action);
-    })
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
 
-export default store;
+export const persistor = persistStore(store);

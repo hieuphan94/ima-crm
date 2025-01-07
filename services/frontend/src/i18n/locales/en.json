@@ -9,5 +9,19 @@
     "login": "Login",
     "logout": "Logout",
     "register": "Register"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "users": "Users Management",
+    "tours": "Tours Management",
+    "library": "Library",
+    "settings": "System Settings",
+    "profile": "Profile",
+    "myTours": "My Tours",
+    "sales": "Sales Management",
+    "tourManagement": "Tour Operation",
+    "schedules": "Schedules",
+    "finance": "Financial Management",
+    "reports": "Reports"
   }
 }

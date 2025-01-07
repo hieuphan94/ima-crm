@@ -1,18 +1,20 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialState = {
+  isLoading: false,
+  notification: null,
+  theme: 'light',
+  sidebarOpen: true,
+  modal: {
+    isOpen: false,
+    type: null,
+    data: null,
+  },
+};
+
 const uiSlice = createSlice({
   name: 'ui',
-  initialState: {
-    isLoading: false,
-    notification: null,
-    theme: 'light',
-    sidebarOpen: true,
-    modal: {
-      isOpen: false,
-      type: null,
-      data: null
-    }
-  },
+  initialState,
   reducers: {
     setLoading: (state, action) => {
       state.isLoading = action.payload;
@@ -20,8 +22,7 @@ const uiSlice = createSlice({
     showNotification: (state, action) => {
       state.notification = {
         message: action.payload.message,
-        type: action.payload.type, // 'success' | 'error' | 'warning' | 'info'
-        id: Date.now()
+        type: action.payload.type,
       };
     },
     clearNotification: (state) => {
@@ -37,17 +38,17 @@ const uiSlice = createSlice({
       state.modal = {
         isOpen: true,
         type: action.payload.type,
-        data: action.payload.data
+        data: action.payload.data,
       };
     },
     closeModal: (state) => {
       state.modal = {
         isOpen: false,
         type: null,
-        data: null
+        data: null,
       };
-    }
-  }
+    },
+  },
 });
 
 export const {
@@ -57,7 +58,7 @@ export const {
   toggleTheme,
   toggleSidebar,
   openModal,
-  closeModal
+  closeModal,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

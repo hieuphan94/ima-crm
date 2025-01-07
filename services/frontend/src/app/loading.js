@@ -1,5 +1,5 @@
 'use client';
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from '@nextui-org/react';
 
 export default function Loading() {
   return (
@@ -7,4 +7,4 @@ export default function Loading() {
       <Spinner size="lg" />
     </div>
   );
-} 
+}

@@ -6,14 +6,11 @@ import { useEffect } from 'react';
 export function Toast() {
   const { notification, clearNotification } = useUI();
 
-  console.log('Current notification:', notification); // Debug log
-
   useEffect(() => {
     if (notification) {
-      console.log('Notification received:', notification); // Debug log
       const timer = setTimeout(() => {
         clearNotification();
-      }, 3000);
+      }, notification.duration || 3000);
 
       return () => clearTimeout(timer);
     }
@@ -21,9 +18,28 @@ export function Toast() {
 
   if (!notification) return null;
 
+  const toastColors = {
+    success: 'bg-green-500',
+    error: 'bg-red-500',
+    info: 'bg-blue-500',
+    warning: 'bg-yellow-500',
+  };
+
   return (
-    <div className={`fixed top-4 right-4 z-50 ${notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white px-6 py-3 rounded-lg shadow-lg`}>
-      {notification.message}
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] pointer-events-none flex items-end justify-center bg-transparent">
+      <div className="w-full max-w-md mb-4 px-4 bg-transparent">
+        <div
+          key={notification.id}
+          className={`
+            px-6 py-3 rounded-lg shadow-lg 
+            ${toastColors[notification.type] || toastColors.info}
+            text-white
+            animate-slide-up
+          `}
+        >
+          {notification.message}
+        </div>
+      </div>
     </div>
   );
-} 
+}

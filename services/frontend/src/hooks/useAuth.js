@@ -1,82 +1,140 @@
+'use client';
+
 import { useDispatch, useSelector } from 'react-redux';
-import { loginStart, loginSuccess, loginFailure, logout } from '@/store/slices/authSlice';
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  logout as logoutAction,
+} from '@/store/slices/authSlice';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useEffect, useCallback } from 'react';
+import { useUI } from '@/hooks/useUI';
+import { useTranslation } from 'react-i18next';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const auth = useSelector((state) => {
-    console.log('Auth state:', state.auth);
-    return state.auth;
-  });
+  const auth = useSelector((state) => state.auth);
+  const { notifySuccess, notifyError } = useUI();
+  const { t } = useTranslation();
+
+  // Hàm lấy token từ storage
+  const getStoredToken = useCallback(() => {
+    const token = Cookies.get('token') || localStorage.getItem('token');
+    return token;
+  }, []);
+
+  // Hàm lấy thông tin user từ token
+  const getUserFromToken = useCallback(async () => {
+    const token = getStoredToken();
+
+    if (!token) {
+      dispatch(logoutAction());
+      return null;
+    }
+
+    try {
+      const response = await axios.get('http://localhost:3000/api/users/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userData = response.data;
+      dispatch(loginSuccess({ token, user: userData }));
+      return userData;
+    } catch (error) {
+      dispatch(logoutAction());
+      return null;
+    }
+  }, [dispatch, getStoredToken]);
+
+  // Kiểm tra và load user data khi component mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const token = getStoredToken();
+      if (token && !auth.user) {
+        await getUserFromToken();
+      }
+    };
+
+    initializeAuth();
+  }, [getUserFromToken, auth.user]); // Thêm dependencies
 
   const login = async ({ email, password }) => {
     try {
       dispatch(loginStart());
-      
+
       const response = await axios.post('http://localhost:3000/api/users/login', {
         email,
-        password
+        password,
       });
 
-      console.log('API Response:', response);
-
-      // Xử lý thành công
       const { token, user } = response.data;
+
       localStorage.setItem('token', token);
       Cookies.set('token', token);
       dispatch(loginSuccess({ token, user }));
-      return response.data;
 
+      return {
+        success: true,
+        data: response.data,
+      };
     } catch (error) {
-      console.error('Auth Error:', error);
-      
-      // Xử lý lỗi 401 (Unauthorized)
-      if (error.response?.status === 401) {
-        const errorMessage = 'Email hoặc mật khẩu không đúng';
-        dispatch(loginFailure(errorMessage));
-        throw new Error(errorMessage);
-      }
-      
-      // Xử lý lỗi 404 (Not Found)
-      if (error.response?.status === 404) {
-        const errorMessage = 'Tài khoản không tồn tại';
-        dispatch(loginFailure(errorMessage));
-        throw new Error(errorMessage);
+      console.log('Login error:', error);
+
+      let errorMessage;
+
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            errorMessage = t('auth.invalidCredentials');
+            break;
+          case 404:
+            errorMessage = t('auth.userNotFound');
+            break;
+          default:
+            errorMessage = error.response.data?.message || t('auth.loginFailed');
+        }
+      } else if (error.request) {
+        errorMessage = t('errors.networkError');
+      } else {
+        errorMessage = t('auth.loginFailed');
       }
 
-      // Các lỗi khác
-      const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại';
       dispatch(loginFailure(errorMessage));
-      throw new Error(errorMessage);
+      notifyError(errorMessage);
+
+      return {
+        success: false,
+        error: errorMessage,
+      };
     }
   };
 
-  const handleLogout = () => {
+  const logoutHandler = useCallback(async () => {
     try {
-      // Xóa token
       localStorage.removeItem('token');
       Cookies.remove('token');
-      
-      // Clear auth state
-      dispatch(logout());
-      
-      // Redirect về trang login
+      dispatch(logoutAction());
+      notifySuccess(t('auth.logoutSuccess'));
       router.push('/login');
-      
     } catch (error) {
       console.error('Logout error:', error);
+      notifyError(t('errors.logoutFailed'));
     }
-  };
+  }, [dispatch, router, notifySuccess, notifyError, t]);
 
   return {
-    login,
-    logout: handleLogout,
-    isAuthenticated: auth.isAuthenticated,
     user: auth.user,
+    isAuthenticated: auth.isAuthenticated,
     loading: auth.loading,
-    error: auth.error
+    error: auth.error,
+    login,
+    logout: logoutHandler,
+    getUserFromToken,
   };
-}; 
+};

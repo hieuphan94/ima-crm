@@ -3,11 +3,59 @@
     "dashboard": "Tổng quan",
     "customers": "Khách hàng",
     "tours": "Tours",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "loading": "Đang xử lý...",
+    "error": "Lỗi",
+    "success": "Thành công"
   },
   "auth": {
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
-    "register": "Đăng ký"
+    "register": "Đăng ký",
+    "email": "Email",
+    "emailPlaceholder": "Nhập email của bạn",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu của bạn",
+    "loginSuccess": "Đăng nhập thành công!",
+    "logoutSuccess": "Đăng xuất thành công!",
+    "sessionExpired": "Phiên đăng nhập đã hết hạn",
+    "invalidCredentials": "Email hoặc mật khẩu không chính xác",
+    "userNotFound": "Không tìm thấy tài khoản",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại",
+    "logoutFailed": "Đăng xuất thất bại. Vui lòng thử lại"
+  },
+  "errors": {
+    "serverError": "Lỗi server. Vui lòng thử lại sau",
+    "contactSupport": "Vui lòng liên hệ hỗ trợ kỹ thuật:",
+    "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại",
+    "networkError": "Lỗi kết nối mạng. Vui lòng thử lại sau",
+    "invalidCredentials": "Email hoặc mật khẩu không chính xác",
+    "fillAllFields": "Vui lòng điền đầy đủ thông tin",
+    "validation": {
+      "email": {
+        "required": "Email không được để trống",
+        "invalid": "Email không hợp lệ"
+      },
+      "password": {
+        "required": "Mật khẩu không được để trống",
+        "minLength": "Mật khẩu phải có ít nhất 6 ký tự"
+      }
+    },
+    "serverNotFound": "Không tìm thấy server",
+    "unexpectedError": "Đã xảy ra lỗi không mong muốn"
+  },
+  "sidebar": {
+    "dashboard": "Tổng quan",
+    "users": "Quản lý Users",
+    "tours": "Quản lý Tours",
+    "library": "Thư viện",
+    "settings": "Cài đặt hệ thống",
+    "profile": "Thông tin cá nhân",
+    "myTours": "Tours của tôi",
+    "sales": "Quản lý bán hàng",
+    "tourManagement": "Điều hành Tour",
+    "schedules": "Lịch trình",
+    "finance": "Quản lý tài chính",
+    "reports": "Báo cáo"
   }
 }

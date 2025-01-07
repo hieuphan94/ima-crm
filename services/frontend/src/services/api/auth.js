@@ -14,4 +14,4 @@ export const authApi = {
   getUsers: () => axiosInstance.get('/users'),
   updateUserStatus: (userId, data) => axiosInstance.put(`/users/${userId}/status`, data),
   deleteUser: (userId) => axiosInstance.delete(`/users/${userId}`),
-}; 
+};

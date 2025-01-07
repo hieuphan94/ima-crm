@@ -1,51 +1,51 @@
-export const validateEmail = (email, setErrors, notify) => {
+export const validateEmail = (email, setErrors, notifyError) => {
   if (!email) {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      email: 'Vui lòng nhập email'
+      email: 'Vui lòng nhập email',
     }));
-    notify('Vui lòng nhập email', 'error');
+    notifyError('Vui lòng nhập email');
     return false;
   }
   if (!email.includes('@')) {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      email: 'Email không hợp lệ'
+      email: 'Email không hợp lệ',
     }));
-    notify('Email không hợp lệ', 'error');
+    notifyError('Email không hợp lệ');
     return false;
   }
-  setErrors(prev => ({
+  setErrors((prev) => ({
     ...prev,
-    email: ''
+    email: '',
   }));
   return true;
 };
 
-export const validatePassword = (password, setErrors, notify) => {
+export const validatePassword = (password, setErrors, notifyError) => {
   if (!password) {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      password: 'Vui lòng nhập mật khẩu'
+      password: 'Vui lòng nhập mật khẩu',
     }));
-    notify('Vui lòng nhập mật khẩu', 'error');
+    notifyError('Vui lòng nhập mật khẩu');
     return false;
   }
   if (password.length < 6) {
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      password: 'Mật khẩu phải có ít nhất 6 ký tự'
+      password: 'Mật khẩu phải có ít nhất 6 ký tự',
     }));
-    notify('Mật khẩu phải có ít nhất 6 ký tự', 'error');
+    notifyError('Mật khẩu phải có ít nhất 6 ký tự');
     return false;
   }
-  setErrors(prev => ({
+  setErrors((prev) => ({
     ...prev,
-    password: ''
+    password: '',
   }));
   return true;
 };
 
 export const validateRequired = (value) => {
   return value !== null && value !== undefined && value !== '';
-}; 
+};

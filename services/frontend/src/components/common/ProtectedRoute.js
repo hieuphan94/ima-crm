@@ -18,4 +18,4 @@ export default function ProtectedRoute({ children }) {
   if (!isAuthenticated) return null;
 
   return children;
-} 
+}

@@ -1,6 +1,6 @@
 'use client';
 import { Component } from 'react';
-import { Button } from "@nextui-org/react";
+import { Button } from '@nextui-org/react';
 
 /**
  * ErrorBoundary Component để bắt lỗi trong React tree
@@ -9,10 +9,10 @@ import { Button } from "@nextui-org/react";
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
+    this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     };
   }
 
@@ -28,7 +28,7 @@ class ErrorBoundary extends Component {
     console.error('Error Info:', errorInfo);
     this.setState({
       error: error,
-      errorInfo: errorInfo
+      errorInfo: errorInfo,
     });
   }
 
@@ -37,7 +37,7 @@ class ErrorBoundary extends Component {
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     });
     window.location.reload();
   };
@@ -48,10 +48,7 @@ class ErrorBoundary extends Component {
         <div className="min-h-screen flex flex-col items-center justify-center">
           <h1 className="text-2xl font-bold mb-4">Đã có lỗi xảy ra</h1>
           <p className="mb-8">Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.</p>
-          <Button 
-            color="primary"
-            onClick={this.handleReset}
-          >
+          <Button color="primary" onClick={this.handleReset}>
             Tải lại trang
           </Button>
         </div>
