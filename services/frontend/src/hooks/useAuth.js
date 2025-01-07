@@ -1,18 +1,19 @@
 'use client';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { URLS } from '@/configs/urls';
+import { useUI } from '@/hooks/useUI';
+import axiosInstance from '@/services/axios';
 import {
+  loginFailure,
   loginStart,
   loginSuccess,
-  loginFailure,
   logout as logoutAction,
 } from '@/store/slices/authSlice';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
-import { useEffect, useCallback } from 'react';
-import { useUI } from '@/hooks/useUI';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -37,11 +38,7 @@ export const useAuth = () => {
     }
 
     try {
-      const response = await axios.get('http://localhost:3000/api/users/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axiosInstance.get(URLS.AUTH.PROFILE);
 
       const userData = response.data;
       dispatch(loginSuccess({ token, user: userData }));
@@ -68,7 +65,7 @@ export const useAuth = () => {
     try {
       dispatch(loginStart());
 
-      const response = await axios.post('http://localhost:3000/api/users/login', {
+      const response = await axiosInstance.post(URLS.AUTH.LOGIN, {
         email,
         password,
       });
