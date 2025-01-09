@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { createTransform, persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
+import profileReducer from './slices/profileSlice';
 import uiReducer from './slices/uiSlice';
 import userReducer from './slices/userSlice';
 
@@ -61,6 +62,7 @@ export const store = configureStore({
     auth: persistedAuthReducer,
     ui: persistedUiReducer,
     users: userReducer,
+    profile: profileReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

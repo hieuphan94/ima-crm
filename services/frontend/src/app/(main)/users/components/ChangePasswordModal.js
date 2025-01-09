@@ -1,3 +1,4 @@
+import { generatePassword } from '@/utils/generatePassword';
 import {
   Button,
   Input,
@@ -50,14 +51,9 @@ export function ChangePasswordModal({ isOpen, onClose, onSubmit, user, loading }
     onClose();
   }, [onClose]);
 
-  const generatePassword = useCallback(() => {
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let password = '';
-    for (let i = 0; i < 8; i++) {
-      const randomIndex = Math.floor(Math.random() * charset.length);
-      password += charset[randomIndex];
-    }
-    setNewPassword(password);
+  const handleGeneratePassword = useCallback(() => {
+    const newPassword = generatePassword();
+    setNewPassword(newPassword);
   }, []);
 
   const toggleVisibility = useCallback(() => setIsVisible(!isVisible), [isVisible]);
@@ -88,7 +84,7 @@ export function ChangePasswordModal({ isOpen, onClose, onSubmit, user, loading }
                   </Button>
                 }
               />
-              <Button isIconOnly variant="flat" onPress={generatePassword} className="h-14">
+              <Button isIconOnly variant="flat" onPress={handleGeneratePassword} className="h-14">
                 <Wand2 size={18} />
               </Button>
             </div>

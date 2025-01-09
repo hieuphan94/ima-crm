@@ -31,16 +31,14 @@ export default function Sidebar() {
       return allMenuItems.sales;
     }
 
-    // Trường hợp không xác định
-    console.warn('Unknown user role/department:', user);
-    return [];
+    return []; // Return empty array cho các trường hợp khác
   };
 
   // Get menu items based on user role and department
   const menuItems = getMenuByRoleAndDepartment(user);
 
+  // Không hiển thị sidebar nếu không có user hoặc menu items
   if (!user || !menuItems.length) {
-    console.warn('No menu items for user:', user);
     return null;
   }
 
