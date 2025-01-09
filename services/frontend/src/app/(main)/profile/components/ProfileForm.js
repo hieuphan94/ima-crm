@@ -8,7 +8,7 @@ export default function ProfileForm({ user, onCancel }) {
   const { updateProfile, loading } = useProfile();
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
-    email: user?.email || '',
+    username: user?.username || '',
   });
 
   const handleChange = (e) => {
@@ -22,7 +22,12 @@ export default function ProfileForm({ user, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateProfile(formData);
+      const updateData = {
+        fullName: formData.fullName.trim(),
+        username: formData.username.trim(),
+      };
+
+      await updateProfile(updateData);
       onCancel();
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -49,10 +54,9 @@ export default function ProfileForm({ user, onCancel }) {
             />
 
             <Input
-              label="Email"
-              name="email"
-              type="email"
-              value={formData.email}
+              label="Username"
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               required
             />

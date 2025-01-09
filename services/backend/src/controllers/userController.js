@@ -159,7 +159,7 @@ class UserController {
     // 4. Cập nhật thông tin user
     static async updateProfile(req, res) {
         try {
-            const { fullName, department, currentPassword, newPassword } = req.body;
+            const { fullName, username } = req.body;
             const userId = req.user.id;
 
             const user = await User.findByPk(userId);
@@ -169,30 +169,24 @@ class UserController {
                 });
             }
 
-            // Nếu muốn đổi mật khẩu
-            if (currentPassword && newPassword) {
-                const isValidPassword = await user.comparePassword(currentPassword);
-                if (!isValidPassword) {
+            // Kiểm tra username đã tồn tại chưa (nếu có thay đổi)
+            if (username && username !== user.username) {
+                const existingUsername = await User.findByUsername(username);
+                if (existingUsername) {
                     return res.status(400).json({
-                        message: 'Current password is incorrect'
+                        message: 'Username already exists'
                     });
                 }
-                user.password = newPassword;
+                user.username = username;
             }
 
             // Cập nhật thông tin khác
             if (fullName) user.fullName = fullName;
-            if (department) user.department = department;
 
             await user.save();
 
-            // Loại bỏ password trước khi trả về
-            const userWithoutPassword = user.toJSON();
-            delete userWithoutPassword.password;
-
             res.json({
                 message: 'Profile updated successfully',
-                user: userWithoutPassword
             });
 
         } catch (error) {

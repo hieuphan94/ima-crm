@@ -1,4 +1,5 @@
 import { authApi } from '@/services/api/auth';
+import { loginSuccess } from '@/store/slices/authSlice';
 import {
   changePasswordFailure,
   changePasswordStart,
@@ -9,14 +10,12 @@ import {
 } from '@/store/slices/profileSlice';
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useAuth } from './useAuth';
 import { useUI } from './useUI';
 
 export const useProfile = () => {
   const dispatch = useDispatch();
   const { notifyError, notifySuccess } = useUI();
-  const { logout } = useAuth();
-  const { loading, error } = useSelector((state) => state.profile);
+  const currentUser = useSelector((state) => state.auth.user);
 
   const updateProfile = useCallback(
     async (userData) => {
@@ -24,6 +23,19 @@ export const useProfile = () => {
       try {
         const response = await authApi.updateProfile(userData);
         dispatch(updateProfileSuccess());
+
+        const updatedUser = {
+          ...currentUser,
+          ...userData,
+        };
+
+        dispatch(
+          loginSuccess({
+            user: updatedUser,
+            token: localStorage.getItem('token'),
+          })
+        );
+
         notifySuccess('Cập nhật thông tin thành công');
         return response.data;
       } catch (error) {
@@ -32,14 +44,17 @@ export const useProfile = () => {
         throw error;
       }
     },
-    [dispatch, notifySuccess, notifyError]
+    [dispatch, notifySuccess, notifyError, currentUser]
   );
 
   const changePassword = useCallback(
-    async (passwordData) => {
+    async ({ currentPassword, newPassword }) => {
       dispatch(changePasswordStart());
       try {
-        const response = await authApi.changePassword(passwordData);
+        const response = await authApi.changePassword({
+          currentPassword,
+          newPassword,
+        });
         dispatch(changePasswordSuccess());
         notifySuccess('Đổi mật khẩu thành công');
         return response.data;
@@ -53,8 +68,6 @@ export const useProfile = () => {
   );
 
   return {
-    loading,
-    error,
     updateProfile,
     changePassword,
   };
