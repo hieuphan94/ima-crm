@@ -1,56 +1,159 @@
 import { NextResponse } from 'next/server';
+import { ROUTES, getDefaultRoute, hasPermission, isPublicRoute } from './configs/routesPermission';
 
-// Định nghĩa các routes configuration
-const PUBLIC_ROUTES = ['/login', '/forgot-password'];
-const PROTECTED_ROUTES = ['/dashboard', '/users', '/settings'];
+// Helper function để parse JWT token an toàn
+const parseJwt = (token) => {
+  try {
+    // 1. Check token tồn tại
+    if (!token) {
+      console.error('Token is empty');
+      return null;
+    }
 
-// Helper function để check route
-const isProtectedRoute = (path) => {
-  return PROTECTED_ROUTES.some((route) => path.startsWith(route));
+    // 2. Check token format
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Invalid token format');
+      return null;
+    }
+
+    // 3. Parse payload
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(Buffer.from(base64, 'base64').toString());
+
+    // 4. Validate payload
+    if (!payload || typeof payload !== 'object') {
+      console.error('Invalid payload format');
+      return null;
+    }
+
+    return payload;
+  } catch (e) {
+    console.error('Token parse error:', e);
+    return null;
+  }
 };
 
-const isPublicRoute = (path) => {
-  return PUBLIC_ROUTES.some((route) => path.startsWith(route));
+// Helper function để check token validity
+const isValidToken = (userData) => {
+  try {
+    if (!userData) return false;
+
+    // Check expiration time
+    const currentTime = Date.now() / 1000;
+    const isValid = userData.exp > currentTime;
+
+    console.log('Token validity check:', {
+      exp: userData.exp,
+      current: currentTime,
+      isValid,
+    });
+
+    return isValid;
+  } catch (e) {
+    console.error('Token validation error:', e);
+    return false;
+  }
 };
 
 export function middleware(request) {
-  const token = request.cookies.get('token');
   const path = request.nextUrl.pathname;
 
-  // Log để debug
-  console.log('Middleware check:', {
-    path,
-    hasToken: !!token,
-    isProtected: isProtectedRoute(path),
-    isPublic: isPublicRoute(path),
-  });
+  // 1. Skip static files và public assets
+  if (
+    path === '/favicon.ico' ||
+    path.startsWith('/_next/') ||
+    path.startsWith('/public/') ||
+    path.startsWith('/images/')
+  ) {
+    return NextResponse.next();
+  }
 
-  // Nếu không có token và truy cập protected route
-  if (!token && isProtectedRoute(path)) {
-    const loginUrl = new URL('/login', request.url);
+  const token = request.cookies.get('token')?.value;
+  const isApiRoute = path.startsWith('/api/');
+
+  // 2. Parse và validate token
+  let userData = null;
+  if (token) {
+    userData = parseJwt(token);
+    if (!userData || !isValidToken(userData)) {
+      console.warn('Invalid or expired token:', { path, userData });
+
+      if (isApiRoute) {
+        return new NextResponse(JSON.stringify({ message: 'Token invalid or expired' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
+      response.cookies.delete('token');
+      return response;
+    }
+  }
+
+  // 3. API routes luôn cần authentication
+  if (isApiRoute && !userData) {
+    console.warn('Unauthorized API access:', { path });
+    return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'content-type': 'application/json' },
+    });
+  }
+
+  // 4. Xử lý public routes
+  if (isPublicRoute(path)) {
+    if (userData) {
+      // Đã login -> chuyển đến trang mặc định theo role/department
+      const defaultRoute = getDefaultRoute(userData.role, userData.department);
+      console.log('Redirecting logged user from public route:', {
+        from: path,
+        to: defaultRoute,
+        role: userData.role,
+        department: userData.department,
+      });
+      return NextResponse.redirect(new URL(defaultRoute, request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // 5. Xử lý khi chưa đăng nhập
+  if (!userData) {
+    console.warn('Unauthorized access:', { path });
+    const loginUrl = new URL(ROUTES.login, request.url);
     loginUrl.searchParams.set('from', path);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Nếu có token và truy cập public route (như login)
-  if (token && isPublicRoute(path)) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  // 6. Check role và department
+  if (!userData.role || !userData.department) {
+    console.warn('Invalid user data:', { userData, path });
+    const response = NextResponse.redirect(new URL(ROUTES.login, request.url));
+    response.cookies.delete('token');
+    return response;
   }
 
+  // 7. Check permission
+  if (!hasPermission(userData.role, userData.department, path)) {
+    console.warn('Permission denied:', {
+      path,
+      role: userData.role,
+      department: userData.department,
+    });
+    const defaultRoute = getDefaultRoute(userData.role, userData.department);
+    return NextResponse.redirect(new URL(defaultRoute, request.url));
+  }
+
+  // 8. Có quyền truy cập -> cho phép
   return NextResponse.next();
 }
 
-// Match tất cả các routes
+// Cập nhật matcher config
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    // Exclude files
+    '/((?!_next/static|_next/image|favicon.ico|images|public).*)',
+    // Include API routes
+    '/api/:path*',
   ],
 };

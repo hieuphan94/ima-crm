@@ -10,7 +10,8 @@ const CONSTANTS = {
     // Roles
     ROLES: {
         ADMIN: 'admin',
-        USER: 'user'
+        USER: 'user',
+        MANAGER: 'manager'
     },
 
     // Status

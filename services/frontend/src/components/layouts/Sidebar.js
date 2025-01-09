@@ -1,6 +1,7 @@
 'use client';
 
 import { getMenuItems } from '@/configs/menuItems';
+import { DEPARTMENTS, ROLES } from '@/configs/routesPermission';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/hooks/useUI';
 import { Listbox, ListboxItem } from '@nextui-org/react';
@@ -16,9 +17,30 @@ export default function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useUI();
 
   const allMenuItems = getMenuItems(t);
-  const menuItems = user ? allMenuItems[user.role] || allMenuItems.user : [];
 
-  if (!user) {
+  const getMenuByRoleAndDepartment = (user) => {
+    if (!user) return [];
+
+    // Admin có menu riêng
+    if (user.role === ROLES.ADMIN) {
+      return allMenuItems.admin;
+    }
+
+    // User thuộc Sales department
+    if (user.department === DEPARTMENTS.SALES) {
+      return allMenuItems.sales;
+    }
+
+    // Trường hợp không xác định
+    console.warn('Unknown user role/department:', user);
+    return [];
+  };
+
+  // Get menu items based on user role and department
+  const menuItems = getMenuByRoleAndDepartment(user);
+
+  if (!user || !menuItems.length) {
+    console.warn('No menu items for user:', user);
     return null;
   }
 

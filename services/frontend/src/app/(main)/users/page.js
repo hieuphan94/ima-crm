@@ -16,13 +16,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { DeleteUserModal } from './components/DeleteUserModal';
 import { EditUserModal } from './components/EditUserModal';
+import { SearchBar } from './components/SearchBar';
 import { ToggleStatusModal } from './components/ToggleStatusModal';
 
-// Định nghĩa cột cho table với thông tin chi tiết hơn
 const columns = [
   {
     key: 'userInfo',
-    label: 'THÔNG TIN NGƯỜI DÙNG',
+    label: 'THÔNG TIN',
     width: '30%', // Cột này sẽ rộng hơn vì chứa nhiều thông tin
   },
   {
@@ -73,6 +73,20 @@ export default function UsersPage() {
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isToggleStatusOpen, setIsToggleStatusOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter users based on search term
+  const filteredUsers = searchTerm
+    ? users?.filter(
+        (user) =>
+          user?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user?.username?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : users;
+
+  const handleSearch = useCallback((term) => {
+    setSearchTerm(term);
+  }, []);
 
   const handleRefresh = useCallback(async () => {
     try {
@@ -277,7 +291,7 @@ export default function UsersPage() {
     fetchData();
   }, [fetchUsers, notifyError]);
 
-  // Hiển thị loading state
+  // Loading state
   if (loading && !users?.length) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] p-6">
@@ -287,7 +301,7 @@ export default function UsersPage() {
     );
   }
 
-  // Hiển thị error state
+  // Error state
   if (error) {
     return (
       <div className="p-6">
@@ -314,22 +328,26 @@ export default function UsersPage() {
         <div>
           <h1 className="text-xl font-semibold">Danh sách người dùng</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Hiển thị {users.length} người dùng (không bao gồm admin)
+            Hiển thị {filteredUsers?.length || 0} người dùng
+            {searchTerm && ` (đang tìm: "${searchTerm}")`}
           </p>
         </div>
-        <Button
-          isIconOnly
-          variant="light"
-          onPress={handleRefresh}
-          isLoading={loading}
-          className="p-2"
-        >
-          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-        </Button>
+        <div className="flex gap-2 items-center">
+          <SearchBar onSearch={handleSearch} loading={loading} />
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={handleRefresh}
+            isLoading={loading}
+            className="p-2"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
       </div>
 
-      {/* Hiển thị thông báo khi không có dữ liệu */}
-      {users.length === 0 && !loading ? (
+      {/* Table with filtered results */}
+      {users?.length === 0 ? (
         <div className="text-center py-10 bg-gray-50 rounded-lg">
           <p className="text-gray-600">Chưa có người dùng thường nào trong hệ thống</p>
           <Button
@@ -343,8 +361,23 @@ export default function UsersPage() {
             Tải lại dữ liệu
           </Button>
         </div>
+      ) : filteredUsers?.length === 0 ? (
+        <div className="text-center py-10 bg-gray-50 rounded-lg">
+          <p className="text-gray-600">
+            Không tìm thấy người dùng nào khớp với từ khóa "{searchTerm}"
+          </p>
+          <Button
+            color="primary"
+            variant="flat"
+            size="sm"
+            className="mt-2"
+            onPress={() => setSearchTerm('')}
+          >
+            Xóa tìm kiếm
+          </Button>
+        </div>
       ) : (
-        <Table aria-label="Bảng danh sách người dùng">
+        <Table aria-label="Bảng danh sách">
           <TableHeader>
             {columns.map((column) => (
               <TableColumn key={column.key} width={column.width}>
@@ -353,7 +386,7 @@ export default function UsersPage() {
             ))}
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <TableRow key={user?.id}>
                 {/* Cột thông tin người dùng */}
                 <TableCell>
