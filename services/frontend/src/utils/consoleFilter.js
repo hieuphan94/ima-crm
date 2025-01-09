@@ -9,7 +9,11 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   // Override console.warn
   console.warn = (...args) => {
     // Lọc các warning về auto-scroll
-    if (typeof args[0] === 'string' && args[0].includes('Skipping auto-scroll')) {
+    if (
+      typeof args[0] === 'string' &&
+      (args[0].includes('Skipping auto-scroll') ||
+        args[0].includes('<Item> with non-plain text contents is unsupported'))
+    ) {
       return;
     }
     originalConsoleWarn(...args);

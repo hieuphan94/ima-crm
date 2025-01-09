@@ -11,7 +11,11 @@ export const authApi = {
   changePassword: (data) => axiosInstance.put('/users/change-password', data),
 
   // Admin only routes
-  getUsers: () => axiosInstance.get('/users'),
-  updateUserStatus: (userId, data) => axiosInstance.put(`/users/${userId}/status`, data),
-  deleteUser: (userId) => axiosInstance.delete(`/users/${userId}`),
+  getUsers: () => axiosInstance.get('/users/users'),
+  getUserById: (userId) => axiosInstance.get(`/users/users/${userId}`),
+  updateUser: (userId, data) => axiosInstance.put(`/users/users/${userId}`, data),
+  updateUserStatus: (userId, data) => axiosInstance.put(`/users/users/${userId}/status`, data),
+  deleteUser: (userId) => axiosInstance.delete(`/users/users/${userId}`),
+  changeUserPassword: (userId, data) =>
+    axiosInstance.put(`/users/users/${userId}/change-password`, data),
 };

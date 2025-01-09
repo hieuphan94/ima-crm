@@ -1,6 +1,8 @@
 // src/controllers/userController.js
 const { User, Tour } = require('../models');
 const jwt = require('jsonwebtoken');
+const CONSTANTS = require('../constants');
+
 
 class UserController {
     // 1. Đăng ký user mới
@@ -87,7 +89,7 @@ class UserController {
             }
 
             // Kiểm tra status
-            if (user.status !== 'active') {
+            if (user.status !== CONSTANTS.STATUS.ACTIVE) {
                 return res.status(401).json({
                     message: 'Account is not active'
                 });
@@ -251,6 +253,21 @@ class UserController {
         }
     }
 
+    // 6. Lấy thông tin user theo id (Admin only)
+    static async getUserById(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            res.json({ user });
+        } catch (error) {
+            console.error('Get user by id error:', error);
+            res.status(500).json({ message: 'Error retrieving user', error: error.message });
+        }
+    }
+
     // 6. Cập nhật status user (Admin only)
     static async updateUserStatus(req, res) {
         try {
@@ -358,6 +375,111 @@ class UserController {
             console.error('Change password error:', error);
             res.status(500).json({
                 message: 'Error changing password',
+                error: error.message
+            });
+        }
+    }
+
+    // Admin đổi mật khẩu cho user
+    static async changeUserPassword(req, res) {
+        try {
+            const { id } = req.params; // ID của user cần đổi mật khẩu
+            const { newPassword } = req.body;
+
+            // Validate input
+            if (!newPassword) {
+                return res.status(400).json({
+                    message: 'New password is required'
+                });
+            }
+
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({
+                    message: 'User not found'
+                });
+            }
+
+            // Kiểm tra không cho phép admin đổi mật khẩu của admin khác
+            if (user.role === CONSTANTS.ROLES.ADMIN && user.id !== req.user.id) {
+                return res.status(403).json({
+                    message: 'Cannot change password of other admin users'
+                });
+            }
+
+            user.password = newPassword;
+            await user.save();
+
+            res.json({
+                message: 'User password changed successfully'
+            });
+
+        } catch (error) {
+            console.error('Change user password error:', error);
+            res.status(500).json({
+                message: 'Error changing user password',
+                error: error.message
+            });
+        }
+    }
+
+    static async updateUserByAdmin(req, res) {
+        try {
+            const { id } = req.params;
+            const updates = req.body; // Lấy tất cả các trường được gửi lên
+
+            // Tìm user cần update
+            const user = await User.findByPk(id);
+            if (!user) {
+                return res.status(404).json({
+                    message: 'User not found'
+                });
+            }
+
+            // Kiểm tra không cho phép admin sửa thông tin của admin khác
+            if (user.role === CONSTANTS.ROLES.ADMIN && user.id !== req.user.id) {
+                return res.status(403).json({
+                    message: 'Cannot update information of other admin users'
+                });
+            }
+
+            // Kiểm tra email đã tồn tại chưa (chỉ khi email được gửi lên và khác email hiện tại)
+            if (updates.email && updates.email !== user.email) {
+                const existingUser = await User.findOne({ where: { email: updates.email } });
+                if (existingUser) {
+                    return res.status(400).json({
+                        message: 'Email already exists'
+                    });
+                }
+            }
+
+            // Validate department
+            if (updates.department && !CONSTANTS.VALID_DEPARTMENTS.includes(updates.department.toLowerCase())) {
+                return res.status(400).json({
+                    message: `Invalid department. Must be one of: ${CONSTANTS.VALID_DEPARTMENTS.join(', ')}`
+                });
+            }
+
+            // Cập nhật từng trường nếu có
+            if (updates.fullName !== undefined) user.fullName = updates.fullName;
+            if (updates.email !== undefined) user.email = updates.email;
+            if (updates.department !== undefined) user.department = updates.department;
+
+            await user.save();
+
+            // Loại bỏ password trước khi trả về
+            const userWithoutPassword = user.toJSON();
+            delete userWithoutPassword.password;
+
+            res.json({
+                message: 'User updated successfully',
+                user: userWithoutPassword
+            });
+
+        } catch (error) {
+            console.error('Update user error:', error);
+            res.status(500).json({
+                message: 'Error updating user',
                 error: error.message
             });
         }

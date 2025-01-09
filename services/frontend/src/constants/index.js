@@ -43,3 +43,10 @@ export const APP_CONFIG = {
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
   SUPPORTED_FILE_TYPES: ['image/jpeg', 'image/png', 'application/pdf'],
 };
+
+export const DEPARTMENTS = [
+  { label: 'Sales', value: 'sales' },
+  { label: 'Operator', value: 'operator' },
+  { label: 'Accountant', value: 'accountant' },
+  { label: 'Intern', value: 'intern' },
+];

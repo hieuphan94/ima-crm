@@ -15,7 +15,10 @@ router.put('/change-password', auth, UserController.changePassword);
 
 // Admin only routes
 router.get('/users', auth, isAdmin, UserController.getUsers);
+router.get('/users/:id', auth, isAdmin, UserController.getUserById);
+router.put('/users/:id', auth, isAdmin, UserController.updateUserByAdmin); // Thêm route mới
 router.put('/users/:id/status', auth, isAdmin, UserController.updateUserStatus);
 router.delete('/users/:id', auth, isAdmin, UserController.deleteUser);
+router.put('/users/:id/change-password', auth, isAdmin, UserController.changeUserPassword);
 
 module.exports = router;

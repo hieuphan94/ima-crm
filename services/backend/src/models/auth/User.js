@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 const bcrypt = require('bcryptjs');
+const CONSTANTS = require('../../constants');
 
 const User = sequelize.define('User', {
     id: {
@@ -31,15 +32,32 @@ const User = sequelize.define('User', {
     },
     role: {
         type: DataTypes.STRING(20),
-        defaultValue: 'user'
+        defaultValue: CONSTANTS.ROLES.USER,
+        validate: {
+            isIn: {
+                args: [CONSTANTS.VALID_ROLES],
+                msg: `Role must be one of: ${CONSTANTS.VALID_ROLES.join(', ')}`
+            }
+        }
     },
     department: {
         type: DataTypes.STRING(50),
-        // Có thể là: sales, operator, accountant, intern
+        validate: {
+            isIn: {
+                args: [CONSTANTS.VALID_DEPARTMENTS],
+                msg: `Department must be one of: ${CONSTANTS.VALID_DEPARTMENTS.join(', ')}`
+            }
+        }
     },
     status: {
         type: DataTypes.STRING(20),
-        defaultValue: 'active'
+        defaultValue: CONSTANTS.STATUS.ACTIVE,
+        validate: {
+            isIn: {
+                args: [CONSTANTS.VALID_STATUS],
+                msg: `Status must be one of: ${CONSTANTS.VALID_STATUS.join(', ')}`
+            }
+        }
     }
 }, {
     timestamps: true,

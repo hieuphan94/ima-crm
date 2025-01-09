@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { persistStore, persistReducer, createTransform } from 'redux-persist';
+import { createTransform, persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
+import userReducer from './slices/userSlice';
 
 let persistStorage;
 
@@ -59,6 +60,7 @@ export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     ui: persistedUiReducer,
+    users: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -11,13 +11,13 @@ async function seedAdmin() {
         if (!existingAdmin) {
             // Tạo admin user với UUID
             await User.create({
-                id: uuidv4(), // Thêm UUID
+                id: uuidv4(),
                 username: 'admin',
                 email: 'admin@example.com',
-                password: 'admin123', // Nên thay đổi password này
+                password: 'admin123',
                 fullName: 'System Admin',
                 role: 'admin',
-                department: 'admin',
+                department: 'sales',
                 status: 'active'
             });
             console.log('Admin user created successfully');
