@@ -11,6 +11,9 @@ export const ROUTES = {
   dashboard: '/dashboard',
   profile: '/profile',
   library: '/library',
+  libraryTemplates: '/library/templates',
+  libraryDayTemplates: '/library/templates/day-templates',
+  libraryServicesRepository: '/library/templates/services-repository',
 
   // Admin routes
   users: '/users',
@@ -41,6 +44,9 @@ export const DEPARTMENT_PERMISSIONS = {
     ROUTES.tours,
     ROUTES.profile,
     ROUTES.library,
+    ROUTES.libraryTemplates,
+    ROUTES.libraryDayTemplates,
+    ROUTES.libraryServicesRepository,
   ],
 };
 
