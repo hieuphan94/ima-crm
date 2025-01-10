@@ -43,8 +43,6 @@ export default function TemplatesPage() {
         <span>Templates</span>
       </div>
 
-      <h1 className="text-2xl font-bold">Templates Management</h1>
-
       {/* Main content with 50-50 split */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Day Templates Section */}

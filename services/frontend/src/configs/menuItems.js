@@ -1,4 +1,12 @@
-import { FiBook, FiDollarSign, FiHome, FiMap, FiSettings, FiUser, FiUsers } from 'react-icons/fi';
+import {
+  FiBook,
+  FiCalendar,
+  FiDollarSign,
+  FiHome,
+  FiSettings,
+  FiUser,
+  FiUsers,
+} from 'react-icons/fi';
 import { ROUTES } from './routesPermission';
 
 export const getMenuItems = (t) => ({
@@ -17,10 +25,10 @@ export const getMenuItems = (t) => ({
       icon: FiUsers,
     },
     {
-      key: 'tours',
-      label: t('sidebar.tours'),
-      href: ROUTES.tours,
-      icon: FiMap,
+      key: 'trips',
+      label: t('sidebar.trips'),
+      href: ROUTES.trips,
+      icon: FiCalendar,
     },
     {
       key: 'library',
@@ -51,10 +59,10 @@ export const getMenuItems = (t) => ({
       icon: FiDollarSign,
     },
     {
-      key: 'tours',
-      label: t('sidebar.tours'),
-      href: ROUTES.tours,
-      icon: FiMap,
+      key: 'trips',
+      label: t('sidebar.trips'),
+      href: ROUTES.trips,
+      icon: FiCalendar,
     },
     {
       key: 'library',

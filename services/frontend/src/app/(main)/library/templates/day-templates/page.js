@@ -20,7 +20,6 @@ export default function DayTemplatesPage() {
         <span>Day Templates</span>
       </div>
 
-      <h1 className="text-2xl font-bold">Day Templates</h1>
       {/* Table component sẽ được thêm sau */}
     </div>
   );

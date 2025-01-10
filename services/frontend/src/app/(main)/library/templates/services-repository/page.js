@@ -20,7 +20,6 @@ export default function ServicesRepositoryPage() {
         <span>Services Repository</span>
       </div>
 
-      <h1 className="text-2xl font-bold">Services Repository</h1>
       {/* Table component sẽ được thêm sau */}
     </div>
   );

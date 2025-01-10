@@ -22,6 +22,8 @@ export const ROUTES = {
   // Department routes (Sales)
   sales: '/sales',
   tours: '/tours',
+  trips: '/trips',
+  tripsDetail: '/trips/:id',
 };
 
 // 3. Ba loại role có thể có
@@ -42,11 +44,13 @@ export const DEPARTMENT_PERMISSIONS = {
     ROUTES.dashboard,
     ROUTES.sales,
     ROUTES.tours,
+    ROUTES.trips,
     ROUTES.profile,
     ROUTES.library,
     ROUTES.libraryTemplates,
     ROUTES.libraryDayTemplates,
     ROUTES.libraryServicesRepository,
+    ROUTES.settings,
   ],
 };
 

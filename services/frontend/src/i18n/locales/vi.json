@@ -3,10 +3,16 @@
     "dashboard": "Tổng quan",
     "customers": "Khách hàng",
     "tours": "Tours",
+    "trips": "Trips",
     "settings": "Cài đặt",
     "loading": "Đang xử lý...",
     "error": "Lỗi",
-    "success": "Thành công"
+    "success": "Thành công",
+    "search": "Tìm kiếm",
+    "status": "Trạng thái",
+    "back": "Quay lại",
+    "viewDetails": "Xem chi tiết",
+    "new": "Tạo mới"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -47,7 +53,8 @@
   "sidebar": {
     "dashboard": "Tổng quan",
     "users": "Thành viên",
-    "tours": "Chuyến đi",
+    "tours": "Tours",
+    "trips": "Trips",
     "library": "Thư viện",
     "settings": "Cài đặt",
     "profile": "Thông tin cá nhân",
@@ -57,5 +64,22 @@
     "schedules": "Lịch trình",
     "finance": "Tài chính",
     "reports": "Báo cáo"
+  },
+  "trips": {
+    "title": "Chương trình Tour",
+    "newTrip": "Tạo chương trình mới",
+    "searchPlaceholder": "Tìm kiếm chương trình...",
+    "status": {
+      "all": "Tất cả trạng thái",
+      "draft": "Bản nháp",
+      "published": "Đã xuất bản",
+      "archived": "Đã lưu trữ"
+    },
+    "details": {
+      "destination": "Điểm đến",
+      "duration": "Thời gian",
+      "capacity": "Số lượng khách",
+      "startDate": "Ngày khởi hành"
+    }
   }
 }
