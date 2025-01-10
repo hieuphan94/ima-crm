@@ -8,7 +8,7 @@ import {
 } from '@nextui-org/react';
 import { AlertTriangle } from 'lucide-react';
 
-export function ToggleStatusModal({ isOpen, onClose, onConfirm, user, loading }) {
+export default function ToggleStatusModal({ isOpen, onClose, onConfirm, user, loading }) {
   const newStatus = user?.status === 'active' ? 'inactive' : 'active';
 
   return (

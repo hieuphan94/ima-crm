@@ -2,7 +2,7 @@ import { Input } from '@nextui-org/react';
 import { Search } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-export function SearchBar({ onSearch, loading }) {
+export default function SearchBar({ onSearch, loading }) {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Debounce search để tránh gọi API quá nhiều

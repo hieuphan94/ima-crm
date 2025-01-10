@@ -11,7 +11,7 @@ import {
 import { Eye, EyeOff, Wand2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
-export function ChangePasswordModal({ isOpen, onClose, onSubmit, user, loading }) {
+export default function ChangePasswordModal({ isOpen, onClose, onSubmit, user, loading }) {
   const [newPassword, setNewPassword] = useState('');
   const [isVisible, setIsVisible] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);

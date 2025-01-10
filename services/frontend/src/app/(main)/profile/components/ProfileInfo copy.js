@@ -3,33 +3,9 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { Button, CardBody, CardHeader } from '@nextui-org/react';
-import dynamic from 'next/dynamic';
 import { useState } from 'react';
-
-// Dynamic imports
-const ProfileForm = dynamic(() => import('./ProfileForm'), {
-  loading: () => (
-    <div className="space-y-4 p-4">
-      <div className="h-8 bg-default-100 rounded animate-pulse mb-4" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="h-12 bg-default-100 rounded animate-pulse" />
-        <div className="h-12 bg-default-100 rounded animate-pulse" />
-      </div>
-    </div>
-  ),
-});
-
-const ChangePasswordForm = dynamic(() => import('./ChangePasswordForm'), {
-  loading: () => (
-    <div className="space-y-4 p-4">
-      <div className="h-8 bg-default-100 rounded animate-pulse mb-4" />
-      <div className="space-y-4">
-        <div className="h-12 bg-default-100 rounded animate-pulse" />
-        <div className="h-12 bg-default-100 rounded animate-pulse" />
-      </div>
-    </div>
-  ),
-});
+import ChangePasswordForm from './ChangePasswordForm';
+import ProfileForm from './ProfileForm';
 
 export default function ProfileInfo() {
   const { user } = useAuth();

@@ -12,7 +12,7 @@ import {
 } from '@nextui-org/react';
 import { useCallback, useEffect, useState } from 'react';
 
-export function EditUserModal({ isOpen, onClose, onSubmit, user, loading }) {
+export default function EditUserModal({ isOpen, onClose, onSubmit, user, loading }) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',

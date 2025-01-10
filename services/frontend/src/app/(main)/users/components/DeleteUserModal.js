@@ -8,7 +8,7 @@ import {
 } from '@nextui-org/react';
 import { AlertTriangle } from 'lucide-react';
 
-export function DeleteUserModal({ isOpen, onClose, onConfirm, user, loading }) {
+export default function DeleteUserModal({ isOpen, onClose, onConfirm, user, loading }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalContent>
