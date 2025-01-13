@@ -351,21 +351,6 @@ export default function ServicesSidebar() {
     activity: 'bg-purple-50/90 hover:bg-purple-100/90',
   };
 
-  const handleDragStart = (e, service) => {
-    e.dataTransfer.setData(
-      'text/plain',
-      JSON.stringify({
-        type: 'service',
-        data: service,
-      })
-    );
-    e.target.classList.add('opacity-50');
-  };
-
-  const handleDragEnd = (e) => {
-    e.target.classList.remove('opacity-50');
-  };
-
   return (
     <div className="w-56 bg-white rounded-lg shadow-sm border border-gray-200 p-1 overflow-y-auto max-h-[calc(100vh-120px)]">
       <div className="space-y-2">
@@ -465,8 +450,13 @@ export default function ServicesSidebar() {
                               <div
                                 key={service.id}
                                 draggable
-                                onDragStart={(e) => handleDragStart(e, service)}
-                                onDragEnd={handleDragEnd}
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData('text/plain', JSON.stringify(service));
+                                  e.target.classList.add('opacity-50');
+                                }}
+                                onDragEnd={(e) => {
+                                  e.target.classList.remove('opacity-50');
+                                }}
                                 className="flex flex-col p-1 rounded cursor-move bg-white/90 hover:bg-gray-50 border border-gray-100 shadow-sm"
                               >
                                 <div className="flex items-center justify-between">
@@ -559,14 +549,7 @@ export default function ServicesSidebar() {
                     key={guide.id}
                     draggable
                     onDragStart={(e) => {
-                      e.dataTransfer.setData(
-                        'text/plain',
-                        JSON.stringify({
-                          type: 'guide',
-                          data: guide,
-                        })
-                      );
-                      e.target.classList.add('opacity-50');
+                      e.dataTransfer.setData('text/plain', JSON.stringify(guide));
                     }}
                     className="flex flex-col p-1 rounded hover:bg-gray-50 cursor-move border border-gray-100"
                   >

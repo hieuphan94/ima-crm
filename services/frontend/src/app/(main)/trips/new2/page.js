@@ -4,9 +4,9 @@ import { useUI } from '@/hooks/useUI';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import DailySchedule from '../components/DailySchedule';
+import DailySchedule from '../components/DailySchedule2';
 
-export default function NewTripPage() {
+export default function NewTripPage2() {
   const router = useRouter();
   const { notifyError } = useUI();
   const [numberOfDays, setNumberOfDays] = useState(null);
@@ -14,62 +14,46 @@ export default function NewTripPage() {
   const [previewData, setPreviewData] = useState(null);
   const [getScheduleData, setGetScheduleData] = useState(null);
 
+  // Copy các handlers từ trang cũ
   const handleDaysChange = (e) => {
     const value = e.target.value;
-
-    // Nếu input trống
     if (!value) {
       setNumberOfDays(null);
       return;
     }
-
-    // Kiểm tra nếu không phải số
     if (!/^\d+$/.test(value)) {
       notifyError('Vui lòng chỉ nhập số ngày');
       return;
     }
-
-    // Convert sang số và kiểm tra range
     const numValue = parseInt(value, 10);
     if (numValue < 1) {
       notifyError('Số ngày phải lớn hơn 0');
       return;
     }
-
-    // Nếu hợp lệ
     setNumberOfDays(numValue);
   };
 
   const handleGuestsChange = (e) => {
     const value = e.target.value;
-
-    // Nếu input trống
     if (!value) {
       setNumberOfGuests(null);
       return;
     }
-
-    // Kiểm tra nếu không phải số
     if (!/^\d+$/.test(value)) {
       notifyError('Vui lòng chỉ nhập số khách');
       return;
     }
-
-    // Convert sang số và kiểm tra range
     const numValue = parseInt(value, 10);
     if (numValue < 1) {
       notifyError('Số khách phải lớn hơn 0');
       return;
     }
-
-    // Nếu hợp lệ
     setNumberOfGuests(numValue);
   };
 
   const handlePreview = () => {
     if (getScheduleData) {
-      // Thay vì gọi getScheduleData(), gọi getScheduleData
-      const data = getScheduleData; // Bỏ dấu ()
+      const data = getScheduleData;
       setPreviewData(data);
       console.log('Preview data:', data);
     }
@@ -91,7 +75,7 @@ export default function NewTripPage() {
             <span>/</span>
             <span>Trips</span>
             <span>/</span>
-            <span>New Trip</span>
+            <span>New Trip 2</span>
           </div>
 
           {/* Quick Create Form */}
@@ -153,8 +137,6 @@ export default function NewTripPage() {
           onPreview={setGetScheduleData}
         />
       </div>
-
-      {/* TODO: Add Preview Modal component */}
     </div>
   );
 }
