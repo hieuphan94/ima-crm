@@ -13,21 +13,26 @@ export default function DaysContainer({
 }) {
   return (
     <div className="flex gap-2 p-2 min-w-max">
-      {Array.from({ length: numberOfDays }).map((_, dayIndex) => (
-        <div key={dayIndex}>
-          <DayCard
-            dayIndex={dayIndex}
-            pax={pax}
-            scheduleItems={scheduleItems}
-            expandedSlots={expandedSlots}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            onOpenModal={onOpenModal}
-            onRemoveService={onRemoveService}
-          />
-        </div>
-      ))}
+      {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
+        const day = dayIndex + 1;
+        const daySchedule = scheduleItems[day] || {};
+
+        return (
+          <div key={dayIndex}>
+            <DayCard
+              dayIndex={dayIndex}
+              daySchedule={daySchedule}
+              pax={pax}
+              expandedSlots={expandedSlots}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onOpenModal={onOpenModal}
+              onRemoveService={onRemoveService}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

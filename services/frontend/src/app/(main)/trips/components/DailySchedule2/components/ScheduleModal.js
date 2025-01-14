@@ -13,10 +13,20 @@ function ScheduleModal({
 }) {
   if (!isOpen) return null;
 
-  const handleDragStart = useCallback((e, index) => {
-    e.dataTransfer.setData('text/plain', index.toString());
-    e.target.classList.add('opacity-50');
-  }, []);
+  const handleDragStart = useCallback(
+    (e, index) => {
+      e.dataTransfer.setData(
+        'text/plain',
+        JSON.stringify({
+          index,
+          day,
+          time,
+        })
+      );
+      e.target.classList.add('opacity-50');
+    },
+    [day, time]
+  );
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -36,17 +46,22 @@ function ScheduleModal({
   const handleDrop = useCallback(
     (e, dropIndex) => {
       e.preventDefault();
-      const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
       const dragTarget = e.target.closest('.service-item');
       if (dragTarget) {
         dragTarget.classList.remove('bg-gray-100');
       }
 
-      if (dragIndex !== dropIndex) {
-        const newServices = [...services];
-        const [movedItem] = newServices.splice(dragIndex, 1);
-        newServices.splice(dropIndex, 0, movedItem);
-        onReorderServices(day, time, newServices);
+      try {
+        const { index: dragIndex } = JSON.parse(e.dataTransfer.getData('text/plain'));
+
+        if (dragIndex !== dropIndex) {
+          const newServices = [...services];
+          const [movedItem] = newServices.splice(dragIndex, 1);
+          newServices.splice(dropIndex, 0, movedItem);
+          onReorderServices(day, time, newServices);
+        }
+      } catch (error) {
+        console.error('Invalid drag data:', error);
       }
     },
     [services, day, time, onReorderServices]
@@ -60,7 +75,11 @@ function ScheduleModal({
             <h3 className="font-medium text-gray-900">
               Ngày {day} - {time}
             </h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+              aria-label="Đóng"
+            >
               ×
             </button>
           </div>
@@ -89,6 +108,7 @@ function ScheduleModal({
                 <button
                   onClick={() => onRemoveService(day, time, idx)}
                   className="text-red-500 hover:text-red-700"
+                  aria-label={`Xóa ${service.name}`}
                 >
                   ×
                 </button>

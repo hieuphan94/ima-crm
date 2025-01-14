@@ -22,33 +22,32 @@ export function useScheduleState() {
   );
 
   const addService = useCallback((day, time, service) => {
-    const slotKey = `${day}-${time}`;
     setScheduleItems((prev) => {
-      if (prev[slotKey]?.some((s) => s.id === service.id)) {
+      if (prev[day]?.[time]?.some((s) => s.id === service.id)) {
         return prev;
       }
+
       return {
         ...prev,
-        [slotKey]: [...(prev[slotKey] || []), service],
+        [day]: {
+          ...prev[day],
+          [time]: [...(prev[day]?.[time] || []), service],
+        },
       };
     });
   }, []);
 
   const removeService = useCallback(
     (day, time, index) => {
-      const slotKey = `${day}-${time}`;
-
       setScheduleItems((prev) => {
-        // Early return nếu slot không tồn tại
-        if (!prev[slotKey]) return prev;
+        if (!prev[day]?.[time]) return prev;
 
-        const currentServices = [...prev[slotKey]];
+        const currentServices = [...prev[day][time]];
         currentServices.splice(index, 1);
 
-        // Cập nhật modalData nếu đang mở
         if (modalData?.day === day && modalData?.time === time) {
           if (currentServices.length <= 1) {
-            setModalData(null); // Đóng modal nếu còn ≤ 1 service
+            setModalData(null);
           } else {
             setModalData({
               ...modalData,
@@ -57,16 +56,26 @@ export function useScheduleState() {
           }
         }
 
-        // Nếu không còn services, xóa slot
+        const newState = { ...prev };
+
         if (currentServices.length === 0) {
-          const { [slotKey]: _, ...rest } = prev;
-          return rest;
+          const { [time]: _, ...restTime } = prev[day];
+
+          if (Object.keys(restTime).length === 0) {
+            const { [day]: __, ...restDays } = newState;
+            return restDays;
+          }
+
+          newState[day] = restTime;
+          return newState;
         }
 
-        // Return new state với services đã cập nhật
         return {
           ...prev,
-          [slotKey]: currentServices,
+          [day]: {
+            ...prev[day],
+            [time]: currentServices,
+          },
         };
       });
     },
@@ -75,22 +84,21 @@ export function useScheduleState() {
 
   const reorderServices = useCallback(
     (day, time, newServices) => {
-      const slotKey = `${day}-${time}`;
-
       setScheduleItems((prev) => {
-        // Early return nếu không có thay đổi thực sự
-        const currentServices = prev[slotKey] || [];
+        const currentServices = prev[day]?.[time] || [];
         if (JSON.stringify(currentServices) === JSON.stringify(newServices)) {
           return prev;
         }
 
         return {
           ...prev,
-          [slotKey]: newServices,
+          [day]: {
+            ...prev[day],
+            [time]: newServices,
+          },
         };
       });
 
-      // Cập nhật modal nếu đang mở
       if (modalData?.day === day && modalData?.time === time) {
         setModalData((prev) => ({
           ...prev,
@@ -103,7 +111,6 @@ export function useScheduleState() {
 
   const openModal = useCallback((day, time, services) => {
     if (services.length > 0) {
-      // Chỉ mở khi có services
       setModalData({
         isOpen: true,
         day,

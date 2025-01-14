@@ -8,7 +8,7 @@ import TimeSlots from './TimeSlots';
 function DayCard({
   dayIndex,
   pax,
-  daySchedule,
+  scheduleItems,
   expandedSlots,
   onDragOver,
   onDragLeave,
@@ -21,7 +21,7 @@ function DayCard({
       <DayHeader dayIndex={dayIndex} />
       <TimeSlots
         dayIndex={dayIndex}
-        daySchedule={daySchedule}
+        scheduleItems={scheduleItems}
         expandedSlots={expandedSlots}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
