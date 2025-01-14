@@ -1,9 +1,9 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { SLOT_HEIGHT, TIME_GROUPS } from '../../utils/constants';
 
-function TimeSlots({
+const TimeSlots = memo(function TimeSlots({
   dayIndex,
   daySchedule,
   expandedSlots = {},
@@ -16,19 +16,22 @@ function TimeSlots({
   const day = dayIndex + 1;
 
   // Helper function để lấy services cho một time slot
-  const getServices = (time) => {
-    return daySchedule[time] || [];
-  };
+  const getServices = useCallback(
+    (time) => {
+      return daySchedule[time] || [];
+    },
+    [daySchedule]
+  );
 
-  // Helper function để sắp xếp services - không thay đổi
-  const sortServices = (services) => {
+  // Helper function để sắp xếp services
+  const sortServices = useCallback((services) => {
     return [...services].sort((a, b) => {
       if (a.type !== b.type) {
         return a.type < b.type ? -1 : 1;
       }
       return a.name.localeCompare(b.name);
     });
-  };
+  }, []);
 
   return (
     <div>
@@ -50,9 +53,7 @@ function TimeSlots({
                     <div
                       className="absolute inset-0 flex flex-col justify-center bg-white border border-gray-200 rounded shadow-sm px-2"
                       draggable
-                      onClick={() => {
-                        onOpenModal(day, time, sortedServices);
-                      }}
+                      onClick={() => onOpenModal(day, time, sortedServices)}
                       onDragStart={(e) => {
                         e.dataTransfer.setData(
                           'text/plain',
@@ -168,6 +169,19 @@ function TimeSlots({
       ))}
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return (
+    prevProps.dayIndex === nextProps.dayIndex &&
+    JSON.stringify(prevProps.daySchedule) === JSON.stringify(nextProps.daySchedule) &&
+    JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
+    prevProps.onDragOver === nextProps.onDragOver &&
+    prevProps.onDragLeave === nextProps.onDragLeave &&
+    prevProps.onDrop === nextProps.onDrop &&
+    prevProps.onOpenModal === nextProps.onOpenModal &&
+    prevProps.onRemoveService === nextProps.onRemoveService
+  );
 }
 
-export default memo(TimeSlots);
+export default TimeSlots;

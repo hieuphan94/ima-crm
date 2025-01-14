@@ -1,4 +1,8 @@
-export default function DistancePrice({ pax }) {
+'use client';
+
+import { memo } from 'react';
+
+const DistancePrice = memo(function DistancePrice({ pax }) {
   return (
     <div className="mt-2 space-y-1">
       <div className="flex items-center justify-between">
@@ -22,4 +26,10 @@ export default function DistancePrice({ pax }) {
       </div>
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return prevProps.pax === nextProps.pax;
 }
+
+export default DistancePrice;

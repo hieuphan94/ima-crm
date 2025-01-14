@@ -2,7 +2,7 @@
 
 import { memo, useCallback } from 'react';
 
-function ScheduleModal({
+const ScheduleModal = memo(function ScheduleModal({
   isOpen,
   onClose,
   services,
@@ -119,6 +119,18 @@ function ScheduleModal({
       </div>
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return (
+    prevProps.isOpen === nextProps.isOpen &&
+    prevProps.day === nextProps.day &&
+    prevProps.time === nextProps.time &&
+    JSON.stringify(prevProps.services) === JSON.stringify(nextProps.services) &&
+    prevProps.onClose === nextProps.onClose &&
+    prevProps.onRemoveService === nextProps.onRemoveService &&
+    prevProps.onReorderServices === nextProps.onReorderServices
+  );
 }
 
-export default memo(ScheduleModal);
+export default ScheduleModal;

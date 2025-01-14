@@ -1,7 +1,9 @@
+'use client';
+
 import { memo } from 'react';
 import { SLOT_HEIGHT, TIME_GROUPS } from '../utils/constants';
 
-function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
+const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
   return (
     <div className="w-12 pt-10">
       {TIME_GROUPS.map((group, groupIndex) => (
@@ -12,11 +14,11 @@ function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
               <div className={`h-[${SLOT_HEIGHT}px] relative group`}>
                 <div
                   className={`
-                  h-full
-                  text-[10px] text-gray-600
-                  flex items-center justify-between px-2
-                  ${group.bgColor} ${group.borderColor} border-r-2
-                `}
+                    h-full
+                    text-[10px] text-gray-600
+                    flex items-center justify-between px-2
+                    ${group.bgColor} ${group.borderColor} border-r-2
+                  `}
                 >
                   <span>{time}</span>
                   <button
@@ -40,12 +42,12 @@ function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
                 <div className={`h-[${SLOT_HEIGHT}px] mt-1`}>
                   <div
                     className={`
-                    h-full
-                    text-[10px] text-gray-600
-                    flex items-center px-2
-                    ${group.bgColor} bg-opacity-50
-                    border-r-2 border-dashed ${group.borderColor}
-                  `}
+                      h-full
+                      text-[10px] text-gray-600
+                      flex items-center px-2
+                      ${group.bgColor} bg-opacity-50
+                      border-r-2 border-dashed ${group.borderColor}
+                    `}
                   >
                     <span>{time.split(':')[0]}:30</span>
                   </div>
@@ -57,6 +59,13 @@ function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
       ))}
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return (
+    JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
+    prevProps.onToggleTime === nextProps.onToggleTime
+  );
 }
 
-export default memo(TimeSlotsSidebar);
+export default TimeSlotsSidebar;

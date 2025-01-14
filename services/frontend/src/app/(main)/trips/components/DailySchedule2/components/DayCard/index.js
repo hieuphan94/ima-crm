@@ -5,7 +5,7 @@ import DayHeader from './DayHeader';
 import DistancePrice from './DistancePrice';
 import TimeSlots from './TimeSlots';
 
-function DayCard({
+const DayCard = memo(function DayCard({
   dayIndex,
   pax,
   daySchedule,
@@ -32,6 +32,20 @@ function DayCard({
       <DistancePrice pax={pax} />
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return (
+    prevProps.dayIndex === nextProps.dayIndex &&
+    prevProps.pax === nextProps.pax &&
+    JSON.stringify(prevProps.daySchedule) === JSON.stringify(nextProps.daySchedule) &&
+    JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
+    prevProps.onDragOver === nextProps.onDragOver &&
+    prevProps.onDragLeave === nextProps.onDragLeave &&
+    prevProps.onDrop === nextProps.onDrop &&
+    prevProps.onOpenModal === nextProps.onOpenModal &&
+    prevProps.onRemoveService === nextProps.onRemoveService
+  );
 }
 
-export default memo(DayCard);
+export default DayCard;

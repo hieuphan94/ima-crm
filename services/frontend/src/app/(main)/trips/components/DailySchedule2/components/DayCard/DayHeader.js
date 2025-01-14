@@ -1,4 +1,8 @@
-export default function DayHeader({ dayIndex }) {
+'use client';
+
+import { memo } from 'react';
+
+const DayHeader = memo(function DayHeader({ dayIndex }) {
   return (
     <div className="mb-1 flex items-center justify-between">
       <h3 className="font-medium text-gray-900 text-xs">Day {dayIndex + 1}</h3>
@@ -7,4 +11,10 @@ export default function DayHeader({ dayIndex }) {
       </button>
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return prevProps.dayIndex === nextProps.dayIndex;
 }
+
+export default DayHeader;

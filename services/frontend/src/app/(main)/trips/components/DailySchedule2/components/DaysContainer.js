@@ -1,6 +1,9 @@
+'use client';
+
+import { memo } from 'react';
 import DayCard from './DayCard';
 
-export default function DaysContainer({
+const DaysContainer = memo(function DaysContainer({
   numberOfDays,
   pax,
   scheduleItems,
@@ -35,4 +38,20 @@ export default function DaysContainer({
       })}
     </div>
   );
+}, arePropsEqual);
+
+function arePropsEqual(prevProps, nextProps) {
+  return (
+    prevProps.numberOfDays === nextProps.numberOfDays &&
+    prevProps.pax === nextProps.pax &&
+    JSON.stringify(prevProps.scheduleItems) === JSON.stringify(nextProps.scheduleItems) &&
+    JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
+    prevProps.onDragOver === nextProps.onDragOver &&
+    prevProps.onDragLeave === nextProps.onDragLeave &&
+    prevProps.onDrop === nextProps.onDrop &&
+    prevProps.onOpenModal === nextProps.onOpenModal &&
+    prevProps.onRemoveService === nextProps.onRemoveService
+  );
 }
+
+export default DaysContainer;
