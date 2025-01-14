@@ -1,6 +1,9 @@
+'use client';
+
+import { memo } from 'react';
 import { TIME_GROUPS } from '../../utils/constants';
 
-export default function TimeSlots({
+function TimeSlots({
   dayIndex,
   scheduleItems,
   onDragOver,
@@ -9,30 +12,41 @@ export default function TimeSlots({
   onOpenModal,
   onRemoveService,
 }) {
+  // Helper function để sắp xếp services
+  const sortServices = (services) => {
+    return [...services].sort((a, b) => {
+      // Ưu tiên sắp xếp theo type (nếu có)
+      if (a.type !== b.type) {
+        return a.type < b.type ? -1 : 1;
+      }
+      // Sau đó sắp xếp theo name
+      return a.name.localeCompare(b.name);
+    });
+  };
+
   return (
     <>
       {TIME_GROUPS.map((group, groupIndex) => (
-        <div key={group.label} className={groupIndex !== 0 ? 'mt-2' : ''}>
+        <div key={`${dayIndex}-${group.label}`} className={groupIndex !== 0 ? 'mt-2' : ''}>
           {group.slots.map((time) => {
             const slotKey = `${dayIndex + 1}-${time}`;
             const services = scheduleItems[slotKey] || [];
+            const sortedServices = sortServices(services); // Sắp xếp services
 
             return (
               <div
-                key={time}
+                key={`${dayIndex}-${time}`}
                 className="h-[28px] rounded bg-white border border-gray-100 px-2 relative"
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={(e) => onDrop(dayIndex + 1, time, e)}
               >
-                {services.length > 0 && (
+                {sortedServices.length > 0 && (
                   <div
                     className="absolute inset-0 flex flex-col justify-center bg-white border border-gray-200 rounded shadow-sm px-2"
                     draggable
                     onClick={() => {
-                      if (services.length > 1) {
-                        onOpenModal(dayIndex + 1, time, services);
-                      }
+                      onOpenModal(dayIndex + 1, time, sortedServices);
                     }}
                     onDragStart={(e) => {
                       e.dataTransfer.setData(
@@ -40,7 +54,7 @@ export default function TimeSlots({
                         JSON.stringify({
                           type: 'moveService',
                           data: {
-                            service: services[0],
+                            service: sortedServices[0],
                             sourceDay: dayIndex + 1,
                             sourceTime: time,
                           },
@@ -50,11 +64,11 @@ export default function TimeSlots({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center min-w-0">
-                        <span className="text-[11px] mr-1">{services[0].icon}</span>
-                        <span className="text-[9px] truncate">{services[0].name}</span>
+                        <span className="text-[11px] mr-1">{sortedServices[0].icon}</span>
+                        <span className="text-[9px] truncate">{sortedServices[0].name}</span>
                       </div>
 
-                      {services.length === 1 && (
+                      {sortedServices.length === 1 && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -67,9 +81,9 @@ export default function TimeSlots({
                       )}
                     </div>
 
-                    {services.length > 1 && (
+                    {sortedServices.length > 1 && (
                       <div className="text-[8px] text-gray-500">
-                        +{services.length - 1} dịch vụ khác
+                        +{sortedServices.length - 1} dịch vụ khác
                       </div>
                     )}
                   </div>
@@ -82,3 +96,5 @@ export default function TimeSlots({
     </>
   );
 }
+
+export default memo(TimeSlots);

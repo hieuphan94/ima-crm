@@ -563,10 +563,21 @@ export default function ServicesSidebar() {
                         'text/plain',
                         JSON.stringify({
                           type: 'guide',
-                          data: guide,
+                          data: {
+                            id: guide.id,
+                            name: guide.name,
+                            icon: guide.icon,
+                            price: guide.price,
+                            languages: guide.languages,
+                            region: guide.region,
+                            type: 'guide',
+                          },
                         })
                       );
                       e.target.classList.add('opacity-50');
+                    }}
+                    onDragEnd={(e) => {
+                      e.target.classList.remove('opacity-50');
                     }}
                     className="flex flex-col p-1 rounded hover:bg-gray-50 cursor-move border border-gray-100"
                   >

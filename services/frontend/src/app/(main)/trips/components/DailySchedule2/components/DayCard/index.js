@@ -1,8 +1,11 @@
+'use client';
+
+import { memo } from 'react';
 import DayHeader from './DayHeader';
 import DistancePrice from './DistancePrice';
 import TimeSlots from './TimeSlots';
 
-export default function DayCard({
+function DayCard({
   dayIndex,
   pax,
   scheduleItems,
@@ -28,3 +31,5 @@ export default function DayCard({
     </div>
   );
 }
+
+export default memo(DayCard);
