@@ -9,6 +9,7 @@ function DayCard({
   dayIndex,
   pax,
   scheduleItems,
+  expandedSlots,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -21,6 +22,7 @@ function DayCard({
       <TimeSlots
         dayIndex={dayIndex}
         scheduleItems={scheduleItems}
+        expandedSlots={expandedSlots}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}

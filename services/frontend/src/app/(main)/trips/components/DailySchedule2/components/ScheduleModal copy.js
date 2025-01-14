@@ -1,4 +1,8 @@
-export default function ScheduleModal({
+'use client';
+
+import { memo, useCallback } from 'react';
+
+function ScheduleModal({
   isOpen,
   onClose,
   services,
@@ -9,44 +13,44 @@ export default function ScheduleModal({
 }) {
   if (!isOpen) return null;
 
-  const handleDragStart = (e, index) => {
+  const handleDragStart = useCallback((e, index) => {
     e.dataTransfer.setData('text/plain', index.toString());
     e.target.classList.add('opacity-50');
-  };
+  }, []);
 
-  const handleDragOver = (e) => {
+  const handleDragOver = useCallback((e) => {
     e.preventDefault();
     const dragTarget = e.target.closest('.service-item');
     if (dragTarget) {
       dragTarget.classList.add('bg-gray-100');
     }
-  };
+  }, []);
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = useCallback((e) => {
     const dragTarget = e.target.closest('.service-item');
     if (dragTarget) {
       dragTarget.classList.remove('bg-gray-100');
     }
-  };
+  }, []);
 
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
-    const dragTarget = e.target.closest('.service-item');
-    if (dragTarget) {
-      dragTarget.classList.remove('bg-gray-100');
-    }
+  const handleDrop = useCallback(
+    (e, dropIndex) => {
+      e.preventDefault();
+      const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
+      const dragTarget = e.target.closest('.service-item');
+      if (dragTarget) {
+        dragTarget.classList.remove('bg-gray-100');
+      }
 
-    if (dragIndex !== dropIndex) {
-      // Tạo mảng services mới với thứ tự đã thay đổi
-      const newServices = [...services];
-      const [movedItem] = newServices.splice(dragIndex, 1);
-      newServices.splice(dropIndex, 0, movedItem);
-
-      // Gọi hàm reorder từ props
-      onReorderServices(day, time, newServices);
-    }
-  };
+      if (dragIndex !== dropIndex) {
+        const newServices = [...services];
+        const [movedItem] = newServices.splice(dragIndex, 1);
+        newServices.splice(dropIndex, 0, movedItem);
+        onReorderServices(day, time, newServices);
+      }
+    },
+    [services, day, time, onReorderServices]
+  );
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -65,7 +69,7 @@ export default function ScheduleModal({
         <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
           {services.map((service, idx) => (
             <div
-              key={idx}
+              key={`${service.id}-${idx}`}
               className="service-item flex items-start justify-between p-2 rounded border border-gray-100 hover:bg-gray-50 cursor-move"
               draggable
               onDragStart={(e) => handleDragStart(e, idx)}
@@ -96,3 +100,5 @@ export default function ScheduleModal({
     </div>
   );
 }
+
+export default memo(ScheduleModal);
