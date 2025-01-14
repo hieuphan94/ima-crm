@@ -7,23 +7,25 @@ export default function DaysContainer({
   onDragOver,
   onDragLeave,
   onDrop,
+  onOpenModal,
+  onRemoveService,
 }) {
   return (
-    <div className="relative" style={{ width: 'calc(160px * 7 + 8px * 6)' }}>
-      <div className="overflow-x-auto">
-        <div className="inline-flex gap-2">
-          {[...Array(numberOfDays)].map((_, dayIndex) => (
-            <DayCard
-              key={dayIndex}
-              dayIndex={dayIndex}
-              pax={pax}
-              scheduleItems={scheduleItems}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-            />
-          ))}
-        </div>
+    <div className="flex-1 overflow-x-auto">
+      <div className="flex gap-2 min-w-min">
+        {Array.from({ length: numberOfDays }).map((_, index) => (
+          <DayCard
+            key={index}
+            dayIndex={index}
+            pax={pax}
+            scheduleItems={scheduleItems}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onOpenModal={onOpenModal}
+            onRemoveService={onRemoveService}
+          />
+        ))}
       </div>
     </div>
   );

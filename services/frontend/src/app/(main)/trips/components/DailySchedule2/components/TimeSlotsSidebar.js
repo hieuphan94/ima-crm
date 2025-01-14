@@ -2,7 +2,7 @@ import { TIME_GROUPS } from '../utils/constants';
 
 export default function TimeSlotsSidebar() {
   return (
-    <div className="w-12 pt-8 ml-2">
+    <div className="w-12 pt-8">
       {TIME_GROUPS.map((group, groupIndex) => (
         <div key={group.label} className={groupIndex !== 0 ? 'mt-2' : ''}>
           {group.slots.map((time) => (

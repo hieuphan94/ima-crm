@@ -17,30 +17,45 @@ export function useDragDrop() {
   };
 
   // Handler cho việc thả vào slot
-  const handleDrop = (day, time, e, addService) => {
+  const handleDrop = (day, time, e, addService, removeService) => {
     e.preventDefault();
     e.currentTarget.classList.remove('bg-gray-100');
 
     try {
-      const droppedData = JSON.parse(e.dataTransfer.getData('text/plain'));
-      if (!droppedData.type || !droppedData.data) {
-        console.error('Invalid drop data format');
-        return;
-      }
+      const dropData = JSON.parse(e.dataTransfer.getData('text/plain'));
 
-      // Kiểm tra type để xử lý phù hợp
-      if (droppedData.type === 'service' || droppedData.type === 'guide') {
-        const serviceWithTime = {
-          ...droppedData.data,
-          scheduledDay: day,
-          scheduledTime: time,
-          itemType: droppedData.type, // Thêm type để phân biệt khi render
-        };
+      switch (dropData.type) {
+        // Xử lý kéo từ sidebar (code cũ)
+        case 'service':
+        case 'guide':
+          const serviceWithTime = {
+            ...dropData.data,
+            scheduledDay: day,
+            scheduledTime: time,
+          };
+          addService(day, time, serviceWithTime);
+          break;
 
-        addService(day, time, serviceWithTime);
+        // Thêm case xử lý kéo từ slot khác
+        case 'moveService':
+          const { service, sourceDay, sourceTime } = dropData.data;
+
+          // Nếu kéo vào chính slot cũ -> không làm gì
+          if (sourceDay === day && sourceTime === time) return;
+
+          // Remove from old slot
+          removeService(sourceDay, sourceTime, 0); // 0 là index của service trong slot cũ
+
+          // Add to new slot
+          addService(day, time, {
+            ...service,
+            scheduledDay: day,
+            scheduledTime: time,
+          });
+          break;
       }
     } catch (error) {
-      console.error('Error processing dropped item:', error);
+      console.error('Error handling drop:', error);
     }
   };
 
