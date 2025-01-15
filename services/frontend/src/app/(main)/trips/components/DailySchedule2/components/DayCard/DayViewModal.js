@@ -2,7 +2,15 @@
 
 import PropTypes from 'prop-types';
 
-function DayViewModal({ isOpen, onClose, day, dayName, services = [], guides = [], distance = 0 }) {
+function DayViewModal({
+  isOpen,
+  onClose,
+  day,
+  titleOfDay,
+  services = [],
+  guides = [],
+  distance = 0,
+}) {
   if (!isOpen) return null;
 
   console.log('guides', guides);
@@ -63,7 +71,7 @@ function DayViewModal({ isOpen, onClose, day, dayName, services = [], guides = [
 
         <div className="p-6 space-y-6">
           {/* Sub headings */}
-          {dayName && <div className="text-lg font-medium text-gray-700">{dayName}</div>}
+          {titleOfDay && <div className="text-lg font-medium text-gray-700">{titleOfDay}</div>}
 
           {guides.length > 0 && (
             <div className="text-sm text-gray-600">Hướng dẫn viên: {guides.join(', ')}</div>
@@ -117,7 +125,7 @@ DayViewModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   day: PropTypes.number.isRequired,
-  dayName: PropTypes.string,
+  titleOfDay: PropTypes.string,
   services: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
