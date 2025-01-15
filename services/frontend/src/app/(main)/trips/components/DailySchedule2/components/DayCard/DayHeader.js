@@ -47,8 +47,13 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
   const prepareModalData = useCallback(() => {
     const services = [];
     const guides = [];
+    const { distance, price } = handleGetDistancePrice();
 
-    console.log('daySchedule', daySchedule);
+    const priceOfDistance = {
+      dayIndex: dayIndex + 1,
+      distance,
+      priceDt: price,
+    };
 
     if (daySchedule) {
       Object.entries(daySchedule).forEach(([time, timeServices]) => {
@@ -68,8 +73,15 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
       });
     }
 
-    return { services, guides };
-  }, [daySchedule]);
+    const modalData = {
+      services,
+      guides,
+      priceOfDistance,
+      titleOfDay: daySchedule?.titleOfDay || '',
+    };
+
+    return modalData;
+  }, [daySchedule, dayIndex, handleGetDistancePrice]);
 
   const handleSaveDayName = useCallback(
     (day, name) => {
@@ -82,9 +94,22 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
     [daySchedule]
   );
 
+  const handleGetDistancePrice = useCallback(() => {
+    const dayContainer = document.querySelector(`.day-container[data-day="${dayIndex}"]`);
+    if (!dayContainer) return { distance: 0, price: 0 };
+
+    const distanceInput = dayContainer.querySelector('.distance-input');
+    const priceElement = dayContainer.querySelector('.price-value');
+
+    const distance = distanceInput ? parseFloat(distanceInput.value) || 0 : 0;
+    const price = priceElement ? parseFloat(priceElement.textContent) || 0 : 0;
+
+    return { distance, price };
+  }, [dayIndex]);
+
   return (
     <>
-      <div className="mb-1 flex items-center justify-between">
+      <div className="mb-1 flex items-center justify-between gap-1">
         <h3
           className={`font-medium text-xs cursor-pointer hover:text-blue-600 ${
             titleOfDay ? 'text-green-600' : 'text-yellow-600'
@@ -93,12 +118,14 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
         >
           Day {dayIndex + 1}
         </h3>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-        >
-          View
-        </button>
+        <div className="flex gap-1">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="text-[10px] px-2 py-0.5 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
+          >
+            View
+          </button>
+        </div>
       </div>
 
       {/* Modal */}

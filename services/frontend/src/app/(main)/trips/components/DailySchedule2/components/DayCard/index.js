@@ -17,7 +17,10 @@ const DayCard = memo(function DayCard({
   onRemoveService,
 }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-2">
+    <div
+      className="bg-white rounded-lg border border-gray-200 p-2 day-container"
+      data-day={dayIndex}
+    >
       <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
       <TimeSlots
         dayIndex={dayIndex}
@@ -29,7 +32,7 @@ const DayCard = memo(function DayCard({
         onOpenModal={onOpenModal}
         onRemoveService={onRemoveService}
       />
-      <DistancePrice pax={pax} />
+      <DistancePrice pax={pax} dayIndex={dayIndex} />
     </div>
   );
 }, arePropsEqual);

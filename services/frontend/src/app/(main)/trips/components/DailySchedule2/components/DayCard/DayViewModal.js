@@ -1,6 +1,7 @@
 'use client';
 
 import PropTypes from 'prop-types';
+import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
 
 function DayViewModal({
   isOpen,
@@ -9,21 +10,17 @@ function DayViewModal({
   titleOfDay,
   services = [],
   guides = [],
-  distance = 0,
+  priceOfDistance,
 }) {
   if (!isOpen) return null;
 
-  // Chuẩn hóa services và tính toán giá
   const normalizeServices = () => {
     return services.map((service) => {
-      // Tách giờ từ tên dịch vụ (format: "HH:mm - Service Name")
       const [time, ...nameParts] = service.name.split(' - ');
       const serviceName = nameParts.join(' - ');
 
-      // Chuẩn hóa giá từ string "xxx,xxxđ" sang number
       let price = 0;
       if (typeof service.price === 'string') {
-        // Loại bỏ dấu phẩy và ký tự 'đ', chuyển sang số
         price = parseInt(service.price.replace(/[,đ]/g, ''), 10) || 0;
       } else if (typeof service.price === 'number') {
         price = service.price;
@@ -33,18 +30,22 @@ function DayViewModal({
         time,
         name: serviceName,
         price,
+        priceUSD: convertVNDtoUSD(price),
       };
     });
   };
 
   const calculateTotal = () => {
     const servicesTotal = normalizeServices().reduce((sum, service) => sum + service.price, 0);
-    const distancePrice = distance * 5000; // Giả sử giá mỗi km là 5000đ
-    return { servicesTotal, distancePrice, total: servicesTotal + distancePrice };
+    const distancePrice = priceOfDistance?.priceDt || 0;
+    const total = servicesTotal + distancePrice;
+    const totalUSD = convertVNDtoUSD(total);
+
+    return { servicesTotal, distancePrice, total, totalUSD };
   };
 
   const normalizedServices = normalizeServices();
-  const { servicesTotal, distancePrice, total } = calculateTotal();
+  const { totalUSD } = calculateTotal();
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -93,7 +94,7 @@ function DayViewModal({
                   <div className="col-span-2 text-gray-600">{service.time}</div>
                   <div className="col-span-6">{service.name}</div>
                   <div className="col-span-3 text-right">
-                    {service.price.toLocaleString('vi-VN')}đ
+                    {formatCurrency(service.priceUSD, 'USD')}
                   </div>
                 </div>
               ))}
@@ -103,15 +104,21 @@ function DayViewModal({
           {/* Distance and price */}
           <div className="grid grid-cols-12 gap-4 p-3 text-sm border-t border-gray-200">
             <div className="col-span-1"></div>
-            <div className="col-span-8">Khoảng cách di chuyển ({distance}km)</div>
-            <div className="col-span-3 text-right">{distancePrice.toLocaleString('vi-VN')}đ</div>
+            <div className="col-span-2"></div>
+            <div className="col-span-6">
+              Khoảng cách di chuyển ({priceOfDistance?.distance || 0}km)
+            </div>
+            <div className="col-span-3 text-right">
+              {formatCurrency(convertVNDtoUSD(priceOfDistance?.priceDt || 0), 'USD')}
+            </div>
           </div>
 
           {/* Total */}
           <div className="grid grid-cols-12 gap-4 p-3 text-sm font-medium bg-gray-50 rounded-lg">
             <div className="col-span-1"></div>
-            <div className="col-span-8">Tổng cộng</div>
-            <div className="col-span-3 text-right">{total.toLocaleString('vi-VN')}đ</div>
+            <div className="col-span-2"></div>
+            <div className="col-span-6">Tổng cộng</div>
+            <div className="col-span-3 text-right">{formatCurrency(totalUSD, 'USD')}</div>
           </div>
         </div>
       </div>
@@ -127,11 +134,15 @@ DayViewModal.propTypes = {
   services: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
-      price: PropTypes.number,
+      price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     })
   ),
   guides: PropTypes.arrayOf(PropTypes.string),
-  distance: PropTypes.number,
+  priceOfDistance: PropTypes.shape({
+    dayIndex: PropTypes.number,
+    distance: PropTypes.number,
+    priceDt: PropTypes.number,
+  }),
 };
 
 export default DayViewModal;
