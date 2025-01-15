@@ -95,14 +95,16 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
   );
 
   const handleGetDistancePrice = useCallback(() => {
-    const dayContainer = document.querySelector(`.day-container[data-day="${dayIndex}"]`);
+    const dayContainer = document.getElementById(`day-${dayIndex}`);
     if (!dayContainer) return { distance: 0, price: 0 };
 
-    const distanceInput = dayContainer.querySelector('.distance-input');
-    const priceElement = dayContainer.querySelector('.price-value');
+    const elements = {
+      distance: dayContainer.querySelector('.distance-input'),
+      price: dayContainer.querySelector('.price-value'),
+    };
 
-    const distance = distanceInput ? parseFloat(distanceInput.value) || 0 : 0;
-    const price = priceElement ? parseFloat(priceElement.textContent) || 0 : 0;
+    const distance = elements.distance ? parseFloat(elements.distance.value) || 0 : 0;
+    const price = elements.price ? parseFloat(elements.price.textContent) || 0 : 0;
 
     return { distance, price };
   }, [dayIndex]);

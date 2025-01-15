@@ -18,7 +18,8 @@ const DayCard = memo(function DayCard({
 }) {
   return (
     <div
-      className="bg-white rounded-lg border border-gray-200 p-2 day-container"
+      id={`day-${dayIndex}`}
+      className="bg-white rounded-lg border border-gray-200 p-2"
       data-day={dayIndex}
     >
       <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
