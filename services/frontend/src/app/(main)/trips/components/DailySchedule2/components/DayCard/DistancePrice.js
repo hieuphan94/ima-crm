@@ -1,8 +1,21 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useCallback, useState } from 'react';
+
+// Hàm tính giá riêng
+const calculatePrice = (pax, distance) => {
+  if (!pax || !distance) return 0;
+  return pax * distance;
+};
 
 const DistancePrice = memo(function DistancePrice({ pax }) {
+  const [distance, setDistance] = useState('');
+  const price = calculatePrice(pax, Number(distance));
+
+  const handleDistanceChange = useCallback((e) => {
+    setDistance(e.target.value);
+  }, []);
+
   return (
     <div className="mt-2 space-y-1">
       <div className="flex items-center justify-between">
@@ -10,6 +23,8 @@ const DistancePrice = memo(function DistancePrice({ pax }) {
         <div className="flex items-center gap-1">
           <input
             type="text"
+            value={distance}
+            onChange={handleDistanceChange}
             className="w-16 text-right text-xs p-1 border border-gray-200 rounded focus:outline-none focus:border-blue-300"
             placeholder="0.00"
           />
@@ -20,7 +35,7 @@ const DistancePrice = memo(function DistancePrice({ pax }) {
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-gray-600">Price:</span>
         <div className="flex items-center gap-1">
-          <span className="text-xs font-medium text-blue-600">0</span>
+          <span className="text-xs font-medium text-blue-600">{price}</span>
           <span className="text-xs text-blue-600">đ</span>
         </div>
       </div>

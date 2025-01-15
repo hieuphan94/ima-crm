@@ -13,8 +13,6 @@ function DayViewModal({
 }) {
   if (!isOpen) return null;
 
-  console.log('guides', guides);
-
   // Chuẩn hóa services và tính toán giá
   const normalizeServices = () => {
     return services.map((service) => {
