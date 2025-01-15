@@ -38,17 +38,63 @@ const DayCard = memo(function DayCard({
 }, arePropsEqual);
 
 function arePropsEqual(prevProps, nextProps) {
-  return (
-    prevProps.dayIndex === nextProps.dayIndex &&
-    prevProps.pax === nextProps.pax &&
-    JSON.stringify(prevProps.daySchedule) === JSON.stringify(nextProps.daySchedule) &&
-    JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
-    prevProps.onDragOver === nextProps.onDragOver &&
-    prevProps.onDragLeave === nextProps.onDragLeave &&
-    prevProps.onDrop === nextProps.onDrop &&
-    prevProps.onOpenModal === nextProps.onOpenModal &&
-    prevProps.onRemoveService === nextProps.onRemoveService
-  );
+  // 1. So sánh primitive values trước
+  if (prevProps.dayIndex !== nextProps.dayIndex || prevProps.pax !== nextProps.pax) return false;
+
+  // 2. So sánh function references
+  if (
+    prevProps.onDragOver !== nextProps.onDragOver ||
+    prevProps.onDragLeave !== nextProps.onDragLeave ||
+    prevProps.onDrop !== nextProps.onDrop ||
+    prevProps.onOpenModal !== nextProps.onOpenModal ||
+    prevProps.onRemoveService !== nextProps.onRemoveService
+  )
+    return false;
+
+  // 3. So sánh expandedSlots (thường là array hoặc object đơn giản)
+  const prevExpanded = prevProps.expandedSlots || [];
+  const nextExpanded = nextProps.expandedSlots || [];
+
+  if (prevExpanded.length !== nextExpanded.length) return false;
+
+  const isExpandedEqual = prevExpanded.every((slot, index) => slot === nextExpanded[index]);
+
+  if (!isExpandedEqual) return false;
+
+  // 4. So sánh daySchedule (phức tạp nhất)
+  const prevSchedule = prevProps.daySchedule || {};
+  const nextSchedule = nextProps.daySchedule || {};
+
+  const prevKeys = Object.keys(prevSchedule);
+  const nextKeys = Object.keys(nextSchedule);
+
+  if (prevKeys.length !== nextKeys.length) return false;
+
+  // So sánh từng key trong daySchedule
+  return prevKeys.every((key) => {
+    if (key === 'titleOfDay') {
+      return prevSchedule[key] === nextSchedule[key];
+    }
+
+    const prevServices = prevSchedule[key];
+    const nextServices = nextSchedule[key];
+
+    if (!Array.isArray(prevServices) || !Array.isArray(nextServices)) {
+      return prevServices === nextServices;
+    }
+
+    if (prevServices.length !== nextServices.length) return false;
+
+    // So sánh từng service trong time slot
+    return prevServices.every((service, idx) => {
+      const nextService = nextServices[idx];
+      return (
+        service.name === nextService.name &&
+        service.price === nextService.price &&
+        service.type === nextService.type
+      );
+    });
+  });
 }
 
 export default DayCard;

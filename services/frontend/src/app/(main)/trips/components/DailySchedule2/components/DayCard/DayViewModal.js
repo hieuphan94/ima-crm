@@ -1,6 +1,7 @@
 'use client';
 
 import PropTypes from 'prop-types';
+import { useMemo } from 'react';
 import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
 
 function DayViewModal({
@@ -14,7 +15,8 @@ function DayViewModal({
 }) {
   if (!isOpen) return null;
 
-  const normalizeServices = () => {
+  // Memoize normalized services
+  const normalizedServices = useMemo(() => {
     return services.map((service) => {
       const [time, ...nameParts] = service.name.split(' - ');
       const serviceName = nameParts.join(' - ');
@@ -33,19 +35,17 @@ function DayViewModal({
         priceUSD: convertVNDtoUSD(price),
       };
     });
-  };
+  }, [services]);
 
-  const calculateTotal = () => {
-    const servicesTotal = normalizeServices().reduce((sum, service) => sum + service.price, 0);
+  // Memoize totals calculation
+  const { servicesTotal, distancePrice, totalUSD } = useMemo(() => {
+    const servicesTotal = normalizedServices.reduce((sum, service) => sum + service.price, 0);
     const distancePrice = priceOfDistance?.priceDt || 0;
     const total = servicesTotal + distancePrice;
     const totalUSD = convertVNDtoUSD(total);
 
     return { servicesTotal, distancePrice, total, totalUSD };
-  };
-
-  const normalizedServices = normalizeServices();
-  const { totalUSD } = calculateTotal();
+  }, [normalizedServices, priceOfDistance?.priceDt]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
