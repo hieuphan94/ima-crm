@@ -1,16 +1,11 @@
 'use client';
 
 import { memo, useCallback, useState } from 'react';
-
-// Hàm tính giá riêng
-const calculatePrice = (pax, distance) => {
-  if (!pax || !distance) return 0;
-  return pax * distance;
-};
+import { calculatePrice } from '../../utils/calculations';
 
 const DistancePrice = memo(function DistancePrice({ pax }) {
   const [distance, setDistance] = useState('');
-  const price = calculatePrice(pax, Number(distance));
+  const price = calculatePrice(distance, pax);
 
   const handleDistanceChange = useCallback((e) => {
     setDistance(e.target.value);
