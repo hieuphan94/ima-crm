@@ -18,7 +18,7 @@ const DayCard = memo(function DayCard({
 }) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-2">
-      <DayHeader dayIndex={dayIndex} />
+      <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
       <TimeSlots
         dayIndex={dayIndex}
         daySchedule={daySchedule}
