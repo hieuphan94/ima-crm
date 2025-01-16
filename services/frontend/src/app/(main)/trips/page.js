@@ -33,11 +33,6 @@ export default function TripsPage() {
     router.push('/trips/new'); // Chuyển đến trang tạo trip mới
   };
 
-  const handleNewTrip2 = () => {
-    toggleSidebar();
-    router.push('/trips/new2'); // Chuyển đến trang mới
-  };
-
   return (
     <div className="space-y-6 p-6">
       {/* Breadcrumb */}
@@ -63,12 +58,6 @@ export default function TripsPage() {
               className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
             >
               <span>New Trip</span>
-            </button>
-            <button
-              onClick={handleNewTrip2}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
-              <span>New Trip 2</span>
             </button>
           </div>
         </div>

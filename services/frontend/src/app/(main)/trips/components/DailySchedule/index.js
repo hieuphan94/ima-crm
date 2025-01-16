@@ -6,7 +6,7 @@ import TimeSlotsSidebar from './components/TimeSlotsSidebar';
 import { useDragDrop } from './states/useDragDrop';
 import { useScheduleState } from './states/useScheduleState';
 
-export default function DailySchedule2({ numberOfDays, pax }) {
+export default function DailySchedule({ numberOfDays, pax }) {
   const {
     scheduleItems,
     modalData,
