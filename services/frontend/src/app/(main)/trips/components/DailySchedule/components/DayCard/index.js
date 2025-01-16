@@ -15,6 +15,7 @@ const DayCard = memo(function DayCard({
   onDrop,
   onOpenModal,
   onRemoveService,
+  updateDayTitle,
 }) {
   const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
 
@@ -55,7 +56,7 @@ const DayCard = memo(function DayCard({
         }`}
         data-day={dayIndex}
       >
-        <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
+        <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} updateDayTitle={updateDayTitle} />
         <TimeSlots
           dayIndex={dayIndex}
           daySchedule={daySchedule}
@@ -82,7 +83,8 @@ function arePropsEqual(prevProps, nextProps) {
     prevProps.onDragLeave !== nextProps.onDragLeave ||
     prevProps.onDrop !== nextProps.onDrop ||
     prevProps.onOpenModal !== nextProps.onOpenModal ||
-    prevProps.onRemoveService !== nextProps.onRemoveService
+    prevProps.onRemoveService !== nextProps.onRemoveService ||
+    prevProps.updateDayTitle !== nextProps.updateDayTitle
   )
     return false;
 

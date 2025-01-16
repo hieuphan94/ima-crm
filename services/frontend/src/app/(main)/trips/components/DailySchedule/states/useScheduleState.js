@@ -124,6 +124,16 @@ export function useScheduleState() {
     setModalData(null);
   }, []);
 
+  const updateDayTitle = useCallback((day, title) => {
+    setScheduleItems((prev) => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        titleOfDay: title,
+      },
+    }));
+  }, []);
+
   return {
     scheduleItems,
     modalData,
@@ -135,5 +145,6 @@ export function useScheduleState() {
     reorderServices,
     openModal,
     closeModal,
+    updateDayTitle,
   };
 }

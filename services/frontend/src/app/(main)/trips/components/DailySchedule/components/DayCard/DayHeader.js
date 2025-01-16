@@ -4,7 +4,7 @@ import { memo, useCallback, useState } from 'react';
 import DayNameModal from './DayNameModal';
 import DayViewModal from './DayViewModal';
 
-const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
+const DayHeader = memo(function DayHeader({ dayIndex, daySchedule, updateDayTitle }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
 
@@ -85,13 +85,10 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule }) {
 
   const handleSaveDayName = useCallback(
     (day, name) => {
-      // Thêm titleOfDay vào daySchedule
-      if (daySchedule) {
-        daySchedule.titleOfDay = name;
-      }
+      updateDayTitle(dayIndex + 1, name);
       setIsNameModalOpen(false);
     },
-    [daySchedule]
+    [dayIndex, updateDayTitle]
   );
 
   const handleGetDistancePrice = useCallback(() => {

@@ -13,6 +13,7 @@ const DaysContainer = memo(function DaysContainer({
   onDrop,
   onOpenModal,
   onRemoveService,
+  updateDayTitle,
 }) {
   return (
     <div className="flex gap-2 min-w-max">
@@ -32,6 +33,7 @@ const DaysContainer = memo(function DaysContainer({
               onDrop={onDrop}
               onOpenModal={onOpenModal}
               onRemoveService={onRemoveService}
+              updateDayTitle={updateDayTitle}
             />
           </div>
         );
@@ -50,7 +52,8 @@ function arePropsEqual(prevProps, nextProps) {
     prevProps.onDragLeave === nextProps.onDragLeave &&
     prevProps.onDrop === nextProps.onDrop &&
     prevProps.onOpenModal === nextProps.onOpenModal &&
-    prevProps.onRemoveService === nextProps.onRemoveService
+    prevProps.onRemoveService === nextProps.onRemoveService &&
+    prevProps.updateDayTitle === nextProps.updateDayTitle
   );
 }
 

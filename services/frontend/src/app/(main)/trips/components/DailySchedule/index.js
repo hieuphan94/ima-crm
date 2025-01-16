@@ -17,6 +17,7 @@ export default function DailySchedule({ numberOfDays, pax }) {
     closeModal,
     openModal,
     reorderServices,
+    updateDayTitle,
   } = useScheduleState();
 
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
@@ -51,6 +52,7 @@ export default function DailySchedule({ numberOfDays, pax }) {
                     onDrop={(day, time, e) => handleDrop(day, time, e, addService, removeService)}
                     onOpenModal={openModal}
                     onRemoveService={removeService}
+                    updateDayTitle={updateDayTitle}
                   />
                 </div>
               </div>
