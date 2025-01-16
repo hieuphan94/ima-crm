@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import DayHeader from './DayHeader';
 import DistancePrice from './DistancePrice';
 import TimeSlots from './TimeSlots';
@@ -16,25 +16,59 @@ const DayCard = memo(function DayCard({
   onOpenModal,
   onRemoveService,
 }) {
+  const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
+
+  useEffect(() => {
+    setPaxValue(daySchedule?.paxChangeOfDay || '');
+  }, [daySchedule?.paxChangeOfDay]);
+
   return (
-    <div
-      id={`day-${dayIndex}`}
-      className="bg-white rounded-lg border border-gray-200 p-2"
-      data-day={dayIndex}
-    >
-      <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
-      <TimeSlots
-        dayIndex={dayIndex}
-        daySchedule={daySchedule}
-        expandedSlots={expandedSlots}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        onOpenModal={onOpenModal}
-        onRemoveService={onRemoveService}
-      />
-      <DistancePrice pax={pax} dayIndex={dayIndex} />
-    </div>
+    <>
+      <div className="group flex items-center justify-center gap-2 mb-1">
+        <label
+          className={`text-xs text-yellow-600 transition-opacity duration-200 ${
+            paxValue ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+        >
+          Pax Change:
+        </label>
+        <input
+          type="text"
+          className={`w-[30px] text-xs text-center text-yellow-600 p-1 border rounded outline-none focus:border-gray-200 transition-opacity duration-200 ${
+            paxValue ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
+          value={paxValue}
+          onChange={(e) => {
+            const newValue = e.target.value.replace(/[^0-9]/g, '');
+            const parsedValue = newValue ? parseInt(newValue, 10) : '';
+            setPaxValue(parsedValue);
+            if (daySchedule) {
+              daySchedule.paxChangeOfDay = parsedValue;
+            }
+          }}
+        />
+      </div>
+      <div
+        id={`day-${dayIndex}`}
+        className={`bg-white rounded-lg border p-2 ${
+          paxValue ? 'border-yellow-400' : 'border-gray-200'
+        }`}
+        data-day={dayIndex}
+      >
+        <DayHeader dayIndex={dayIndex} daySchedule={daySchedule} />
+        <TimeSlots
+          dayIndex={dayIndex}
+          daySchedule={daySchedule}
+          expandedSlots={expandedSlots}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onOpenModal={onOpenModal}
+          onRemoveService={onRemoveService}
+        />
+        <DistancePrice pax={pax} dayIndex={dayIndex} />
+      </div>
+    </>
   );
 }, arePropsEqual);
 

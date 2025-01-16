@@ -15,7 +15,7 @@ const DaysContainer = memo(function DaysContainer({
   onRemoveService,
 }) {
   return (
-    <div className="flex gap-2 p-2 min-w-max">
+    <div className="flex gap-2 min-w-max">
       {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
         const day = dayIndex + 1;
         const daySchedule = scheduleItems[day] || {};

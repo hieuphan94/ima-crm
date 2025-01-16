@@ -5,7 +5,7 @@ import { SLOT_HEIGHT, TIME_GROUPS } from '../utils/constants';
 
 const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
   return (
-    <div className="w-12 pt-10">
+    <div style={{ paddingTop: '62px' }} className="w-12">
       {TIME_GROUPS.map((group, groupIndex) => (
         <div key={group.label} className={groupIndex !== 0 ? 'mt-2' : ''}>
           {group.slots.map((time) => (
