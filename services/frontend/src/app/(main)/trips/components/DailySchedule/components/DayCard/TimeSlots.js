@@ -44,7 +44,8 @@ const TimeSlots = memo(function TimeSlots({
             return (
               <div key={`${dayIndex}-${time}`} className="mb-1">
                 <div
-                  className={`h-[${SLOT_HEIGHT}px] rounded px-2 relative ${group.bgColor} ${group.borderColor} border`}
+                  style={{ height: SLOT_HEIGHT }}
+                  className={`rounded px-2 relative ${group.bgColor} ${group.borderColor} border`}
                   onDragOver={onDragOver}
                   onDragLeave={onDragLeave}
                   onDrop={(e) => onDrop(day, time, e)}
@@ -98,7 +99,8 @@ const TimeSlots = memo(function TimeSlots({
 
                 {expandedSlots[time] && (
                   <div
-                    className={`h-[${SLOT_HEIGHT}px] mt-1 rounded px-2 relative 
+                    style={{ height: SLOT_HEIGHT }}
+                    className={`mt-1 rounded px-2 relative 
                       ${group.bgColor} bg-opacity-50 border border-dashed ${group.borderColor}`}
                     onDragOver={onDragOver}
                     onDragLeave={onDragLeave}

@@ -11,7 +11,7 @@ const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggl
           {group.slots.map((time) => (
             <div key={time} className="mb-1">
               {/* Regular time slot */}
-              <div className={`h-[${SLOT_HEIGHT}px] relative group`}>
+              <div style={{ height: SLOT_HEIGHT }} className={`relative group`}>
                 <div
                   className={`
                     h-full
@@ -39,7 +39,7 @@ const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggl
 
               {/* 30-min slot */}
               {expandedSlots[time] && (
-                <div className={`h-[${SLOT_HEIGHT}px] mt-1`}>
+                <div style={{ height: SLOT_HEIGHT }} className={`mt-1`}>
                   <div
                     className={`
                       h-full
