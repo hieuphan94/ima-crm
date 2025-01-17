@@ -5,12 +5,13 @@ import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import DailySchedule from '../components/DailySchedule';
+import { useScheduleState } from '../components/DailySchedule/states/useScheduleState';
 
 export default function NewTripPage() {
   const router = useRouter();
   const { notifyError } = useUI();
   const [numberOfDays, setNumberOfDays] = useState(null);
-  const [numberOfGuests, setNumberOfGuests] = useState(null);
+  const { pax, updatePax } = useScheduleState();
   const [previewData, setPreviewData] = useState(null);
   const [getScheduleData, setGetScheduleData] = useState(null);
 
@@ -36,7 +37,7 @@ export default function NewTripPage() {
   const handleGuestsChange = (e) => {
     const value = e.target.value;
     if (!value) {
-      setNumberOfGuests(null);
+      updatePax(null);
       return;
     }
     if (!/^\d+$/.test(value)) {
@@ -48,7 +49,8 @@ export default function NewTripPage() {
       notifyError('Số khách phải lớn hơn 0');
       return;
     }
-    setNumberOfGuests(numValue);
+    console.log('numValue', numValue);
+    updatePax(numValue);
   };
 
   const handlePreview = () => {
@@ -101,7 +103,7 @@ export default function NewTripPage() {
                 type="text"
                 className="w-[100px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="Pax"
-                value={numberOfGuests || ''}
+                value={pax || ''}
                 onChange={handleGuestsChange}
               />
             </div>
@@ -131,11 +133,7 @@ export default function NewTripPage() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <DailySchedule
-          numberOfDays={numberOfDays}
-          pax={numberOfGuests}
-          onPreview={setGetScheduleData}
-        />
+        <DailySchedule numberOfDays={numberOfDays} pax={pax} onPreview={setGetScheduleData} />
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import ServicesSidebar from '../ServicesSidebar';
 import DaysContainer from './components/DaysContainer';
 import ScheduleModal from './components/ScheduleModal';
@@ -18,9 +19,16 @@ export default function DailySchedule({ numberOfDays, pax }) {
     openModal,
     reorderServices,
     updateDayTitle,
+    updatePax,
   } = useScheduleState();
 
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
+
+  useEffect(() => {
+    if (pax !== undefined && pax !== null) {
+      updatePax(pax);
+    }
+  }, [pax, updatePax]);
 
   return (
     <div className="flex gap-4 h-full">
