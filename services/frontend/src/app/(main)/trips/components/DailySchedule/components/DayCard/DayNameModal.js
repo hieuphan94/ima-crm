@@ -2,6 +2,8 @@
 
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useSelector } from 'react-redux';
 
 // Tách component cho phần template
 const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
@@ -77,8 +79,11 @@ const ImageUploader = ({ images, onUpload, onRemove }) => {
   );
 };
 
-function DayNameModal({ isOpen, onClose, day, initialName, onSave, onLoaded }) {
-  const [name, setName] = useState(initialName || '');
+function DayNameModal({ isOpen, onClose, order, dayId, onSave, onLoaded }) {
+  const titleOfDay =
+    useSelector((state) => state.dailySchedule.scheduleItems[dayId].titleOfDay) || '';
+
+  const [name, setName] = useState(titleOfDay || '');
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
 
@@ -89,13 +94,6 @@ function DayNameModal({ isOpen, onClose, day, initialName, onSave, onLoaded }) {
       setSearchTemplate('');
     }
   }, [isOpen]);
-
-  // Cập nhật name khi initialName thay đổi
-  useEffect(() => {
-    if (initialName) {
-      setName(initialName);
-    }
-  }, [initialName]);
 
   const dayTemplates = useMemo(
     () => [
@@ -121,9 +119,15 @@ function DayNameModal({ isOpen, onClose, day, initialName, onSave, onLoaded }) {
       alert('Vui lòng nhập tên ngày');
       return;
     }
-    onSave(day, name.trim());
+    onSave(name.trim());
     onClose();
-  }, [day, name, onSave, onClose]);
+  }, [name, onSave, onClose]);
+
+  // useEffect(() => {
+  //   if (titleOfDay) {
+  //     setName(titleOfDay);
+  //   }
+  // }, [titleOfDay]);
 
   // Thêm useEffect để thông báo khi modal đã tải xong
   useEffect(() => {
@@ -132,13 +136,30 @@ function DayNameModal({ isOpen, onClose, day, initialName, onSave, onLoaded }) {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg w-[500px] max-h-[80vh] overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Overlay with blur effect */}
+      <div
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity animate-overlay-appear"
+        onClick={onClose}
+      />
+
+      {/* Modal with animation */}
+      <div
+        className="
+          relative bg-white rounded-lg shadow-2xl w-[500px] max-h-[80vh] overflow-y-auto
+          animate-modal-appear
+          transform transition-all
+          z-[10000]
+        "
+      >
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-900">Ngày {day}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <h3 className="font-medium text-xl text-gray-900">Ngày {order}</h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-xl transition-colors duration-200"
+            >
               ×
             </button>
           </div>
@@ -180,18 +201,22 @@ function DayNameModal({ isOpen, onClose, day, initialName, onSave, onLoaded }) {
         </div>
 
         <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
+          >
             Hủy
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-200"
           >
             Lưu
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -199,7 +224,6 @@ DayNameModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   day: PropTypes.number.isRequired,
-  initialName: PropTypes.string,
   onSave: PropTypes.func.isRequired,
   onLoaded: PropTypes.func,
 };

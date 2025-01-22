@@ -20,7 +20,7 @@ export default function DailySchedule() {
     // closeModal,
     // openModal,
     // reorderServices,
-    updateDayTitle,
+    // updateDayTitle,
   } = useScheduleState();
 
   const dispatch = useDispatch();
@@ -97,7 +97,6 @@ export default function DailySchedule() {
                     }
                     onOpenModal={handleOpenModal}
                     onRemoveService={handleRemoveService}
-                    updateDayTitle={updateDayTitle}
                   />
                 </div>
               </div>

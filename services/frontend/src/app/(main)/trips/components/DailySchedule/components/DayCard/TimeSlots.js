@@ -5,6 +5,7 @@ import { SLOT_HEIGHT, TIME_GROUPS } from '../../utils/constants';
 
 const TimeSlots = memo(function TimeSlots({
   dayId,
+  order,
   daySchedule,
   expandedSlots = {},
   onDragOver,
@@ -43,7 +44,6 @@ const TimeSlots = memo(function TimeSlots({
           {group.slots.map((time) => {
             const services = getServices(time);
             const sortedServices = services;
-            // console.log('sortedServices', sortedServices);
             return (
               <div key={`${dayId}-${time}`} className="mb-1">
                 <div

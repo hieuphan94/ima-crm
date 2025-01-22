@@ -14,7 +14,6 @@ const DaysContainer = memo(function DaysContainer({
   onDrop,
   onOpenModal,
   onRemoveService,
-  updateDayTitle,
 }) {
   const dispatch = useDispatch();
   const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
@@ -53,7 +52,6 @@ const DaysContainer = memo(function DaysContainer({
             onDrop={onDrop}
             onOpenModal={onOpenModal}
             onRemoveService={onRemoveService}
-            updateDayTitle={updateDayTitle}
           />
         </div>
       ))}

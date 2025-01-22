@@ -15,7 +15,6 @@ const DayCard = memo(function DayCard({
   onDrop,
   onOpenModal,
   onRemoveService,
-  updateDayTitle,
 }) {
   const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
   const [isDragging, setIsDragging] = useState(false);
@@ -86,13 +85,7 @@ const DayCard = memo(function DayCard({
         `}
         data-day={dayId}
       >
-        <DayHeader
-          dayId={dayId}
-          order={order}
-          daySchedule={daySchedule}
-          updateDayTitle={updateDayTitle}
-          isDragging={isDragging}
-        />
+        <DayHeader dayId={dayId} order={order} daySchedule={daySchedule} isDragging={isDragging} />
         <TimeSlots
           dayId={dayId}
           order={order}

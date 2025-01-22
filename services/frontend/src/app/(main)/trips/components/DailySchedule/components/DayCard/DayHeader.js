@@ -1,6 +1,6 @@
 'use client';
 
-import { removeDay } from '@/store/slices/useDailyScheduleSlice';
+import { removeDay, updateDayTitle } from '@/store/slices/useDailyScheduleSlice';
 import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
@@ -9,7 +9,7 @@ import DayNameModal from './DayNameModal';
 import DayViewModal from './DayViewModal';
 import DeleteDayModal from './DeleteDayModal';
 
-const DayHeader = memo(function DayHeader({ dayId, order, daySchedule, updateDayTitle }) {
+const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -68,11 +68,11 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule, updateDay
   }, [daySchedule, dayId, handleGetDistancePrice]);
 
   const handleSaveDayName = useCallback(
-    (day, name) => {
-      updateDayTitle(dayId + 1, name);
+    (name) => {
+      dispatch(updateDayTitle({ day: dayId, title: name }));
       setIsNameModalOpen(false);
     },
-    [dayId, updateDayTitle]
+    [dayId, dispatch]
   );
 
   const handleGetDistancePrice = useCallback(() => {
@@ -138,7 +138,7 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule, updateDay
         <DayViewModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          day={dayId + 1}
+          day={order}
           titleOfDay={daySchedule?.titleOfDay || ''}
           {...prepareModalData()}
           distance={0} // Bạn có thể thêm logic tính khoảng cách ở đây
@@ -150,7 +150,8 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule, updateDay
         <DayNameModal
           isOpen={isNameModalOpen}
           onClose={() => setIsNameModalOpen(false)}
-          day={dayId + 1}
+          order={order}
+          dayId={dayId}
           initialName={titleOfDay}
           onSave={handleSaveDayName}
         />
