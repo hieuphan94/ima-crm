@@ -18,13 +18,14 @@ const DayCard = memo(function DayCard({
   updateDayTitle,
 }) {
   const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setPaxValue(daySchedule?.paxChangeOfDay || '');
   }, [daySchedule?.paxChangeOfDay]);
 
   return (
-    <>
+    <div className="day-card-container transition-all duration-300 ease-in-out">
       <div className="group flex items-center justify-center gap-2 mb-1">
         <label
           className={`text-xs text-yellow-600 transition-opacity duration-200 ${
@@ -51,16 +52,23 @@ const DayCard = memo(function DayCard({
       </div>
       <div
         id={`day-${order}`}
-        className={`bg-white rounded-lg border p-2 ${
-          paxValue ? 'border-yellow-400' : 'border-gray-200'
-        }`}
+        className={`
+          bg-white rounded-lg border p-2
+          transition-all duration-300 ease-in-out
+          ${paxValue ? 'border-yellow-400' : 'border-gray-200'}
+          ${isDragging ? 'scale-95 opacity-70 shadow-lg' : 'scale-100 opacity-100'}
+          hover:shadow-md
+        `}
         data-day={dayId}
+        onDragStart={() => setIsDragging(true)}
+        onDragEnd={() => setIsDragging(false)}
       >
         <DayHeader
           dayId={dayId}
           order={order}
           daySchedule={daySchedule}
           updateDayTitle={updateDayTitle}
+          isDragging={isDragging}
         />
         <TimeSlots
           dayId={dayId}
@@ -75,7 +83,7 @@ const DayCard = memo(function DayCard({
         />
         <DistancePrice dayId={dayId} />
       </div>
-    </>
+    </div>
   );
 }, arePropsEqual);
 

@@ -33,3 +33,101 @@ body {
 .dragging {
   opacity: 0.5;
 }
+
+/* Animation và Styles cho Drag & Drop */
+
+/* Element đang được kéo */
+.dragging {
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  cursor: grabbing !important;
+}
+
+/* Vùng có thể thả */
+.drag-over {
+  transition: all 0.2s ease;
+  background-color: rgba(59, 130, 246, 0.1) !important; /* blue-500 với opacity */
+  border-color: #3b82f6 !important; /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Hiệu ứng khi thả thành công */
+.drop-success {
+  animation: dropFlash 0.3s ease;
+}
+
+@keyframes dropFlash {
+  0% {
+    background-color: rgba(59, 130, 246, 0.2);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent;
+    transform: scale(1);
+  }
+}
+
+/* Smooth transitions cho tất cả các thay đổi */
+.day-header {
+  transition: all 0.2s ease;
+}
+
+/* Cursor styles */
+[draggable='true'] {
+  cursor: grab;
+}
+
+[draggable='true']:active {
+  cursor: grabbing;
+}
+
+/* Animation styles cho DayCard */
+.day-card-container {
+  position: relative;
+  will-change: transform;
+}
+
+/* Smooth transitions cho tất cả các thay đổi */
+.day-card-container > div {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect */
+.day-card-container:hover > div:last-child {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Dragging state */
+.day-card-container.dragging > div:last-child {
+  transform: scale(0.95);
+  opacity: 0.7;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Drop target state */
+.day-card-container.drop-target > div:last-child {
+  transform: scale(1.02);
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+/* Drop success animation */
+@keyframes dropSuccess {
+  0% {
+    transform: scale(1.05);
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  100% {
+    transform: scale(1);
+    background-color: white;
+  }
+}
+
+.drop-success {
+  animation: dropSuccess 0.3s ease-out;
+}
