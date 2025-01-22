@@ -24,8 +24,31 @@ const DayCard = memo(function DayCard({
     setPaxValue(daySchedule?.paxChangeOfDay || '');
   }, [daySchedule?.paxChangeOfDay]);
 
+  const handleDragStart = (e) => {
+    // Chỉ áp dụng animation khi kéo từ DayHeader
+    const isDayHeader = e.target.closest('.day-header');
+    if (!isDayHeader) return;
+
+    setIsDragging(true);
+    e.currentTarget.classList.add('dragging');
+  };
+
+  const handleDragEnd = (e) => {
+    // Chỉ remove animation khi kéo từ DayHeader
+    const isDayHeader = e.target.closest('.day-header');
+    if (!isDayHeader) return;
+
+    setIsDragging(false);
+    e.currentTarget.classList.remove('dragging');
+  };
+
   return (
-    <div className="day-card-container transition-all duration-300 ease-in-out">
+    <div
+      className="day-card-container"
+      draggable="true"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className="group flex items-center justify-center gap-2 mb-1">
         <label
           className={`text-xs text-yellow-600 transition-opacity duration-200 ${
@@ -50,18 +73,18 @@ const DayCard = memo(function DayCard({
           }}
         />
       </div>
+
       <div
         id={`day-${order}`}
         className={`
+          day-card
           bg-white rounded-lg border p-2
-          transition-all duration-300 ease-in-out
           ${paxValue ? 'border-yellow-400' : 'border-gray-200'}
-          ${isDragging ? 'scale-95 opacity-70 shadow-lg' : 'scale-100 opacity-100'}
+          ${isDragging ? 'dragging' : ''}
           hover:shadow-md
+          transition-all duration-300 ease-in-out
         `}
         data-day={dayId}
-        onDragStart={() => setIsDragging(true)}
-        onDragEnd={() => setIsDragging(false)}
       >
         <DayHeader
           dayId={dayId}

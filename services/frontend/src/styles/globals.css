@@ -47,9 +47,10 @@ body {
 /* Vùng có thể thả */
 .drag-over {
   transition: all 0.2s ease;
-  background-color: rgba(59, 130, 246, 0.1) !important; /* blue-500 với opacity */
+  background-color: rgba(59, 130, 246, 0.05) !important; /* Màu nhạt hơn */
   border-color: #3b82f6 !important; /* blue-500 */
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  transform: scale(1.01); /* Scale nhẹ hơn */
 }
 
 /* Hiệu ứng khi thả thành công */
@@ -59,8 +60,12 @@ body {
 
 @keyframes dropFlash {
   0% {
-    background-color: rgba(59, 130, 246, 0.2);
+    background-color: rgba(59, 130, 246, 0.1);
     transform: scale(1.02);
+  }
+  50% {
+    background-color: rgba(59, 130, 246, 0.05);
+    transform: scale(1.01);
   }
   100% {
     background-color: transparent;
@@ -102,32 +107,49 @@ body {
 
 /* Dragging state */
 .day-card-container.dragging > div:last-child {
-  transform: scale(0.95);
-  opacity: 0.7;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: scale(0.98);
+  opacity: 0.8;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* Drop target state */
-.day-card-container.drop-target > div:last-child {
-  transform: scale(1.02);
-  border-color: #3b82f6;
+/* Drop target state - thêm mới */
+.day-card.drop-target {
   background-color: rgba(59, 130, 246, 0.05);
+  border-color: #3b82f6;
+  transition: all 0.2s ease-out;
 }
 
-/* Drop success animation */
-@keyframes dropSuccess {
-  0% {
-    transform: scale(1.05);
-    background-color: rgba(59, 130, 246, 0.1);
+/* Drop hover state - thêm mới */
+.day-card.drop-hover {
+  background-color: rgba(59, 130, 246, 0.03);
+  border-color: #93c5fd; /* blue-300 */
+  transition: all 0.15s ease-in;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
   }
-  100% {
-    transform: scale(1);
-    background-color: white;
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-.drop-success {
-  animation: dropSuccess 0.3s ease-out;
+@keyframes overlayAppear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-modal-appear {
+  animation: modalAppear 0.2s ease-out;
+}
+
+.animate-overlay-appear {
+  animation: overlayAppear 0.2s ease-out;
 }

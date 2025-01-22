@@ -8,9 +8,11 @@ export function useDragDrop() {
   const dispatch = useDispatch();
   const [draggedDay, setDraggedDay] = useState(null);
 
+  // Regular drag handlers cho services (không animation)
   const handleDragOver = useCallback((e) => {
     if (!e?.currentTarget) return;
     e.preventDefault();
+    // Chỉ thêm highlight nhẹ cho drop zone của services
     e.currentTarget.classList?.add('bg-gray-100');
   }, []);
 
@@ -56,20 +58,25 @@ export function useDragDrop() {
     }
   }, []);
 
-  // Xử lý khi bắt đầu kéo một ngày
+  // Day reorder handlers (có animation)
   const handleDayDragStart = useCallback((e, dayId, order) => {
     if (!e?.currentTarget) return;
+
+    // Kiểm tra xem có phải đang kéo DayCard không
+    const isDayCard = e.currentTarget.closest('.day-card-container');
+    if (!isDayCard) return;
+
     setDraggedDay({ dayId, order });
 
-    const target = e.currentTarget;
-    target.classList?.add('dragging');
-
-    // Sử dụng try-catch để xử lý lỗi style
-    try {
-      target.style.transform = 'scale(0.95)';
-      target.style.opacity = '0.7';
-    } catch (error) {
-      console.error('Error setting style:', error);
+    const dayCard = isDayCard.querySelector('.day-card');
+    if (dayCard) {
+      dayCard.classList?.add('dragging');
+      try {
+        dayCard.style.transform = 'scale(0.95)';
+        dayCard.style.opacity = '0.7';
+      } catch (error) {
+        console.error('Error setting style:', error);
+      }
     }
 
     const dragData = {
@@ -79,28 +86,32 @@ export function useDragDrop() {
     e.dataTransfer?.setData('text/plain', JSON.stringify(dragData));
   }, []);
 
-  // Xử lý khi kết thúc kéo
   const handleDayDragEnd = useCallback((e) => {
     if (!e?.currentTarget) return;
-    const target = e.currentTarget;
 
-    target.classList?.remove('dragging');
-    try {
-      target.style.transform = '';
-      target.style.opacity = '';
-    } catch (error) {
-      console.error('Error resetting style:', error);
+    const isDayCard = e.currentTarget.closest('.day-card-container');
+    if (!isDayCard) return;
+
+    const dayCard = isDayCard.querySelector('.day-card');
+    if (dayCard) {
+      dayCard.classList?.remove('dragging');
+      try {
+        dayCard.style.transform = '';
+        dayCard.style.opacity = '';
+      } catch (error) {
+        console.error('Error resetting style:', error);
+      }
     }
     setDraggedDay(null);
   }, []);
 
-  // Xử lý khi di chuột qua DayHeader
   const handleDayHeaderDragOver = useCallback((e) => {
     if (!e?.currentTarget) return;
     e.preventDefault();
 
     try {
-      if (e.dataTransfer?.types.includes('text/plain')) {
+      const dragData = e.dataTransfer?.getData('text/plain');
+      if (dragData && JSON.parse(dragData).type === 'moveDay') {
         const target = e.currentTarget;
         target.classList?.add('drag-over');
         target.style.transform = 'scale(1.02)';
@@ -110,7 +121,6 @@ export function useDragDrop() {
     }
   }, []);
 
-  // Xử lý khi rời khỏi vùng DayHeader
   const handleDayHeaderDragLeave = useCallback((e) => {
     if (!e?.currentTarget) return;
     e.preventDefault();
@@ -124,7 +134,6 @@ export function useDragDrop() {
     }
   }, []);
 
-  // Xử lý khi thả vào DayHeader
   const handleDayHeaderDrop = useCallback(
     (e, targetDayId, targetOrder) => {
       if (!e?.currentTarget) return;
