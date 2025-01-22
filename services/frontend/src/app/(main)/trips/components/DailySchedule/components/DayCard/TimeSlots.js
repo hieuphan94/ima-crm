@@ -4,7 +4,7 @@ import { memo, useCallback } from 'react';
 import { SLOT_HEIGHT, TIME_GROUPS } from '../../utils/constants';
 
 const TimeSlots = memo(function TimeSlots({
-  dayIndex,
+  dayId,
   daySchedule,
   expandedSlots = {},
   onDragOver,
@@ -13,7 +13,8 @@ const TimeSlots = memo(function TimeSlots({
   onOpenModal,
   onRemoveService,
 }) {
-  const day = dayIndex + 1;
+  const day = dayId;
+  console.log('day', daySchedule);
 
   // Helper function để lấy services cho một time slot
   const getServices = useCallback(
@@ -23,26 +24,29 @@ const TimeSlots = memo(function TimeSlots({
     [daySchedule]
   );
 
-  // Helper function để sắp xếp services
-  const sortServices = useCallback((services) => {
-    return [...services].sort((a, b) => {
-      if (a.type !== b.type) {
-        return a.type < b.type ? -1 : 1;
-      }
-      return a.name.localeCompare(b.name);
-    });
-  }, []);
+  // Chuyển sortServices thành useCallback
+  const sortServices = useCallback(
+    (services) => {
+      return [...services].sort((a, b) => {
+        if (a.type !== b.type) {
+          return a.type < b.type ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name);
+      });
+    },
+    [daySchedule]
+  );
 
   return (
     <div>
       {TIME_GROUPS.map((group, groupIndex) => (
-        <div key={`${dayIndex}-${group.label}`} className={groupIndex !== 0 ? 'mt-2' : ''}>
+        <div key={`${dayId}-${group.label}`} className={groupIndex !== 0 ? 'mt-2' : ''}>
           {group.slots.map((time) => {
             const services = getServices(time);
-            const sortedServices = sortServices(services);
-
+            const sortedServices = services;
+            // console.log('sortedServices', sortedServices);
             return (
-              <div key={`${dayIndex}-${time}`} className="mb-1">
+              <div key={`${dayId}-${time}`} className="mb-1">
                 <div
                   style={{ height: SLOT_HEIGHT }}
                   className={`rounded px-2 relative ${group.bgColor} ${group.borderColor} border`}
@@ -175,7 +179,7 @@ const TimeSlots = memo(function TimeSlots({
 
 function arePropsEqual(prevProps, nextProps) {
   return (
-    prevProps.dayIndex === nextProps.dayIndex &&
+    prevProps.dayId === nextProps.dayId &&
     JSON.stringify(prevProps.daySchedule) === JSON.stringify(nextProps.daySchedule) &&
     JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
     prevProps.onDragOver === nextProps.onDragOver &&

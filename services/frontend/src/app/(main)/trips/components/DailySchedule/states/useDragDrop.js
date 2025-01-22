@@ -19,6 +19,7 @@ export function useDragDrop() {
 
     try {
       const dropData = JSON.parse(e.dataTransfer.getData('text/plain'));
+      console.log('dropData', dropData);
 
       switch (dropData.type) {
         case 'service':

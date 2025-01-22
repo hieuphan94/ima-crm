@@ -13,9 +13,6 @@ export default function NewTripPage() {
   const dispatch = useDispatch();
   const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
 
-  console.log('numberOfDays', numberOfDays);
-  console.log('globalPax', globalPax);
-
   const router = useRouter();
   const { notifyError } = useUI();
 

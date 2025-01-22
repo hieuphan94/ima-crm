@@ -1,19 +1,27 @@
 'use client';
 
-import { memo, useCallback, useState } from 'react';
+import { setDistance } from '@/store/slices/useDailyScheduleSlice';
+import { memo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
 
-const DistancePrice = memo(function DistancePrice({ pax }) {
-  const [distance, setDistance] = useState('');
-  const price = calculatePrice(distance, pax);
+const DistancePrice = memo(function DistancePrice({ dayId }) {
+  const dispatch = useDispatch();
+  const { globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || '');
+  // const [distance, setDistance] = useState('');
+  const price = calculatePrice(distance, globalPax);
 
-  const handleDistanceChange = useCallback((e) => {
-    const value = e.target.value;
-    // Chỉ cho phép số và dấu chấm
-    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-      setDistance(value);
-    }
-  }, []);
+  const handleDistanceChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      // Chỉ cho phép số và dấu chấm
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        dispatch(setDistance({ day: dayId, distance: value }));
+      }
+    },
+    [dispatch, dayId]
+  );
 
   const handleKeyDown = useCallback(
     (e) => {
@@ -33,14 +41,22 @@ const DistancePrice = memo(function DistancePrice({ pax }) {
     [distance]
   );
 
-  const handleBlur = useCallback((e) => {
-    const value = e.target.value;
-    // Format số khi blur: loại bỏ số 0 đầu và dấu chấm cuối
-    if (value) {
-      const formattedValue = parseFloat(value).toString();
-      setDistance(formattedValue === 'NaN' ? '' : formattedValue);
-    }
-  }, []);
+  const handleBlur = useCallback(
+    (e) => {
+      const value = e.target.value;
+      // Format số khi blur: loại bỏ số 0 đầu và dấu chấm cuối
+      if (value) {
+        const formattedValue = parseFloat(value);
+        dispatch(
+          setDistance({
+            day: dayId,
+            distance: formattedValue === 'NaN' ? '' : formattedValue,
+          })
+        );
+      }
+    },
+    [dispatch, dayId]
+  );
 
   return (
     <div className="mt-2 space-y-1">
@@ -73,7 +89,7 @@ const DistancePrice = memo(function DistancePrice({ pax }) {
 }, arePropsEqual);
 
 function arePropsEqual(prevProps, nextProps) {
-  return prevProps.pax === nextProps.pax;
+  return prevProps.dayId === nextProps.dayId;
 }
 
 export default DistancePrice;

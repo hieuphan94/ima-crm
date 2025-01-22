@@ -91,7 +91,7 @@ const initialState = {
   scheduleItems: {},
 
   ui: {
-    modal: {
+    modalData: {
       isOpen: false,
       day: null,
       time: null,
@@ -105,15 +105,32 @@ const useDailyScheduleSlice = createSlice({
   name: 'dailySchedule',
   initialState,
   reducers: {
+    // Core
     setSettingsSchedule: (state, action) => {
       state.settings = action.payload;
     },
 
+    initializeDays: (state, action) => {
+      const days = action.payload;
+      // Reset scheduleItems và tạo mới với UUID
+      state.scheduleItems = days.reduce((acc, { id, order }) => {
+        acc[id] = {
+          order,
+          distance: 0,
+          titleOfDay: '',
+          // ... other day properties
+        };
+        return acc;
+      }, {});
+    },
+
+    // Time slot
     toggleTimeSlot: (state, action) => {
       const time = action.payload;
       state.ui.expandedSlots[time] = !state.ui.expandedSlots[time];
     },
 
+    // Add, Remove, Reorder Services
     addService: (state, action) => {
       const { day, time, service } = action.payload;
       const currentPax = state.settings.globalPax;
@@ -145,12 +162,12 @@ const useDailyScheduleSlice = createSlice({
         }
       }
 
-      // Update modal if necessary
-      if (state.ui.modal.day === day && state.ui.modal.time === time) {
+      // Update modalData if necessary
+      if (state.ui.modalData.day === day && state.ui.modalData.time === time) {
         if (state.scheduleItems[day]?.[time]?.length <= 1) {
-          state.ui.modal = { isOpen: false, day: null, time: null, services: [] };
+          state.ui.modalData = { isOpen: false, day: null, time: null, services: [] };
         } else {
-          state.ui.modal.services = state.scheduleItems[day][time];
+          state.ui.modalData.services = state.scheduleItems[day][time];
         }
       }
     },
@@ -162,18 +179,32 @@ const useDailyScheduleSlice = createSlice({
         state.scheduleItems[day] = {};
       }
 
-      state.scheduleItems[day][time] = newServices;
+      // If time slot would be empty after reorder, delete it
+      if (!newServices || newServices.length === 0) {
+        delete state.scheduleItems[day][time];
+        // If day becomes empty, delete it
+        if (Object.keys(state.scheduleItems[day]).length === 0) {
+          delete state.scheduleItems[day];
+        }
+      } else {
+        state.scheduleItems[day][time] = newServices;
+      }
 
-      // Update modal if necessary
-      if (state.ui.modal.day === day && state.ui.modal.time === time) {
-        state.ui.modal.services = newServices;
+      // Update modalData if necessary
+      if (state.ui.modalData.day === day && state.ui.modalData.time === time) {
+        if (!newServices || newServices.length === 0) {
+          state.ui.modalData = { isOpen: false, day: null, time: null, services: [] };
+        } else {
+          state.ui.modalData.services = newServices;
+        }
       }
     },
 
+    // Modal
     openModal: (state, action) => {
       const { day, time, services } = action.payload;
       if (services.length > 0) {
-        state.ui.modal = {
+        state.ui.modalData = {
           isOpen: true,
           day,
           time,
@@ -183,7 +214,7 @@ const useDailyScheduleSlice = createSlice({
     },
 
     closeModal: (state) => {
-      state.ui.modal = {
+      state.ui.modalData = {
         isOpen: false,
         day: null,
         time: null,
@@ -191,12 +222,74 @@ const useDailyScheduleSlice = createSlice({
       };
     },
 
+    // Day
     updateDayTitle: (state, action) => {
       const { day, title } = action.payload;
       if (!state.scheduleItems[day]) {
         state.scheduleItems[day] = {};
       }
       state.scheduleItems[day].titleOfDay = title;
+    },
+
+    setDistance: (state, action) => {
+      const { day, distance } = action.payload;
+
+      // Đảm bảo object cho ngày đó tồn tại
+      if (!state.scheduleItems[day]) {
+        state.scheduleItems[day] = {};
+      }
+
+      // Cập nhật distance cho ngày cụ thể
+      state.scheduleItems[day].distance = distance;
+
+      // Tự động cập nhật totalDistance trong scheduleTransport
+      const allDayDistances = Object.values(state.scheduleItems).map(
+        (dayData) => dayData.distance || 0
+      );
+
+      state.scheduleInfo.scheduleTransport.totalDistance = allDayDistances.reduce(
+        (sum, current) => sum + current,
+        0
+      );
+    },
+
+    // Thêm action để xóa ngày
+    removeDay: (state, action) => {
+      const { dayId } = action.payload;
+      delete state.scheduleItems[dayId];
+
+      // Cập nhật lại order cho các ngày còn lại
+      const remainingDays = Object.entries(state.scheduleItems).sort(
+        ([, a], [, b]) => a.order - b.order
+      );
+
+      remainingDays.forEach(([id, data], index) => {
+        state.scheduleItems[id].order = index + 1;
+      });
+
+      // Cập nhật numberOfDays trong settings
+      state.settings.numberOfDays = remainingDays.length;
+    },
+
+    // Thêm action để reorder ngày
+    reorderDays: (state, action) => {
+      const { fromOrder, toOrder } = action.payload;
+
+      Object.values(state.scheduleItems).forEach((day) => {
+        if (fromOrder < toOrder) {
+          if (day.order > fromOrder && day.order <= toOrder) {
+            day.order--;
+          } else if (day.order === fromOrder) {
+            day.order = toOrder;
+          }
+        } else {
+          if (day.order >= toOrder && day.order < fromOrder) {
+            day.order++;
+          } else if (day.order === fromOrder) {
+            day.order = toOrder;
+          }
+        }
+      });
     },
   },
 });
@@ -210,6 +303,10 @@ export const {
   openModal,
   closeModal,
   updateDayTitle,
+  setDistance,
+  initializeDays,
+  removeDay,
+  reorderDays,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;

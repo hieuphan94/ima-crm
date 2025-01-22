@@ -1,5 +1,5 @@
 'use client';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import ServicesSidebar from '../ServicesSidebar';
 import DaysContainer from './components/DaysContainer';
 import ScheduleModal from './components/ScheduleModal';
@@ -8,28 +8,61 @@ import { useDragDrop } from './states/useDragDrop';
 import { useScheduleState } from './states/useScheduleState';
 
 export default function DailySchedule() {
-  const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
+  const { modalData } = useSelector((state) => state.dailySchedule.ui);
 
   const {
-    scheduleItems,
-    modalData,
+    // modalData,
     expandedSlots,
     toggleTimeSlot,
-    addService,
-    removeService,
-    closeModal,
-    openModal,
-    reorderServices,
+    // addService,
+    // removeService,
+    // closeModal,
+    // openModal,
+    // reorderServices,
     updateDayTitle,
   } = useScheduleState();
 
-  const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   if (pax !== undefined && pax !== null) {
-  //     updatePax(pax);
-  //   }
-  // }, [pax, updatePax]);
+  const handleAddService = (day, time, service) => {
+    console.log('handleAddService', day, time, service);
+    dispatch({
+      type: 'dailySchedule/addService',
+      payload: { day, time, service },
+    });
+  };
+
+  const handleRemoveService = (day, time, service) => {
+    dispatch({
+      type: 'dailySchedule/removeService',
+      payload: { day, time, service },
+    });
+  };
+
+  const handleReorderServices = (day, time, newServices) => {
+    dispatch({
+      type: 'dailySchedule/reorderServices',
+      payload: { day, time, newServices },
+    });
+  };
+
+  const handleOpenModal = (day, time, services) => {
+    dispatch({
+      type: 'dailySchedule/openModal',
+      payload: { day, time, services },
+    });
+  };
+
+  const handleCloseModal = () => {
+    dispatch({
+      type: 'dailySchedule/closeModal',
+    });
+  };
+
+  console.log('modalData', modalData);
+
+  const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
   return (
     <div className="flex gap-4 h-full">
@@ -52,15 +85,21 @@ export default function DailySchedule() {
               <div className={numberOfDays > 7 ? 'overflow-x-auto' : ''}>
                 <div style={{ width: `${numberOfDays * 160}px` }}>
                   <DaysContainer
-                    numberOfDays={numberOfDays}
-                    pax={globalPax}
-                    scheduleItems={scheduleItems}
                     expandedSlots={expandedSlots}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
-                    onDrop={(day, time, e) => handleDrop(day, time, e, addService, removeService)}
-                    onOpenModal={openModal}
-                    onRemoveService={removeService}
+                    onDrop={(day, time, e) =>
+                      handleDrop(
+                        day,
+                        time,
+                        e,
+                        handleAddService,
+                        handleRemoveService,
+                        handleReorderServices
+                      )
+                    }
+                    onOpenModal={handleOpenModal}
+                    onRemoveService={handleRemoveService}
                     updateDayTitle={updateDayTitle}
                   />
                 </div>
@@ -74,9 +113,9 @@ export default function DailySchedule() {
       {modalData?.isOpen && (
         <ScheduleModal
           {...modalData}
-          onClose={closeModal}
-          onRemoveService={removeService}
-          onReorderServices={reorderServices}
+          onClose={handleCloseModal}
+          onRemoveService={handleRemoveService}
+          onReorderServices={handleReorderServices}
         />
       )}
     </div>

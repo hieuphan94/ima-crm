@@ -1,12 +1,13 @@
 'use client';
 
-import { memo } from 'react';
+import { initializeDays } from '@/store/slices/useDailyScheduleSlice';
+import { memo, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
 import DayCard from './DayCard';
 
 const DaysContainer = memo(function DaysContainer({
-  numberOfDays,
-  pax,
-  scheduleItems,
+  // scheduleItems,
   expandedSlots,
   onDragOver,
   onDragLeave,
@@ -15,37 +16,54 @@ const DaysContainer = memo(function DaysContainer({
   onRemoveService,
   updateDayTitle,
 }) {
+  const dispatch = useDispatch();
+  const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
+  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
+
+  // Khởi tạo days khi numberOfDays thay đổi
+  useEffect(() => {
+    const existingDays = Object.values(scheduleItems).length;
+
+    if (existingDays !== numberOfDays) {
+      const days = Array.from({ length: numberOfDays }).map((_, index) => ({
+        id: uuidv4(),
+        order: index + 1,
+      }));
+
+      dispatch(initializeDays(days));
+    }
+  }, [numberOfDays, dispatch]);
+
+  console.log('scheduleItems', scheduleItems);
+
+  // Sắp xếp days theo order
+  const dataDays = Object.entries(scheduleItems);
+  console.log('dataDays', dataDays);
+
   return (
     <div className="flex gap-2 min-w-max">
-      {Array.from({ length: numberOfDays }).map((_, dayIndex) => {
-        const day = dayIndex + 1;
-        const daySchedule = scheduleItems[day] || {};
-
-        return (
-          <div key={dayIndex}>
-            <DayCard
-              dayIndex={dayIndex}
-              daySchedule={daySchedule}
-              pax={pax}
-              expandedSlots={expandedSlots}
-              onDragOver={onDragOver}
-              onDragLeave={onDragLeave}
-              onDrop={onDrop}
-              onOpenModal={onOpenModal}
-              onRemoveService={onRemoveService}
-              updateDayTitle={updateDayTitle}
-            />
-          </div>
-        );
-      })}
+      {dataDays.map(([dayId, dayData]) => (
+        <div key={dayId}>
+          <DayCard
+            dayId={dayId}
+            order={dayData.order}
+            daySchedule={dayData}
+            expandedSlots={expandedSlots}
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
+            onOpenModal={onOpenModal}
+            onRemoveService={onRemoveService}
+            updateDayTitle={updateDayTitle}
+          />
+        </div>
+      ))}
     </div>
   );
 }, arePropsEqual);
 
 function arePropsEqual(prevProps, nextProps) {
   return (
-    prevProps.numberOfDays === nextProps.numberOfDays &&
-    prevProps.pax === nextProps.pax &&
     JSON.stringify(prevProps.scheduleItems) === JSON.stringify(nextProps.scheduleItems) &&
     JSON.stringify(prevProps.expandedSlots) === JSON.stringify(nextProps.expandedSlots) &&
     prevProps.onDragOver === nextProps.onDragOver &&
