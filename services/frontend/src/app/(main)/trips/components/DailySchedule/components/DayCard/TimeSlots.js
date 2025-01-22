@@ -14,7 +14,6 @@ const TimeSlots = memo(function TimeSlots({
   onRemoveService,
 }) {
   const day = dayId;
-  console.log('day', daySchedule);
 
   // Helper function để lấy services cho một time slot
   const getServices = useCallback(

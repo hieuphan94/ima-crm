@@ -26,7 +26,6 @@ export default function DailySchedule() {
   const dispatch = useDispatch();
 
   const handleAddService = (day, time, service) => {
-    console.log('handleAddService', day, time, service);
     dispatch({
       type: 'dailySchedule/addService',
       payload: { day, time, service },
@@ -59,8 +58,6 @@ export default function DailySchedule() {
       type: 'dailySchedule/closeModal',
     });
   };
-
-  console.log('modalData', modalData);
 
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 

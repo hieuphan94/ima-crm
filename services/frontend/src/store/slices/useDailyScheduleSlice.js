@@ -271,22 +271,32 @@ const useDailyScheduleSlice = createSlice({
       state.settings.numberOfDays = remainingDays.length;
     },
 
-    // Thêm action để reorder ngày
+    // Cập nhật lại action reorderDays
     reorderDays: (state, action) => {
-      const { fromOrder, toOrder } = action.payload;
+      const { sourceDayId, targetDayId, sourceOrder, targetOrder } = action.payload;
 
-      Object.values(state.scheduleItems).forEach((day) => {
-        if (fromOrder < toOrder) {
-          if (day.order > fromOrder && day.order <= toOrder) {
-            day.order--;
-          } else if (day.order === fromOrder) {
-            day.order = toOrder;
+      // Lấy tất cả các ngày và sắp xếp theo order hiện tại
+      const days = Object.entries(state.scheduleItems);
+
+      days.forEach(([dayId, dayData]) => {
+        // Trường hợp kéo từ trên xuống (sourceOrder < targetOrder)
+        if (sourceOrder < targetOrder) {
+          if (dayId === sourceDayId) {
+            // Ngày được kéo sẽ có order mới = targetOrder
+            state.scheduleItems[dayId].order = targetOrder;
+          } else if (dayData.order > sourceOrder && dayData.order <= targetOrder) {
+            // Các ngày ở giữa sẽ giảm order đi 1
+            state.scheduleItems[dayId].order -= 1;
           }
-        } else {
-          if (day.order >= toOrder && day.order < fromOrder) {
-            day.order++;
-          } else if (day.order === fromOrder) {
-            day.order = toOrder;
+        }
+        // Trường hợp kéo từ dưới lên (sourceOrder > targetOrder)
+        else if (sourceOrder > targetOrder) {
+          if (dayId === sourceDayId) {
+            // Ngày được kéo sẽ có order mới = targetOrder
+            state.scheduleItems[dayId].order = targetOrder;
+          } else if (dayData.order >= targetOrder && dayData.order < sourceOrder) {
+            // Các ngày ở giữa sẽ tăng order lên 1
+            state.scheduleItems[dayId].order += 1;
           }
         }
       });

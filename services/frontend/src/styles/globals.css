@@ -19,3 +19,17 @@ body {
   background: rgb(var(--background-rgb));
   overflow-x: hidden;
 }
+
+/* Thêm vào global.css hoặc styles của component */
+[draggable='true'] {
+  cursor: move;
+}
+
+.drag-over {
+  border-color: #3b82f6; /* blue-500 */
+  background-color: #eff6ff; /* blue-50 */
+}
+
+.dragging {
+  opacity: 0.5;
+}

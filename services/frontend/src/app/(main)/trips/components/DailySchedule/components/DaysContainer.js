@@ -37,8 +37,7 @@ const DaysContainer = memo(function DaysContainer({
   console.log('scheduleItems', scheduleItems);
 
   // Sắp xếp days theo order
-  const dataDays = Object.entries(scheduleItems);
-  console.log('dataDays', dataDays);
+  const dataDays = Object.entries(scheduleItems).sort(([, a], [, b]) => a.order - b.order);
 
   return (
     <div className="flex gap-2 min-w-max">
