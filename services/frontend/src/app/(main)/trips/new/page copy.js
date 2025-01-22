@@ -12,8 +12,6 @@ export default function NewTripPage() {
   const { notifyError } = useUI();
   const [numberOfDays, setNumberOfDays] = useState(null);
   const { pax, updatePax } = useScheduleState();
-  const [previewData, setPreviewData] = useState(null);
-  const [getScheduleData, setGetScheduleData] = useState(null);
 
   // Copy các handlers từ trang cũ
   const handleDaysChange = (e) => {
@@ -53,13 +51,7 @@ export default function NewTripPage() {
     updatePax(numValue);
   };
 
-  const handlePreview = () => {
-    if (getScheduleData) {
-      const data = getScheduleData;
-      setPreviewData(data);
-      console.log('Preview data:', data);
-    }
-  };
+  const handlePreview = () => {};
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -133,7 +125,7 @@ export default function NewTripPage() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <DailySchedule numberOfDays={numberOfDays} pax={pax} onPreview={setGetScheduleData} />
+        <DailySchedule numberOfDays={numberOfDays} pax={pax} />
       </div>
     </div>
   );

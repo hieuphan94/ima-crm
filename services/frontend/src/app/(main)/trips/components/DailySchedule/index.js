@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import ServicesSidebar from '../ServicesSidebar';
 import DaysContainer from './components/DaysContainer';
 import ScheduleModal from './components/ScheduleModal';
@@ -7,7 +7,9 @@ import TimeSlotsSidebar from './components/TimeSlotsSidebar';
 import { useDragDrop } from './states/useDragDrop';
 import { useScheduleState } from './states/useScheduleState';
 
-export default function DailySchedule({ numberOfDays, pax }) {
+export default function DailySchedule() {
+  const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
+
   const {
     scheduleItems,
     modalData,
@@ -19,16 +21,15 @@ export default function DailySchedule({ numberOfDays, pax }) {
     openModal,
     reorderServices,
     updateDayTitle,
-    updatePax,
   } = useScheduleState();
 
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
-  useEffect(() => {
-    if (pax !== undefined && pax !== null) {
-      updatePax(pax);
-    }
-  }, [pax, updatePax]);
+  // useEffect(() => {
+  //   if (pax !== undefined && pax !== null) {
+  //     updatePax(pax);
+  //   }
+  // }, [pax, updatePax]);
 
   return (
     <div className="flex gap-4 h-full">
@@ -52,7 +53,7 @@ export default function DailySchedule({ numberOfDays, pax }) {
                 <div style={{ width: `${numberOfDays * 160}px` }}>
                   <DaysContainer
                     numberOfDays={numberOfDays}
-                    pax={pax}
+                    pax={globalPax}
                     scheduleItems={scheduleItems}
                     expandedSlots={expandedSlots}
                     onDragOver={handleDragOver}

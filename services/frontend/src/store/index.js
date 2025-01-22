@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import authReducer from './slices/authSlice';
 import profileReducer from './slices/profileSlice';
 import uiReducer from './slices/uiSlice';
+import useDailyScheduleSlice from './slices/useDailyScheduleSlice';
 import userReducer from './slices/userSlice';
 
 let persistStorage;
@@ -63,6 +64,7 @@ export const store = configureStore({
     ui: persistedUiReducer,
     users: userReducer,
     profile: profileReducer,
+    dailySchedule: useDailyScheduleSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

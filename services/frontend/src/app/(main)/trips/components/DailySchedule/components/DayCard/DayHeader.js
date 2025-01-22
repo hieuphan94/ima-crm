@@ -11,38 +11,6 @@ const DayHeader = memo(function DayHeader({ dayIndex, daySchedule, updateDayTitl
   // Lấy titleOfDay từ daySchedule nếu có
   const titleOfDay = daySchedule?.titleOfDay || '';
 
-  // Giữ lại handleExport để dùng sau
-  const handleExport = useCallback(() => {
-    const exportData = {
-      day: dayIndex + 1,
-      schedule: {},
-      exportedAt: new Date().toISOString(),
-    };
-
-    if (daySchedule) {
-      Object.entries(daySchedule).forEach(([time, services]) => {
-        if (services && services.length > 0) {
-          exportData.schedule[time] = services.map((service) => ({
-            id: service.id,
-            name: service.name,
-            type: service.type,
-            icon: service.icon,
-          }));
-        }
-      });
-    }
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `day-${dayIndex + 1}-schedule.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [dayIndex, daySchedule]);
-
   // Chuẩn bị data cho modal
   const prepareModalData = useCallback(() => {
     const services = [];

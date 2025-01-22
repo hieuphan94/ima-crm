@@ -1,27 +1,44 @@
 'use client';
 
 import { useUI } from '@/hooks/useUI';
+import { setSettingsSchedule } from '@/store/slices/useDailyScheduleSlice';
+import debounce from 'lodash/debounce';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import DailySchedule from '../components/DailySchedule';
-import { useScheduleState } from '../components/DailySchedule/states/useScheduleState';
 
 export default function NewTripPage() {
+  const dispatch = useDispatch();
+  const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
+
+  console.log('numberOfDays', numberOfDays);
+  console.log('globalPax', globalPax);
+
   const router = useRouter();
   const { notifyError } = useUI();
-  const [numberOfDays, setNumberOfDays] = useState(null);
-  const { pax, updatePax } = useScheduleState();
-  const [previewData, setPreviewData] = useState(null);
-  const [getScheduleData, setGetScheduleData] = useState(null);
 
-  // Copy các handlers từ trang cũ
+  const debouncedUpdateSettings = useCallback(
+    debounce((field, value) => {
+      dispatch(
+        setSettingsSchedule({
+          ...(field === 'numberOfDays'
+            ? { numberOfDays: value, globalPax }
+            : { globalPax: value, numberOfDays }),
+        })
+      );
+    }, 300),
+    [dispatch, numberOfDays, globalPax]
+  );
+
   const handleDaysChange = (e) => {
     const value = e.target.value;
     if (!value) {
-      setNumberOfDays(null);
+      debouncedUpdateSettings('numberOfDays', null);
       return;
     }
+
     if (!/^\d+$/.test(value)) {
       notifyError('Vui lòng chỉ nhập số ngày');
       return;
@@ -31,13 +48,13 @@ export default function NewTripPage() {
       notifyError('Số ngày phải lớn hơn 0');
       return;
     }
-    setNumberOfDays(numValue);
+    debouncedUpdateSettings('numberOfDays', numValue);
   };
 
   const handleGuestsChange = (e) => {
     const value = e.target.value;
     if (!value) {
-      updatePax(null);
+      debouncedUpdateSettings('globalPax', null);
       return;
     }
     if (!/^\d+$/.test(value)) {
@@ -49,17 +66,10 @@ export default function NewTripPage() {
       notifyError('Số khách phải lớn hơn 0');
       return;
     }
-    console.log('numValue', numValue);
-    updatePax(numValue);
+    debouncedUpdateSettings('globalPax', numValue);
   };
 
-  const handlePreview = () => {
-    if (getScheduleData) {
-      const data = getScheduleData;
-      setPreviewData(data);
-      console.log('Preview data:', data);
-    }
-  };
+  const handlePreview = () => {};
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -103,7 +113,7 @@ export default function NewTripPage() {
                 type="text"
                 className="w-[100px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="Pax"
-                value={pax || ''}
+                value={globalPax || ''}
                 onChange={handleGuestsChange}
               />
             </div>
@@ -133,7 +143,7 @@ export default function NewTripPage() {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <DailySchedule numberOfDays={numberOfDays} pax={pax} onPreview={setGetScheduleData} />
+        <DailySchedule />
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ export function useScheduleState() {
   const [scheduleItems, setScheduleItems] = useState({ globalPax: null });
   const [modalData, setModalData] = useState({ isOpen: false });
   const [expandedSlots, setExpandedSlots] = useState({});
-  const [pax, setPax] = useState(null);
 
   useEffect(() => {
     console.log(scheduleItems);
@@ -149,21 +148,10 @@ export function useScheduleState() {
     }));
   }, []);
 
-  // Pax
-  const updatePax = useCallback((newPax) => {
-    setPax(newPax);
-    setScheduleItems((prev) => ({
-      ...prev,
-      globalPax: newPax,
-    }));
-  }, []);
-
   return {
     scheduleItems,
     modalData,
     expandedSlots,
-    pax,
-    updatePax,
     toggleTimeSlot,
     isTimeExpanded,
     addService,
