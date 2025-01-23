@@ -1,6 +1,8 @@
 'use client';
 
-import { memo, useEffect, useState } from 'react';
+import { setPaxChangeOfDay } from '@/store/slices/useDailyScheduleSlice';
+import { memo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import DayHeader from './DayHeader';
 import DistancePrice from './DistancePrice';
 import TimeSlots from './TimeSlots';
@@ -16,12 +18,13 @@ const DayCard = memo(function DayCard({
   onOpenModal,
   onRemoveService,
 }) {
+  const dispatch = useDispatch();
   const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    setPaxValue(daySchedule?.paxChangeOfDay || '');
-  }, [daySchedule?.paxChangeOfDay]);
+  // useEffect(() => {
+  //   setPaxValue(daySchedule?.paxChangeOfDay || '');
+  // }, [daySchedule?.paxChangeOfDay]);
 
   const handleDragStart = (e) => {
     // Chỉ áp dụng animation khi kéo từ DayHeader
@@ -66,9 +69,7 @@ const DayCard = memo(function DayCard({
             const newValue = e.target.value.replace(/[^0-9]/g, '');
             const parsedValue = newValue ? parseInt(newValue, 10) : '';
             setPaxValue(parsedValue);
-            if (daySchedule) {
-              daySchedule.paxChangeOfDay = parsedValue;
-            }
+            dispatch(setPaxChangeOfDay({ dayId, pax: parsedValue }));
           }}
         />
       </div>

@@ -8,9 +8,16 @@ import { calculatePrice } from '../../utils/calculations';
 const DistancePrice = memo(function DistancePrice({ dayId }) {
   const dispatch = useDispatch();
   const { globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const paxChangeOfDay = useSelector(
+    (state) => state.dailySchedule.scheduleItems[dayId]?.paxChangeOfDay || ''
+  );
+
+  const paxCalculate = paxChangeOfDay ? paxChangeOfDay : globalPax;
+
   const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || '');
   // const [distance, setDistance] = useState('');
-  const price = calculatePrice(distance, globalPax);
+
+  const price = calculatePrice(distance, paxCalculate);
 
   const handleDistanceChange = useCallback(
     (e) => {

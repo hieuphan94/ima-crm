@@ -315,6 +315,40 @@ const useDailyScheduleSlice = createSlice({
         }
       });
     },
+
+    // Thêm action để cập nhật paxChangeOfDay
+    setPaxChangeOfDay: (state, action) => {
+      const { dayId, pax } = action.payload;
+
+      // Đảm bảo object cho ngày đó tồn tại
+      if (!state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId] = {};
+      }
+
+      // Cập nhật paxChangeOfDay
+      if (pax === '' || pax === null) {
+        // Nếu pax rỗng hoặc null, xóa paxChangeOfDay
+        delete state.scheduleItems[dayId].paxChangeOfDay;
+      } else {
+        // Cập nhật giá trị mới
+        state.scheduleItems[dayId].paxChangeOfDay = pax;
+      }
+    },
+
+    // Thêm action resetDays
+    resetDays: (state) => {
+      // Reset về giá trị mặc định
+      state.settings.numberOfDays = 1;
+      state.scheduleItems = {};
+
+      // Tạo ngày đầu tiên
+      const firstDayId = crypto.randomUUID();
+      state.scheduleItems[firstDayId] = {
+        order: 1,
+        distance: 0,
+        titleOfDay: '',
+      };
+    },
   },
 });
 
@@ -331,6 +365,8 @@ export const {
   initializeDays,
   removeDay,
   reorderDays,
+  setPaxChangeOfDay,
+  resetDays,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;

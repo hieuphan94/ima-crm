@@ -13,10 +13,15 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
   const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || 0);
   // const dayPax = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.pax);
   const { globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const paxChangeOfDay = useSelector(
+    (state) => state.dailySchedule.scheduleItems[dayId]?.paxChangeOfDay || ''
+  );
+
+  const paxCalculate = paxChangeOfDay ? paxChangeOfDay : globalPax;
 
   const handleDistancePrice = (distance) => {
-    if (globalPax) {
-      return calculatePrice(distance, globalPax);
+    if (paxCalculate) {
+      return calculatePrice(distance, paxCalculate);
     }
     return 0;
   };
