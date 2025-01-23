@@ -78,7 +78,7 @@ const DayCard = memo(function DayCard({
         id={`day-${order}`}
         className={`
           day-card
-          bg-white rounded-lg border p-2
+          bg-white rounded-lg border p-1
           ${paxValue ? 'border-yellow-400' : 'border-gray-200'}
           ${isDragging ? 'dragging' : ''}
           hover:shadow-md
@@ -99,6 +99,7 @@ const DayCard = memo(function DayCard({
           onRemoveService={onRemoveService}
         />
         <DistancePrice dayId={dayId} />
+        {/* <Meal dayId={dayId} /> */}
       </div>
     </div>
   );

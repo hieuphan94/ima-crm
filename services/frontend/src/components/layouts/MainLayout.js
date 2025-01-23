@@ -9,7 +9,7 @@ export default function MainLayout({ children }) {
       <AppHeader />
       <div className="flex">
         <Sidebar />
-        <main className="relative flex-grow p-6 bg-gray-50">{children}</main>
+        <main className="relative flex-grow p-2 bg-gray-50">{children}</main>
       </div>
     </div>
   );

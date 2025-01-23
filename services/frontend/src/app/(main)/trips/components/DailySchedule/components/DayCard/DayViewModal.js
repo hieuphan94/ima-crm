@@ -26,6 +26,29 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
     return 0;
   };
 
+  // Add meal selector
+  const dayMeals = useSelector(
+    (state) =>
+      state.dailySchedule.scheduleItems[dayId]?.meals || {
+        included: true,
+        breakfast: true,
+        lunch: false,
+        dinner: false,
+      }
+  );
+
+  // Format meal text
+  const getMealText = () => {
+    if (!dayMeals.included) return 'Không bao gồm bữa ăn';
+
+    const meals = [];
+    if (dayMeals.breakfast) meals.push('Sáng');
+    if (dayMeals.lunch) meals.push('Trưa');
+    if (dayMeals.dinner) meals.push('Tối');
+
+    return meals.length > 0 ? `Bao gồm bữa: ${meals.join(', ')}` : 'Bao gồm bữa ăn';
+  };
+
   // Memoize normalized services
   const normalizedServices = useMemo(() => {
     return services
@@ -144,6 +167,13 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
             <div className="col-span-3 text-right">
               {formatCurrency(convertVNDtoUSD(handleDistancePrice(distance) || 0), 'USD')}
             </div>
+          </div>
+
+          {/* Meals */}
+          <div className="grid grid-cols-12 gap-4 p-3 text-sm border-t border-gray-200">
+            <div className="col-span-1"></div>
+            <div className="col-span-2"></div>
+            <div className="col-span-9">{getMealText()}</div>
           </div>
 
           {/* Total */}

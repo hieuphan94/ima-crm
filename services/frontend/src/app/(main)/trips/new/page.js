@@ -108,6 +108,10 @@ export default function NewTripPage() {
       notifyError('Số khách phải lớn hơn 0');
       return;
     }
+    if (numValue > 500) {
+      notifyError('Số khách không lớn hơn 500');
+      return;
+    }
     debouncedUpdateSettings('globalPax', numValue);
   };
 

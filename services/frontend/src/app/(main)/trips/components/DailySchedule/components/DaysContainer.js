@@ -54,7 +54,7 @@ const DaysContainer = memo(function DaysContainer({
   const dataDays = Object.entries(scheduleItems).sort(([, a], [, b]) => a.order - b.order);
 
   return (
-    <div className="flex gap-2 min-w-max">
+    <div className="flex gap-1 min-w-max">
       {dataDays.map(([dayId, dayData]) => (
         <div key={dayId}>
           <DayCard

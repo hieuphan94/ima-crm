@@ -1,9 +1,21 @@
 'use client';
 
 import { memo } from 'react';
+import { useSelector } from 'react-redux';
 import { SLOT_HEIGHT, TIME_GROUPS } from '../utils/constants';
 
 const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggleTime }) {
+  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
+
+  // Helper function để kiểm tra xem time slot có dịch vụ không
+  const hasServicesInHalfHour = (time) => {
+    const halfHourTime = `${time.split(':')[0]}:30`;
+    // Kiểm tra tất cả các ngày
+    return Object.values(scheduleItems).some((day) => {
+      return day[halfHourTime]?.length > 0;
+    });
+  };
+
   return (
     <div style={{ paddingTop: '62px' }} className="w-12">
       {TIME_GROUPS.map((group, groupIndex) => (
@@ -23,14 +35,17 @@ const TimeSlotsSidebar = memo(function TimeSlotsSidebar({ expandedSlots, onToggl
                   <span>{time}</span>
                   <button
                     onClick={() => onToggleTime(time)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity
+                    className={`
                       w-5 h-5 rounded-full 
                       bg-white hover:bg-gray-100
                       border border-gray-300 hover:border-gray-400
                       text-gray-500 hover:text-gray-700
                       flex items-center justify-center
                       shadow-sm hover:shadow
-                      text-xs font-medium"
+                      text-xs font-medium
+                      ${hasServicesInHalfHour(time) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+                      transition-opacity duration-200
+                    `}
                   >
                     {expandedSlots[time] ? '−' : '+'}
                   </button>

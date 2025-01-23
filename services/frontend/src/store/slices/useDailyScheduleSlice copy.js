@@ -88,17 +88,7 @@ const initialState = {
   },
 
   // Schedule Data (Dữ liệu lịch trình)
-  scheduleItems: {
-    // Thêm giá trị mặc định cho meals khi khởi tạo
-    // [dayId]: {
-    //   meals: {
-    //     included: true,
-    //     breakfast: true,
-    //     lunch: false,
-    //     dinner: false
-    //   }
-    // }
-  },
+  scheduleItems: {},
 
   ui: {
     modalData: {
@@ -124,33 +114,23 @@ const useDailyScheduleSlice = createSlice({
       const days = action.payload;
       const existingItems = state.scheduleItems;
       const newScheduleItems = {};
+
+      // Tạo Set để kiểm tra id tồn tại nhanh hơn
       const existingIds = new Set(Object.keys(existingItems));
 
       for (const { id, order } of days) {
         if (existingIds.has(id)) {
+          // Nếu ngày đã tồn tại, chỉ cập nhật order
           newScheduleItems[id] = {
             ...existingItems[id],
             order,
-            // Giữ lại meals nếu đã có
-            meals: existingItems[id].meals || {
-              included: true,
-              breakfast: true,
-              lunch: false,
-              dinner: false,
-            },
           };
         } else {
+          // Nếu là ngày mới, tạo mới với giá trị mặc định
           newScheduleItems[id] = {
             order,
             distance: 0,
             titleOfDay: '',
-            // Thêm meals mặc định cho ngày mới
-            meals: {
-              included: true,
-              breakfast: true,
-              lunch: false,
-              dinner: false,
-            },
           };
         }
       }
@@ -373,45 +353,23 @@ const useDailyScheduleSlice = createSlice({
     // Meal
     setDayMeals: (state, action) => {
       const { dayId, meals } = action.payload;
-      if (!state.scheduleItems[dayId]) {
-        state.scheduleItems[dayId] = {};
+      if (state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId].meals = meals;
       }
-      state.scheduleItems[dayId].meals = {
-        ...state.scheduleItems[dayId].meals,
-        ...meals,
-      };
     },
 
     toggleMealIncluded: (state, action) => {
       const { dayId, included } = action.payload;
-      if (!state.scheduleItems[dayId]) {
-        state.scheduleItems[dayId] = {};
+      if (state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId].meals.included = included;
       }
-      if (!state.scheduleItems[dayId].meals) {
-        state.scheduleItems[dayId].meals = {
-          included: true,
-          breakfast: true,
-          lunch: false,
-          dinner: false,
-        };
-      }
-      state.scheduleItems[dayId].meals.included = included;
     },
 
     toggleMealOption: (state, action) => {
       const { dayId, mealType } = action.payload;
-      if (!state.scheduleItems[dayId]) {
-        state.scheduleItems[dayId] = {};
+      if (state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId].meals[mealType] = !state.scheduleItems[dayId].meals[mealType];
       }
-      if (!state.scheduleItems[dayId].meals) {
-        state.scheduleItems[dayId].meals = {
-          included: true,
-          breakfast: true,
-          lunch: false,
-          dinner: false,
-        };
-      }
-      state.scheduleItems[dayId].meals[mealType] = !state.scheduleItems[dayId].meals[mealType];
     },
   },
 });
