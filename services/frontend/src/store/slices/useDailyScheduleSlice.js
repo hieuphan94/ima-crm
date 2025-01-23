@@ -203,7 +203,7 @@ const useDailyScheduleSlice = createSlice({
     // Modal
     openModal: (state, action) => {
       const { day, time, services } = action.payload;
-      if (services.length > 0) {
+      if (services.length > 1) {
         state.ui.modalData = {
           isOpen: true,
           day,

@@ -72,9 +72,7 @@ const ScheduleModal = memo(function ScheduleModal({
       <div className="bg-white rounded-lg shadow-lg w-[400px] max-h-[80vh] overflow-hidden">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-900">
-              Ngày {day} - {time}
-            </h3>
+            <h3 className="font-medium text-gray-900">Time - {time}</h3>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600"

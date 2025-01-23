@@ -19,6 +19,8 @@ const DaysContainer = memo(function DaysContainer({
   const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
 
+  console.log('scheduleItems', scheduleItems);
+
   // Khởi tạo days khi numberOfDays thay đổi
   useEffect(() => {
     const existingDays = Object.values(scheduleItems).length;

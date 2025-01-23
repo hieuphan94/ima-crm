@@ -138,7 +138,8 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
         <DayViewModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          day={order}
+          order={order}
+          dayId={dayId}
           titleOfDay={daySchedule?.titleOfDay || ''}
           {...prepareModalData()}
           distance={0} // Bạn có thể thêm logic tính khoảng cách ở đây

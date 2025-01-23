@@ -15,12 +15,6 @@ export default function DailySchedule() {
     // modalData,
     expandedSlots,
     toggleTimeSlot,
-    // addService,
-    // removeService,
-    // closeModal,
-    // openModal,
-    // reorderServices,
-    // updateDayTitle,
   } = useScheduleState();
 
   const dispatch = useDispatch();

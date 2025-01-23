@@ -3,18 +3,23 @@
 import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useSelector } from 'react-redux';
+import { calculatePrice } from '../../utils/calculations';
 import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
-
-function DayViewModal({
-  isOpen,
-  onClose,
-  day,
-  titleOfDay,
-  services = [],
-  guides = [],
-  priceOfDistance,
-}) {
+function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = [], guides = [] }) {
   if (!isOpen) return null;
+
+  // Add distance selector
+  const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || 0);
+  // const dayPax = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.pax);
+  const { globalPax } = useSelector((state) => state.dailySchedule.settings);
+
+  const handleDistancePrice = (distance) => {
+    if (globalPax) {
+      return calculatePrice(distance, globalPax);
+    }
+    return 0;
+  };
 
   // Memoize normalized services
   const normalizedServices = useMemo(() => {
@@ -39,14 +44,14 @@ function DayViewModal({
   }, [services]);
 
   // Memoize totals calculation
-  const { servicesTotal, distancePrice, totalUSD } = useMemo(() => {
+  const { totalUSD } = useMemo(() => {
     const servicesTotal = normalizedServices.reduce((sum, service) => sum + service.price, 0);
-    const distancePrice = priceOfDistance?.priceDt || 0;
+    const distancePrice = handleDistancePrice(distance) || 0;
     const total = servicesTotal + distancePrice;
     const totalUSD = convertVNDtoUSD(total);
 
     return { servicesTotal, distancePrice, total, totalUSD };
-  }, [normalizedServices, priceOfDistance?.priceDt]);
+  }, [normalizedServices, distance]);
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
@@ -67,7 +72,7 @@ function DayViewModal({
       >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="font-medium text-xl text-gray-900">Day {day}</h3>
+          <h3 className="font-medium text-xl text-gray-900">Day {order}</h3>
           <div className="flex items-center gap-2">
             <button
               className="px-4 py-2 text-sm text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors duration-200"
@@ -123,11 +128,9 @@ function DayViewModal({
           <div className="grid grid-cols-12 gap-4 p-3 text-sm border-t border-gray-200">
             <div className="col-span-1"></div>
             <div className="col-span-2"></div>
-            <div className="col-span-6">
-              Khoảng cách di chuyển ({priceOfDistance?.distance || 0}km)
-            </div>
+            <div className="col-span-6">Khoảng cách di chuyển ({distance}km)</div>
             <div className="col-span-3 text-right">
-              {formatCurrency(convertVNDtoUSD(priceOfDistance?.priceDt || 0), 'USD')}
+              {formatCurrency(convertVNDtoUSD(handleDistancePrice(distance) || 0), 'USD')}
             </div>
           </div>
 
@@ -148,7 +151,8 @@ function DayViewModal({
 DayViewModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  day: PropTypes.number.isRequired,
+  order: PropTypes.number.isRequired,
+  dayId: PropTypes.string.isRequired,
   titleOfDay: PropTypes.string,
   services: PropTypes.arrayOf(
     PropTypes.shape({
@@ -157,11 +161,6 @@ DayViewModal.propTypes = {
     })
   ),
   guides: PropTypes.arrayOf(PropTypes.string),
-  priceOfDistance: PropTypes.shape({
-    dayIndex: PropTypes.number,
-    distance: PropTypes.number,
-    priceDt: PropTypes.number,
-  }),
 };
 
 export default DayViewModal;
