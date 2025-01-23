@@ -23,24 +23,31 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
 
   // Memoize normalized services
   const normalizedServices = useMemo(() => {
-    return services.map((service) => {
-      const [time, ...nameParts] = service.name.split(' - ');
-      const serviceName = nameParts.join(' - ');
+    return services
+      .map((service) => {
+        const [time, ...nameParts] = service.name.split(' - ');
+        const serviceName = nameParts.join(' - ');
 
-      let price = 0;
-      if (typeof service.price === 'string') {
-        price = parseInt(service.price.replace(/[,đ]/g, ''), 10) || 0;
-      } else if (typeof service.price === 'number') {
-        price = service.price;
-      }
+        // Convert time to minutes for easier comparison
+        const [hours, minutes] = time.split(':').map(Number);
+        const timeInMinutes = hours * 60 + minutes;
 
-      return {
-        time,
-        name: serviceName,
-        price,
-        priceUSD: convertVNDtoUSD(price),
-      };
-    });
+        let price = 0;
+        if (typeof service.price === 'string') {
+          price = parseInt(service.price.replace(/[,đ]/g, ''), 10) || 0;
+        } else if (typeof service.price === 'number') {
+          price = service.price;
+        }
+
+        return {
+          time,
+          timeInMinutes, // Add this for sorting
+          name: serviceName,
+          price,
+          priceUSD: convertVNDtoUSD(price),
+        };
+      })
+      .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
   }, [services]);
 
   // Memoize totals calculation

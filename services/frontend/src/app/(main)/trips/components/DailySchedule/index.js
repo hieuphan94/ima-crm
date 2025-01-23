@@ -5,17 +5,10 @@ import DaysContainer from './components/DaysContainer';
 import ScheduleModal from './components/ScheduleModal';
 import TimeSlotsSidebar from './components/TimeSlotsSidebar';
 import { useDragDrop } from './states/useDragDrop';
-import { useScheduleState } from './states/useScheduleState';
 
 export default function DailySchedule() {
   const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
-  const { modalData } = useSelector((state) => state.dailySchedule.ui);
-
-  const {
-    // modalData,
-    expandedSlots,
-    toggleTimeSlot,
-  } = useScheduleState();
+  const { modalData, expandedSlots } = useSelector((state) => state.dailySchedule.ui);
 
   const dispatch = useDispatch();
 
@@ -53,6 +46,13 @@ export default function DailySchedule() {
     });
   };
 
+  const handleToggleTimeSlot = (time) => {
+    dispatch({
+      type: 'dailySchedule/toggleTimeSlot',
+      payload: time,
+    });
+  };
+
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
   return (
@@ -67,7 +67,7 @@ export default function DailySchedule() {
         <div className="flex">
           {/* Time Slots Column */}
           <div className="flex-none">
-            <TimeSlotsSidebar expandedSlots={expandedSlots} onToggleTime={toggleTimeSlot} />
+            <TimeSlotsSidebar expandedSlots={expandedSlots} onToggleTime={handleToggleTimeSlot} />
           </div>
 
           {/* Days Container - Single scroll container */}

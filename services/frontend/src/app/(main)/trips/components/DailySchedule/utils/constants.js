@@ -19,7 +19,7 @@ export const TIME_GROUPS = [
   },
 ];
 
-export const SLOT_HEIGHT = 28; // px
+export const SLOT_HEIGHT = 24; // px
 export const SLOT_GAP = 2; // px
 export const GROUP_GAP = 8; // px
 

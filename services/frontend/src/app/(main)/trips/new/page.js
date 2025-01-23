@@ -12,6 +12,7 @@ import DailySchedule from '../components/DailySchedule';
 export default function NewTripPage() {
   const dispatch = useDispatch();
   const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
 
   const router = useRouter();
   const { notifyError } = useUI();
@@ -40,11 +41,20 @@ export default function NewTripPage() {
       notifyError('Vui lòng chỉ nhập số ngày');
       return;
     }
+
     const numValue = parseInt(value, 10);
     if (numValue < 1) {
       notifyError('Số ngày phải lớn hơn 0');
       return;
     }
+
+    // Kiểm tra số ngày mới không được nhỏ hơn số ngày hiện có
+    const existingDaysCount = Object.keys(scheduleItems).length;
+    if (numValue < existingDaysCount) {
+      notifyError(`Chỉ có thể xóa từng ngày, nhập ngày mới > ngày hiện tại (${existingDaysCount})`);
+      return;
+    }
+
     debouncedUpdateSettings('numberOfDays', numValue);
   };
 

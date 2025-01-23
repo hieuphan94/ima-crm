@@ -112,16 +112,30 @@ const useDailyScheduleSlice = createSlice({
 
     initializeDays: (state, action) => {
       const days = action.payload;
-      // Reset scheduleItems và tạo mới với UUID
-      state.scheduleItems = days.reduce((acc, { id, order }) => {
-        acc[id] = {
-          order,
-          distance: 0,
-          titleOfDay: '',
-          // ... other day properties
-        };
-        return acc;
-      }, {});
+      const existingItems = state.scheduleItems;
+      const newScheduleItems = {};
+
+      // Tạo Set để kiểm tra id tồn tại nhanh hơn
+      const existingIds = new Set(Object.keys(existingItems));
+
+      for (const { id, order } of days) {
+        if (existingIds.has(id)) {
+          // Nếu ngày đã tồn tại, chỉ cập nhật order
+          newScheduleItems[id] = {
+            ...existingItems[id],
+            order,
+          };
+        } else {
+          // Nếu là ngày mới, tạo mới với giá trị mặc định
+          newScheduleItems[id] = {
+            order,
+            distance: 0,
+            titleOfDay: '',
+          };
+        }
+      }
+
+      state.scheduleItems = newScheduleItems;
     },
 
     // Time slot

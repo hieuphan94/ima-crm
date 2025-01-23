@@ -23,15 +23,28 @@ const DaysContainer = memo(function DaysContainer({
 
   // Khởi tạo days khi numberOfDays thay đổi
   useEffect(() => {
-    const existingDays = Object.values(scheduleItems).length;
+    const existingDays = Object.entries(scheduleItems);
+    const currentLength = existingDays.length;
 
-    if (existingDays !== numberOfDays) {
-      const days = Array.from({ length: numberOfDays }).map((_, index) => ({
-        id: uuidv4(),
-        order: index + 1,
+    if (currentLength < numberOfDays && numberOfDays > 0) {
+      // Sắp xếp các ngày hiện có theo order để lấy order cuối cùng chính xác
+      const sortedExistingDays = existingDays.sort(([, a], [, b]) => a.order - b.order);
+
+      // Tạo map để tra cứu nhanh hơn
+      const existingDaysData = sortedExistingDays.map(([id, day]) => ({
+        id,
+        order: day.order,
       }));
 
-      dispatch(initializeDays(days));
+      // Lấy order cuối cùng từ mảng đã sắp xếp
+      const lastOrder = currentLength > 0 ? sortedExistingDays[currentLength - 1][1].order : 0;
+
+      const newDays = Array.from({ length: numberOfDays - currentLength }).map((_, index) => ({
+        id: uuidv4(),
+        order: lastOrder + index + 1,
+      }));
+
+      dispatch(initializeDays([...existingDaysData, ...newDays]));
     }
   }, [numberOfDays, dispatch]);
 
