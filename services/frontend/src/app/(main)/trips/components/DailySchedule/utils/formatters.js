@@ -7,6 +7,7 @@ export const truncateText = (text, limit) => {
 
 export const convertVNDtoUSD = (amount) => {
   if (!amount) return 0;
+  if (amount === 1) return 1;
   const amountNum = parseFloat(amount) || 0;
   return Number((amountNum / EXCHANGE_RATE.VND_TO_USD).toFixed(2));
 };

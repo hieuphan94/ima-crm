@@ -4,6 +4,7 @@ const initialState = {
   settings: {
     globalPax: 1, // Số khách mặc định = guests.length
     numberOfDays: 1, // Số ngày của lịch trình
+    starRating: 4, // Thêm mặc định là 4 sao
   },
 
   // Schedule Info (Thông tin lịch trình)
@@ -413,11 +414,17 @@ const useDailyScheduleSlice = createSlice({
       }
       state.scheduleItems[dayId].meals[mealType] = !state.scheduleItems[dayId].meals[mealType];
     },
+
+    // Thêm action riêng để update star rating
+    setStarRating: (state, action) => {
+      state.settings.starRating = action.payload;
+    },
   },
 });
 
 export const {
   setSettingsSchedule,
+  setStarRating,
   toggleTimeSlot,
   addService,
   removeService,

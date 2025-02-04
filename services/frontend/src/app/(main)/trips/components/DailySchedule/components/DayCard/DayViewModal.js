@@ -5,12 +5,16 @@ import { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
+import { EXCHANGE_RATE } from '../../utils/constants';
 import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
+
 function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = [], guides = [] }) {
   if (!isOpen) return null;
 
   // Add distance selector
   const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || 0);
+
+  const { starRating } = useSelector((state) => state.dailySchedule.settings);
 
   const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
 
@@ -41,47 +45,106 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
 
   // Format meal text
   const getMealText = () => {
-    if (!dayMeals.included) return 'Không bao gồm bữa ăn';
+    if (!daySchedule) return 'Không bao gồm bữa ăn';
 
-    const meals = [];
-    if (dayMeals.breakfast) meals.push('Sáng');
-    if (dayMeals.lunch) meals.push('Trưa');
-    if (dayMeals.dinner) meals.push('Tối');
+    const meals = Object.keys(daySchedule)
+      .filter((key) => /^\d/.test(key)) // Get only time keys
+      .flatMap((timeKey) => {
+        const services = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
+        return services
+          .filter((service) => service.type === 'food' && service.meal?.mealType)
+          .map((service) => {
+            switch (service.meal.mealType) {
+              case 'breakfast':
+                return 'Sáng';
+              case 'lunch':
+                return 'Trưa';
+              case 'dinner':
+                return 'Tối';
+              default:
+                return null;
+            }
+          })
+          .filter(Boolean);
+      });
 
-    return meals.length > 0 ? `Bao gồm bữa: ${meals.join(', ')}` : 'Bao gồm bữa ăn';
+    return meals.length > 0
+      ? `Bao gồm bữa: ${[...new Set(meals)].join(', ')}`
+      : 'Không bao gồm bữa ăn';
   };
+
+  // Helper function để convert time string sang minutes
+  const convertTimeToMinutes = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  console.log(daySchedule);
 
   // Memoize normalized services
   const normalizedServices = useMemo(() => {
-    return services
-      .map((service) => {
-        const [time, ...nameParts] = service.name.split(' - ');
-        const serviceName = nameParts.join(' - ');
+    if (!daySchedule) return [];
 
-        // Convert time to minutes for easier comparison
-        const [hours, minutes] = time.split(':').map(Number);
-        const timeInMinutes = hours * 60 + minutes;
-
-        let price = 0;
-        if (typeof service.price === 'string') {
-          price = parseInt(service.price.replace(/[,đ]/g, ''), 10) || 0;
-        } else if (typeof service.price === 'number') {
-          price = service.price;
+    // Helper function để tính price dựa vào star rating
+    const calculatePriceByStarRating = (type, mealType) => {
+      // Nếu là food và là bữa sáng thì return 0 ngay từ đầu
+      if (type === 'food' && mealType === 'breakfast') {
+        return 0;
+      } else {
+        const pax = paxChangeOfDay || globalPax;
+        if (type === 'food') {
+          switch (starRating) {
+            case 3:
+              return EXCHANGE_RATE.VND_TO_USD * 2 * pax;
+            case 4:
+              return EXCHANGE_RATE.VND_TO_USD * 5 * pax;
+            case 5:
+              return EXCHANGE_RATE.VND_TO_USD * 10 * pax;
+            default:
+              return EXCHANGE_RATE.VND_TO_USD * pax;
+          }
         }
+        return convertVNDtoUSD(basePrice);
+      }
+    };
 
-        return {
-          time,
-          timeInMinutes, // Add this for sorting
-          name: serviceName,
-          price,
-          priceUSD: convertVNDtoUSD(price),
-        };
+    const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
+
+    return timeKeys
+      .flatMap((timeKey) => {
+        const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
+
+        return timeSlotServices.map((service) => {
+          let price = 0;
+          let name = '';
+
+          if (service.type === 'food' && service.meal) {
+            price = calculatePriceByStarRating(
+              'food',
+              service.meal.mealType // Sử dụng mealType từ service.meal
+            );
+            name = service.name.split(' - ').slice(1).join(' - ');
+          } else {
+            price = calculatePriceByStarRating(service.type);
+            name = service.name;
+          }
+
+          return {
+            time: timeKey,
+            timeInMinutes: convertTimeToMinutes(timeKey),
+            name,
+            price,
+            priceUSD: price,
+            type: service.type,
+          };
+        });
       })
       .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
-  }, [services]);
+  }, [daySchedule, globalPax, paxChangeOfDay, starRating]);
 
   // Memoize totals calculation
   const { totalUSD } = useMemo(() => {
+    console.log(normalizedServices);
     const servicesTotal = normalizedServices.reduce((sum, service) => sum + service.price, 0);
     const distancePrice = handleDistancePrice(distance) || 0;
     const total = servicesTotal + distancePrice;
@@ -200,8 +263,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
     return description;
   }, [daySchedule]);
 
-  console.log(dayDescription);
-
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Overlay with blur effect */}
@@ -260,16 +321,18 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
 
             {/* List services */}
             <div className="divide-y divide-gray-200">
-              {normalizedServices.map((service, index) => (
-                <div key={index} className="grid grid-cols-12 gap-4 p-3 text-sm">
-                  <div className="col-span-1 text-gray-500">{index + 1}</div>
-                  <div className="col-span-2 text-gray-600">{service.time}</div>
-                  <div className="col-span-6">{service.name}</div>
-                  <div className="col-span-3 text-right">
-                    {formatCurrency(service.priceUSD, 'USD')}
+              {normalizedServices
+                .filter((service) => service.type !== 'food') // Chỉ lọc food services ở UI
+                .map((service, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-4 p-3 text-sm">
+                    <div className="col-span-1 text-gray-500">{index + 1}</div>
+                    <div className="col-span-2 text-gray-600">{service.time}</div>
+                    <div className="col-span-6">{service.name}</div>
+                    <div className="col-span-3 text-right">
+                      {formatCurrency(service.priceUSD, 'USD')}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 

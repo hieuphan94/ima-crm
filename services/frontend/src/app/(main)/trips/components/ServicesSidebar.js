@@ -1,5 +1,7 @@
 'use client';
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
+import { salesFoodServices } from '@/data/mockData/salesFoodServicesMock';
+import { MealType, ServiceType } from '@/data/models/enums';
 import { useState } from 'react';
 import {
   IoIosArrowDown,
@@ -9,7 +11,11 @@ import {
   IoIosWarning,
 } from 'react-icons/io';
 
-export default function ServicesSidebar({ sheetServices = [], onRefreshServices }) {
+export default function ServicesSidebar({
+  sheetServices = [],
+  onRefreshServices,
+  isOperator = false,
+}) {
   const [openCountry, setOpenCountry] = useState(null);
   const [openGuide, setOpenGuide] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -26,6 +32,8 @@ export default function ServicesSidebar({ sheetServices = [], onRefreshServices 
   const [hasChanges, setHasChanges] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isRefreshed, setIsRefreshed] = useState(false);
+  const [openFood, setOpenFood] = useState(false);
+  const [foodSearchTerm, setFoodSearchTerm] = useState('');
 
   const guideLanguages = [
     { id: 'en', label: 'English' },
@@ -206,6 +214,35 @@ export default function ServicesSidebar({ sheetServices = [], onRefreshServices 
     const numericPrice = price.toString().replace(/[^\d]/g, '');
     // Format với dấu phẩy ngăn cách hàng nghìn và thêm đơn vị tiền
     return numericPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' đ';
+  };
+
+  const getMealTypeName = (mealType) => {
+    switch (mealType) {
+      case MealType.BREAKFAST:
+        return 'Ăn sáng';
+      case MealType.LUNCH:
+        return 'Ăn trưa';
+      case MealType.DINNER:
+        return 'Ăn tối';
+      default:
+        return '';
+    }
+  };
+
+  // Thêm object để định nghĩa màu cho từng loại bữa ăn
+  const mealTypeColors = {
+    [MealType.BREAKFAST]: {
+      header: 'text-amber-600 bg-amber-50',
+      item: 'hover:bg-amber-50 border-amber-100',
+    },
+    [MealType.LUNCH]: {
+      header: 'text-emerald-600 bg-emerald-50',
+      item: 'hover:bg-emerald-50 border-emerald-100',
+    },
+    [MealType.DINNER]: {
+      header: 'text-indigo-600 bg-indigo-50',
+      item: 'hover:bg-indigo-50 border-indigo-100',
+    },
   };
 
   return (
@@ -565,6 +602,67 @@ export default function ServicesSidebar({ sheetServices = [], onRefreshServices 
             </div>
           )}
         </div>
+
+        {/* Food Services - Phiên bản đơn giản cho sales */}
+        {!isOperator && (
+          <div>
+            <button
+              onClick={() => setOpenFood(!openFood)}
+              className="w-full flex items-center justify-between text-[10px] font-medium p-1 rounded bg-orange-50 text-orange-700 hover:bg-orange-100"
+            >
+              <span>Dịch vụ ăn uống</span>
+              {openFood ? (
+                <IoIosArrowDown className="h-2.5 w-2.5" />
+              ) : (
+                <IoIosArrowForward className="h-2.5 w-2.5" />
+              )}
+            </button>
+
+            {openFood && (
+              <div className="mt-1 space-y-2">
+                {Object.entries(salesFoodServices).map(([mealType, services]) => (
+                  <div key={mealType}>
+                    <div
+                      className={`text-[9px] font-medium px-2 py-1 rounded-sm mb-1 ${mealTypeColors[mealType].header}`}
+                    >
+                      {getMealTypeName(mealType)}
+                    </div>
+                    <div className="grid grid-cols-5 gap-0.5">
+                      {services.map((service) => (
+                        <div
+                          key={service.id}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData(
+                              'text/plain',
+                              JSON.stringify({
+                                type: 'service',
+                                data: {
+                                  ...service,
+                                  type: ServiceType.FOOD,
+                                },
+                              })
+                            );
+                            e.target.classList.add('opacity-50');
+                          }}
+                          onDragEnd={(e) => {
+                            e.target.classList.remove('opacity-50');
+                          }}
+                          className={`flex flex-col items-center p-1 rounded cursor-move border ${mealTypeColors[mealType].item}`}
+                        >
+                          <span className="text-[11px]">{service.icon}</span>
+                          <span className="text-[8px] text-center truncate w-full">
+                            {service.name.split(' - ')[1]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modal hiển thị thay đổi */}

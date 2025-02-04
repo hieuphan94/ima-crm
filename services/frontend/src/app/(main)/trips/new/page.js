@@ -2,7 +2,11 @@
 
 import { VisitService } from '@/data/models';
 import { useUI } from '@/hooks/useUI';
-import { resetDays, setSettingsSchedule } from '@/store/slices/useDailyScheduleSlice';
+import {
+  resetDays,
+  setSettingsSchedule,
+  setStarRating,
+} from '@/store/slices/useDailyScheduleSlice';
 import debounce from 'lodash/debounce';
 import { ChevronLeft, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -14,7 +18,9 @@ import PreviewModal from '../components/PreviewModal';
 
 export default function NewTripPage() {
   const dispatch = useDispatch();
-  const { numberOfDays, globalPax } = useSelector((state) => state.dailySchedule.settings);
+  const { numberOfDays, globalPax, starRating } = useSelector(
+    (state) => state.dailySchedule.settings
+  );
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
 
   const router = useRouter();
@@ -25,6 +31,7 @@ export default function NewTripPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sheetData, setSheetData] = useState(null);
   const [selectedCity, setSelectedCity] = useState('hanoi');
+  const [selectedStar, setSelectedStar] = useState('4');
 
   const debouncedValidation = useCallback(
     debounce((value) => {
@@ -180,6 +187,10 @@ export default function NewTripPage() {
     handleTestSheet(city);
   };
 
+  const handleStarChange = (e) => {
+    dispatch(setStarRating(parseInt(e.target.value, 10)));
+  };
+
   return (
     <>
       <div className="h-full flex flex-col overflow-hidden">
@@ -208,6 +219,17 @@ export default function NewTripPage() {
                   className="w-[300px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="VD: Hạ Long 3 ngày 2 đêm"
                 />
+              </div>
+              <div>
+                <select
+                  value={starRating}
+                  onChange={handleStarChange}
+                  className="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value={3}>3 ⭐</option>
+                  <option value={4}>4 ⭐</option>
+                  <option value={5}>5 ⭐</option>
+                </select>
               </div>
               <div className="relative">
                 <input
