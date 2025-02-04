@@ -11,7 +11,9 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
 
   // Add distance selector
   const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || 0);
-  // const dayPax = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.pax);
+
+  const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
+
   const { globalPax } = useSelector((state) => state.dailySchedule.settings);
   const paxChangeOfDay = useSelector(
     (state) => state.dailySchedule.scheduleItems[dayId]?.paxChangeOfDay || ''
@@ -87,6 +89,118 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
 
     return { servicesTotal, distancePrice, total, totalUSD };
   }, [normalizedServices, distance]);
+
+  // Track used connectors
+  let availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
+
+  const getRandomConnector = () => {
+    // Reset if all connectors have been used
+    if (availableConnectors.length === 0) {
+      availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
+    }
+
+    // Get random index and remove the selected connector
+    const randomIndex = Math.floor(Math.random() * availableConnectors.length);
+    const connector = availableConnectors[randomIndex];
+    availableConnectors.splice(randomIndex, 1);
+
+    return connector;
+  };
+
+  const formatPeriodText = (timeKeys) => {
+    // Reset available connectors for each new period
+    availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
+
+    if (!timeKeys.length) return '';
+    return timeKeys
+      .sort()
+      .map((timeKey, index) => {
+        const timelineItems = daySchedule[timeKey];
+        if (!Array.isArray(timelineItems)) return '';
+        const sentences = timelineItems
+          .map((item) => item?.sentence || '')
+          .filter((sentence) => sentence);
+
+        if (sentences.length === 0) return '';
+
+        let formattedSentence = sentences.join(' ');
+        if (index > 0) {
+          const connector = getRandomConnector();
+          formattedSentence =
+            connector + formattedSentence.charAt(0).toLowerCase() + formattedSentence.slice(1);
+        }
+        return formattedSentence;
+      })
+      .filter((sentence) => sentence)
+      .join(' ');
+  };
+
+  // Build the description
+  const dayDescription = useMemo(() => {
+    if (!daySchedule) return '';
+
+    const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
+    const periods = {
+      morning: timeKeys
+        .filter((key) => {
+          const hour = parseInt(key.split(':')[0]);
+          return hour >= 6 && hour < 12;
+        })
+        .sort(),
+      afternoon: timeKeys
+        .filter((key) => {
+          const hour = parseInt(key.split(':')[0]);
+          return hour >= 12 && hour < 17;
+        })
+        .sort(),
+      evening: timeKeys
+        .filter((key) => {
+          const hour = parseInt(key.split(':')[0]);
+          return hour >= 17 && hour < 21;
+        })
+        .sort(),
+    };
+
+    let description = '';
+
+    // Morning section
+    if (periods.morning.length) {
+      description += 'En matinée, ';
+      const morningText = formatPeriodText(periods.morning);
+      description += morningText.charAt(0).toLowerCase() + morningText.slice(1);
+      description += '\n\n';
+    }
+
+    // Lunch section
+    description += 'Déjeuner au resto.\n\n';
+
+    // Afternoon section
+    if (periods.afternoon.length) {
+      description += 'En après-midi, ';
+      const afternoonText = formatPeriodText(periods.afternoon);
+      description += afternoonText.charAt(0).toLowerCase() + afternoonText.slice(1);
+      description += '\n\n';
+    }
+
+    // Evening section
+    if (periods.evening.length) {
+      const eveningText = formatPeriodText(periods.evening);
+      if (eveningText) {
+        const connector = getRandomConnector();
+        description += connector + eveningText.charAt(0).toLowerCase() + eveningText.slice(1);
+        description += '\n\n';
+      }
+    }
+
+    // Hotel info
+    const hotelName = daySchedule.hotel || "l'hotel";
+    description += `Dîner à ${hotelName}.\n`;
+    description += `Nuit à ${hotelName}.`;
+
+    return description;
+  }, [daySchedule]);
+
+  console.log(dayDescription);
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
@@ -183,6 +297,16 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
             <div className="col-span-6">Tổng cộng</div>
             <div className="col-span-3 text-right">{formatCurrency(totalUSD, 'USD')}</div>
           </div>
+
+          {/* Day Description */}
+          {dayDescription && (
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <h4 className="text-sm font-medium text-blue-900 mb-2">Giới thiệu hành trình</h4>
+              <p className="text-sm text-blue-800 leading-relaxed whitespace-pre-line">
+                {dayDescription}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>,

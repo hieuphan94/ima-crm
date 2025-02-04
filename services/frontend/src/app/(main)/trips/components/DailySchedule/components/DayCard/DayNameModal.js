@@ -182,7 +182,6 @@ function DayNameModal({ isOpen, onClose, order, dayId, onSave, onLoaded }) {
             </label>
             <ImageUploader images={images} onUpload={handleUpload} onRemove={handleRemoveImage} />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Mẫu ngày có sẵn</label>
             <input

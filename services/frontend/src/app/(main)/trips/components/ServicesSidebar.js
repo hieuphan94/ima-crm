@@ -1,5 +1,5 @@
 'use client';
-import { VIETNAM_LOCATIONS, getLocationsByRegion } from '@/constants/vietnam-locations';
+import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { useState } from 'react';
 import {
   IoIosArrowDown,
@@ -26,8 +26,6 @@ export default function ServicesSidebar({ sheetServices = [], onRefreshServices 
   const [hasChanges, setHasChanges] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [isRefreshed, setIsRefreshed] = useState(false);
-
-  const locationsByRegion = getLocationsByRegion();
 
   const guideLanguages = [
     { id: 'en', label: 'English' },
@@ -101,10 +99,6 @@ export default function ServicesSidebar({ sheetServices = [], onRefreshServices 
     Thailand: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
     Laos: 'bg-purple-100 text-purple-700 hover:bg-purple-200',
     Myanmar: 'bg-rose-100 text-rose-700 hover:bg-rose-200',
-  };
-
-  const serviceTypeColors = {
-    visit: 'bg-blue-50/90 hover:bg-blue-100/90',
   };
 
   const handleDragStart = (e, service) => {
