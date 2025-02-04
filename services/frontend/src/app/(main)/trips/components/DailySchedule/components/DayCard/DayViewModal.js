@@ -79,8 +79,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
     return hours * 60 + minutes;
   };
 
-  console.log(daySchedule);
-
   // Memoize normalized services
   const normalizedServices = useMemo(() => {
     if (!daySchedule) return [];
@@ -90,21 +88,18 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
       // Nếu là food và là bữa sáng thì return 0 ngay từ đầu
       if (type === 'food' && mealType === 'breakfast') {
         return 0;
-      } else {
+      } else if (type === 'food') {
         const pax = paxChangeOfDay || globalPax;
-        if (type === 'food') {
-          switch (starRating) {
-            case 3:
-              return EXCHANGE_RATE.VND_TO_USD * 2 * pax;
-            case 4:
-              return EXCHANGE_RATE.VND_TO_USD * 5 * pax;
-            case 5:
-              return EXCHANGE_RATE.VND_TO_USD * 10 * pax;
-            default:
-              return EXCHANGE_RATE.VND_TO_USD * pax;
-          }
+        switch (starRating) {
+          case 3:
+            return EXCHANGE_RATE.VND_TO_USD * 2 * pax;
+          case 4:
+            return EXCHANGE_RATE.VND_TO_USD * 5 * pax;
+          case 5:
+            return EXCHANGE_RATE.VND_TO_USD * 10 * pax;
+          default:
+            return EXCHANGE_RATE.VND_TO_USD * pax;
         }
-        return convertVNDtoUSD(basePrice);
       }
     };
 
@@ -118,29 +113,27 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
           let price = 0;
           let name = '';
 
-          if (service.type === 'food' && service.meal) {
-            price = calculatePriceByStarRating(
-              'food',
-              service.meal.mealType // Sử dụng mealType từ service.meal
-            );
+          if (service.type === 'food') {
+            price = calculatePriceByStarRating('food', service.meal.mealType);
             name = service.name.split(' - ').slice(1).join(' - ');
           } else {
-            price = calculatePriceByStarRating(service.type);
+            price = service.price;
             name = service.name;
           }
-
           return {
             time: timeKey,
             timeInMinutes: convertTimeToMinutes(timeKey),
             name,
             price,
-            priceUSD: price,
+            priceUSD: convertVNDtoUSD(price),
             type: service.type,
           };
         });
       })
       .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
   }, [daySchedule, globalPax, paxChangeOfDay, starRating]);
+
+  console.log(normalizedServices);
 
   // Memoize totals calculation
   const { totalUSD } = useMemo(() => {
