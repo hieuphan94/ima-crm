@@ -282,6 +282,30 @@ export default function NewTripPage() {
           </div>
         </div>
 
+        {/* Hiển thị dữ liệu từ sheet */}
+        {sheetData && (
+          <div className="p-6 overflow-auto">
+            <h3 className="text-lg font-medium mb-4">
+              Dữ liệu từ Sheet ({sheetData.length} địa điểm)
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              {sheetData.map((service, index) => (
+                <div key={service.id} className="p-4 border rounded-lg">
+                  <div className="font-medium">{service.name}</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    Địa điểm: {service.locations.join(', ')}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">{service.sentence}</div>
+                  {/* Có thể sử dụng các phương thức của Service */}
+                  <div className="text-sm text-gray-500 mt-2">
+                    Status: {service.isActiveService() ? 'Active' : 'Inactive'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 overflow-hidden">
           <DailySchedule />
         </div>
