@@ -6,7 +6,7 @@ import ScheduleModal from './components/ScheduleModal';
 import TimeSlotsSidebar from './components/TimeSlotsSidebar';
 import { useDragDrop } from './states/useDragDrop';
 
-export default function DailySchedule() {
+export default function DailySchedule({ sheetServices }) {
   const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
   const { modalData, expandedSlots } = useSelector((state) => state.dailySchedule.ui);
 
@@ -59,7 +59,7 @@ export default function DailySchedule() {
     <div className="flex gap-4 h-full">
       {/* Left Sidebar */}
       <div className="flex-none">
-        <ServicesSidebar />
+        <ServicesSidebar sheetServices={sheetServices} />
       </div>
 
       {/* Main Content */}

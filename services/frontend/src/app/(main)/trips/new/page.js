@@ -283,7 +283,9 @@ export default function NewTripPage() {
         </div>
 
         <div className="flex-1 overflow-hidden">
-          <DailySchedule />
+          <div className="flex h-full">
+            <DailySchedule sheetServices={sheetData || []} />
+          </div>
         </div>
       </div>
 
