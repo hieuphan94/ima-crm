@@ -8,7 +8,7 @@ import { calculatePrice } from '../../utils/calculations';
 import { EXCHANGE_RATE } from '../../utils/constants';
 import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
 
-function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = [], guides = [] }) {
+function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }) {
   if (!isOpen) return null;
 
   // Add distance selector
@@ -17,6 +17,10 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
   const { starRating } = useSelector((state) => state.dailySchedule.settings);
 
   const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
+  if (!daySchedule) {
+    console.warn('Day not found:', dayId);
+    return null;
+  }
 
   const { globalPax } = useSelector((state) => state.dailySchedule.settings);
   const paxChangeOfDay = useSelector(
@@ -30,47 +34,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
       return calculatePrice(distance, paxCalculate);
     }
     return 0;
-  };
-
-  // Add meal selector
-  const dayMeals = useSelector(
-    (state) =>
-      state.dailySchedule.scheduleItems[dayId]?.meals || {
-        included: true,
-        breakfast: true,
-        lunch: false,
-        dinner: false,
-      }
-  );
-
-  // Format meal text
-  const getMealText = () => {
-    if (!daySchedule) return 'Không bao gồm bữa ăn';
-
-    const meals = Object.keys(daySchedule)
-      .filter((key) => /^\d/.test(key)) // Get only time keys
-      .flatMap((timeKey) => {
-        const services = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-        return services
-          .filter((service) => service.type === 'food' && service.meal?.mealType)
-          .map((service) => {
-            switch (service.meal.mealType) {
-              case 'breakfast':
-                return 'Sáng';
-              case 'lunch':
-                return 'Trưa';
-              case 'dinner':
-                return 'Tối';
-              default:
-                return null;
-            }
-          })
-          .filter(Boolean);
-      });
-
-    return meals.length > 0
-      ? `Bao gồm bữa: ${[...new Set(meals)].join(', ')}`
-      : 'Không bao gồm bữa ăn';
   };
 
   // Helper function để convert time string sang minutes
@@ -133,11 +96,8 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
       .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
   }, [daySchedule, globalPax, paxChangeOfDay, starRating]);
 
-  console.log(normalizedServices);
-
   // Memoize totals calculation
   const { totalUSD } = useMemo(() => {
-    console.log(normalizedServices);
     const servicesTotal = normalizedServices.reduce((sum, service) => sum + service.price, 0);
     const distancePrice = handleDistancePrice(distance) || 0;
     const total = servicesTotal + distancePrice;
@@ -146,133 +106,19 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
     return { servicesTotal, distancePrice, total, totalUSD };
   }, [normalizedServices, distance]);
 
-  // Track used connectors
-  let availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
+  // Lấy paragraph từ state
+  const dayParagraph = useSelector(
+    (state) => state.dailySchedule.scheduleItems[dayId]?.paragraphDay?.paragraphTotal || ''
+  );
 
-  const getRandomConnector = () => {
-    // Reset if all connectors have been used
-    if (availableConnectors.length === 0) {
-      availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
-    }
-
-    // Get random index and remove the selected connector
-    const randomIndex = Math.floor(Math.random() * availableConnectors.length);
-    const connector = availableConnectors[randomIndex];
-    availableConnectors.splice(randomIndex, 1);
-
-    return connector;
+  // Đơn giản hóa handleClose
+  const handleClose = () => {
+    onClose();
   };
-
-  const formatPeriodText = (timeKeys) => {
-    // Reset available connectors for each new period
-    availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
-
-    if (!timeKeys.length) return '';
-    return timeKeys
-      .sort()
-      .map((timeKey, index) => {
-        const timelineItems = daySchedule[timeKey];
-        if (!Array.isArray(timelineItems)) return '';
-        const sentences = timelineItems
-          .map((item) => item?.sentence || '')
-          .filter((sentence) => sentence);
-
-        if (sentences.length === 0) return '';
-
-        let formattedSentence = sentences.join(' ');
-        if (index > 0) {
-          const connector = getRandomConnector();
-          formattedSentence =
-            connector + formattedSentence.charAt(0).toLowerCase() + formattedSentence.slice(1);
-        }
-        return formattedSentence;
-      })
-      .filter((sentence) => sentence)
-      .join(' ');
-  };
-
-  // Build the description
-  const dayDescription = useMemo(() => {
-    if (!daySchedule) return '';
-
-    const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
-    const periods = {
-      morning: timeKeys
-        .filter((key) => {
-          const hour = parseInt(key.split(':')[0]);
-          return hour >= 6 && hour < 12;
-        })
-        .sort(),
-      afternoon: timeKeys
-        .filter((key) => {
-          const hour = parseInt(key.split(':')[0]);
-          return hour >= 12 && hour < 17;
-        })
-        .sort(),
-      evening: timeKeys
-        .filter((key) => {
-          const hour = parseInt(key.split(':')[0]);
-          return hour >= 17 && hour < 21;
-        })
-        .sort(),
-    };
-
-    let description = '';
-
-    // Morning section
-    if (periods.morning.length) {
-      description += 'En matinée, ';
-      const morningText = formatPeriodText(periods.morning);
-      description += morningText.charAt(0).toLowerCase() + morningText.slice(1);
-      description += '\n\n';
-    }
-
-    // Lunch section
-    description += 'Déjeuner au resto.\n\n';
-
-    // Afternoon section
-    if (periods.afternoon.length) {
-      description += 'En après-midi, ';
-      const afternoonText = formatPeriodText(periods.afternoon);
-      description += afternoonText.charAt(0).toLowerCase() + afternoonText.slice(1);
-      description += '\n\n';
-    }
-
-    // Evening section
-    if (periods.evening.length) {
-      const eveningText = formatPeriodText(periods.evening);
-      if (eveningText) {
-        const connector = getRandomConnector();
-        description += connector + eveningText.charAt(0).toLowerCase() + eveningText.slice(1);
-        description += '\n\n';
-      }
-    }
-
-    // Hotel info
-    const hotelName = daySchedule.hotel || "l'hotel";
-    description += `Dîner à ${hotelName}.\n`;
-    description += `Nuit à ${hotelName}.`;
-
-    return description;
-  }, [daySchedule]);
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-      {/* Overlay with blur effect */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity animate-overlay-appear"
-        onClick={onClose}
-      />
-
-      {/* Modal with animation */}
-      <div
-        className="
-        relative bg-white rounded-lg shadow-2xl w-[800px] max-h-[80vh] overflow-y-auto
-        animate-modal-appear
-        transform transition-all
-        z-[10000]
-      "
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="font-medium text-xl text-gray-900">Day {order}</h3>
@@ -286,7 +132,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
               Export
             </button>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-gray-400 hover:text-gray-600 text-xl transition-colors duration-200"
             >
               ×
@@ -339,11 +185,13 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
             </div>
           </div>
 
-          {/* Meals */}
+          {/* Meals - Lấy từ paragraphTotal */}
           <div className="grid grid-cols-12 gap-4 p-3 text-sm border-t border-gray-200">
             <div className="col-span-1"></div>
             <div className="col-span-2"></div>
-            <div className="col-span-9">{getMealText()}</div>
+            <div className="col-span-9">
+              {dayParagraph.split('\n\n').find((p) => p.includes('Les repas inclus :'))}
+            </div>
           </div>
 
           {/* Total */}
@@ -354,12 +202,12 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, services = []
             <div className="col-span-3 text-right">{formatCurrency(totalUSD, 'USD')}</div>
           </div>
 
-          {/* Day Description */}
-          {dayDescription && (
+          {/* Day Description - Sử dụng paragraphTotal */}
+          {dayParagraph && (
             <div className="mt-4 p-4 bg-blue-50 rounded-lg">
               <h4 className="text-sm font-medium text-blue-900 mb-2">Giới thiệu hành trình</h4>
               <p className="text-sm text-blue-800 leading-relaxed whitespace-pre-line">
-                {dayDescription}
+                {dayParagraph}
               </p>
             </div>
           )}

@@ -139,6 +139,11 @@ const useDailyScheduleSlice = createSlice({
               lunch: false,
               dinner: false,
             },
+            // Giữ lại paragraphDay nếu đã có
+            paragraphDay: existingItems[id].paragraphDay || {
+              paragraphFromLocation: '',
+              paragraphTotal: '',
+            },
           };
         } else {
           newScheduleItems[id] = {
@@ -151,6 +156,11 @@ const useDailyScheduleSlice = createSlice({
               breakfast: true,
               lunch: false,
               dinner: false,
+            },
+            // Thêm paragraphDay mặc định cho ngày mới
+            paragraphDay: {
+              paragraphFromLocation: '',
+              paragraphTotal: '',
             },
           };
         }
@@ -419,6 +429,25 @@ const useDailyScheduleSlice = createSlice({
     setStarRating: (state, action) => {
       state.settings.starRating = action.payload;
     },
+
+    // Giữ lại reducer đơn giản để update paragraph
+    updateDayParagraph: (state, action) => {
+      const { dayId, paragraphTotal } = action.payload;
+
+      if (!state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId] = {};
+      }
+
+      if (!state.scheduleItems[dayId].paragraphDay) {
+        state.scheduleItems[dayId].paragraphDay = {
+          paragraphFromLocation: '',
+          paragraphTotal: '',
+        };
+      }
+
+      // Update paragraph
+      state.scheduleItems[dayId].paragraphDay.paragraphTotal = paragraphTotal;
+    },
   },
 });
 
@@ -441,6 +470,7 @@ export const {
   setDayMeals,
   toggleMealIncluded,
   toggleMealOption,
+  updateDayParagraph,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;

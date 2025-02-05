@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { createTransform, persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import { paragraphMiddleware } from './middleware/paragraph';
 import authReducer from './slices/authSlice';
 import profileReducer from './slices/profileSlice';
 import uiReducer from './slices/uiSlice';
@@ -69,7 +70,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat(paragraphMiddleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 
