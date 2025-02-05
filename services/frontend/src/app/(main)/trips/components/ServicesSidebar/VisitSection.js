@@ -1,5 +1,4 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
-import { VisitService } from '@/data/models/Service';
 import { useEffect, useState } from 'react';
 import {
   IoIosArrowDown,
@@ -14,6 +13,7 @@ import ServiceTooltip from './components/ServiceTooltip';
 import UpdateModal from './components/UpdateModal';
 import { sectionColors, serviceItemStyles } from './constants/styles';
 import { formatPrice, removeVietnameseTones } from './utils/formatters';
+import { LocationCache } from './utils/locationCache';
 
 export default function VisitSection({
   openCountry,
@@ -113,28 +113,33 @@ export default function VisitSection({
 
     try {
       setLoadingLocation(locationName);
+
+      // Check cache
+      const cachedServices = LocationCache.get(locationName);
+      if (cachedServices?.length > 0) {
+        setSheetServices(cachedServices);
+        onLocationSelect(locationName);
+        return;
+      }
+
+      // Fetch from API
       const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
-      if (!response.ok) throw new Error('Failed to fetch services');
-      const data = await response.json();
+      const result = await response.json();
 
-      const services = data.map((serviceData) => {
-        const randomPrice = Math.floor(Math.random() * (500000 - 100000 + 1) + 100000);
-        return new VisitService({
-          ...serviceData,
-          price: randomPrice,
-          quotedPrice: randomPrice * 1.2,
-          actualPrice: randomPrice * 0.9,
-          duration: 0,
-          ticketInfo: {},
-          openingHours: {},
-          highlights: [],
-        });
-      });
+      if (result.success) {
+        setSheetServices(result.data);
 
-      setSheetServices(services);
-      onLocationSelect(locationName);
+        // Cache successful results
+        if (result.data?.length > 0) {
+          LocationCache.set(locationName, result.data);
+        }
+
+        onLocationSelect(locationName);
+      } else {
+        setSheetServices([]);
+      }
     } catch (error) {
-      console.error('Error fetching location services:', error);
+      setSheetServices([]);
     } finally {
       setLoadingLocation(null);
     }

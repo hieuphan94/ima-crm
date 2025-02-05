@@ -154,16 +154,11 @@ export const paragraphMiddleware = (store) => (next) => (action) => {
         return result;
       }
 
-      const daySchedule = state.dailySchedule.scheduleItems[targetDayId];
-      const paragraph = generateDescription(daySchedule);
+      // Thêm vào pending updates thay vì update ngay
+      pendingUpdates.set(targetDayId, true);
 
-      // Update ngay lập tức thay vì dùng pending updates
-      store.dispatch(
-        updateDayParagraph({
-          dayId: targetDayId,
-          ...paragraph,
-        })
-      );
+      // Trigger batch processing
+      processBatchUpdates(store);
     } catch (error) {
       console.error('Error in paragraph middleware:', error);
     }

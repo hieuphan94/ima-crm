@@ -1,4 +1,4 @@
-import axiosInstance from '../axios';
+import axiosInstance from '@/api/config/axios';
 
 export const toursApi = {
   getAllTours: async (params) => {

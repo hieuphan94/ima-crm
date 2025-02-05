@@ -1,4 +1,4 @@
-import { authApi } from '@/services/api/auth';
+import { authApi } from '@/api/auth/auth';
 import { loginSuccess } from '@/store/slices/authSlice';
 import {
   changePasswordFailure,

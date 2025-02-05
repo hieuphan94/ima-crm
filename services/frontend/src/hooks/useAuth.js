@@ -1,8 +1,8 @@
 'use client';
 
+import axiosInstance from '@/api/config/axios';
 import { URLS } from '@/configs/urls';
 import { useUI } from '@/hooks/useUI';
-import axiosInstance from '@/services/axios';
 import {
   loginFailure,
   loginStart,
