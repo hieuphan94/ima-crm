@@ -1,5 +1,5 @@
+import { BaseMealConfig } from '@/configs/mealConfig';
 import { v4 as uuidv4 } from 'uuid';
-import { BaseMealConfig } from '../../configs/mealConfig';
 import {
   FoodServiceType,
   FoodVenueType,
