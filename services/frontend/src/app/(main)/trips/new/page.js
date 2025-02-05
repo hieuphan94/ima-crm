@@ -31,7 +31,6 @@ export default function NewTripPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [sheetData, setSheetData] = useState(null);
   const [selectedCity, setSelectedCity] = useState('hanoi');
-  const [selectedStar, setSelectedStar] = useState('4');
 
   const debouncedValidation = useCallback(
     debounce((value) => {

@@ -5,7 +5,7 @@ import {
   getStatusBadgeClasses,
   getStatusLabel,
   TRIP_STATUS,
-} from '@/mocks/tripsData';
+} from '@/data/mocks/tripsData';
 import { DollarSign } from 'lucide-react';
 
 export default function AccountantView({ trips }) {

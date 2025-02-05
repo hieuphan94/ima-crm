@@ -1,6 +1,6 @@
 'use client';
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
-import { salesFoodServices } from '@/data/mockData/salesFoodServicesMock';
+import { salesFoodServices } from '@/data/mocks/salesFoodServicesMock';
 import { MealType, ServiceType } from '@/data/models/enums';
 import { useState } from 'react';
 import {

@@ -1,7 +1,7 @@
 'use client';
 
+import { MOCK_TRIPS } from '@/data/mocks/tripsData';
 import { useUI } from '@/hooks/useUI';
-import { MOCK_TRIPS } from '@/mocks/tripsData';
 import { ChevronLeft, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
