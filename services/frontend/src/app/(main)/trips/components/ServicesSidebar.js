@@ -2,6 +2,7 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { salesFoodServices } from '@/data/mocks/salesFoodServicesMock';
 import { MealType, ServiceType } from '@/data/models/enums';
+import { VisitService } from '@/data/models/Service';
 import { useState } from 'react';
 import {
   IoIosArrowDown,
@@ -11,11 +12,7 @@ import {
   IoIosWarning,
 } from 'react-icons/io';
 
-export default function ServicesSidebar({
-  sheetServices = [],
-  onRefreshServices,
-  isOperator = false,
-}) {
+export default function ServicesSidebar({ isOperator = false }) {
   const [openCountry, setOpenCountry] = useState(null);
   const [openGuide, setOpenGuide] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -34,6 +31,8 @@ export default function ServicesSidebar({
   const [isRefreshed, setIsRefreshed] = useState(false);
   const [openFood, setOpenFood] = useState(false);
   const [foodSearchTerm, setFoodSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [sheetServices, setSheetServices] = useState([]);
 
   const guideLanguages = [
     { id: 'en', label: 'English' },
@@ -93,12 +92,44 @@ export default function ServicesSidebar({
     setSelectedFilter('all');
   };
 
-  const handleLocationClick = (locationName) => {
+  const handleLocationClick = async (locationName) => {
     setSelectedLocation(selectedLocation === locationName ? null : locationName);
     setServiceSearchTerm('');
     setGuideSearchTerm('');
     setSelectedFilter('all');
     setCurrentServicePage(0);
+
+    if (selectedLocation !== locationName) {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        const data = await response.json();
+
+        const services = data.map((serviceData) => {
+          const randomPrice = Math.floor(Math.random() * (500000 - 100000 + 1) + 100000);
+
+          return new VisitService({
+            ...serviceData,
+            price: randomPrice,
+            quotedPrice: randomPrice * 1.2,
+            actualPrice: randomPrice * 0.9,
+            duration: 0,
+            ticketInfo: {},
+            openingHours: {},
+            highlights: [],
+          });
+        });
+
+        setSheetServices(services);
+      } catch (error) {
+        console.error('Error fetching location services:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const countryColors = {
@@ -197,8 +228,8 @@ export default function ServicesSidebar({
   };
 
   const handleRefreshServices = () => {
-    if (onRefreshServices) {
-      onRefreshServices();
+    if (onFetchLocationServices) {
+      onFetchLocationServices();
       setHasChanges(false);
       setIsRefreshed(true);
       setTimeout(() => {
@@ -207,12 +238,9 @@ export default function ServicesSidebar({
     }
   };
 
-  // Thêm hàm format giá
   const formatPrice = (price) => {
     if (!price) return '';
-    // Chuyển price về string và loại bỏ các ký tự không phải số
     const numericPrice = price.toString().replace(/[^\d]/g, '');
-    // Format với dấu phẩy ngăn cách hàng nghìn và thêm đơn vị tiền
     return numericPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' đ';
   };
 
@@ -229,7 +257,6 @@ export default function ServicesSidebar({
     }
   };
 
-  // Thêm object để định nghĩa màu cho từng loại bữa ăn
   const mealTypeColors = {
     [MealType.BREAKFAST]: {
       header: 'text-amber-600 bg-amber-50',
@@ -248,11 +275,9 @@ export default function ServicesSidebar({
   return (
     <div className="w-64 bg-white rounded-lg shadow-sm border border-gray-200 p-1 overflow-y-auto max-h-[calc(100vh-120px)]">
       <div className="space-y-2">
-        {/* Countries Section */}
         <div className="pb-2 border-b-2 border-gray-300">
           {countries.map((country, index) => (
             <div key={country.name} className={index > 0 ? 'mt-1' : ''}>
-              {/* Country Level */}
               <button
                 onClick={() => handleCountryClick(country.name)}
                 className={`w-full flex items-center justify-between text-[8px] font-medium p-1 rounded
@@ -266,10 +291,8 @@ export default function ServicesSidebar({
                 )}
               </button>
 
-              {/* Locations Grid */}
               {openCountry === country.name && (
                 <>
-                  {/* Search bar for locations */}
                   <div className="relative mt-1 mb-1">
                     <input
                       type="text"
@@ -277,7 +300,7 @@ export default function ServicesSidebar({
                       value={locationSearchTerm}
                       onChange={(e) => {
                         setLocationSearchTerm(e.target.value);
-                        setCurrentPage(0); // Reset to first page when searching
+                        setCurrentPage(0);
                       }}
                       className="w-full text-[9px] p-1 pr-6 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
@@ -319,13 +342,20 @@ export default function ServicesSidebar({
                                   key={location.name}
                                   onClick={() => handleLocationClick(location.name)}
                                   className={`text-[9px] p-0.5 rounded transition-colors whitespace-nowrap truncate
-                                  ${
-                                    selectedLocation === location.name
-                                      ? `${countryColors[country.name].replace('50', '100')} border-${countryColors[country.name].split('-')[1]}-200`
-                                      : `${regionColor} text-gray-600 border border-gray-200`
-                                  }`}
+                                    ${
+                                      selectedLocation === location.name
+                                        ? `${countryColors[country.name].replace('50', '100')} border-${
+                                            countryColors[country.name].split('-')[1]
+                                          }-200`
+                                        : `${regionColor} text-gray-600 border border-gray-200`
+                                    }
+                                    ${isLoading && selectedLocation === location.name ? 'opacity-50' : ''}`}
+                                  disabled={isLoading}
                                 >
                                   {location.name}
+                                  {isLoading && selectedLocation === location.name && (
+                                    <span className="ml-1 inline-block animate-spin">⌛</span>
+                                  )}
                                 </button>
                               );
                             }
@@ -356,10 +386,8 @@ export default function ServicesSidebar({
                     </div>
                   </div>
 
-                  {/* Services for selected location */}
                   {selectedLocation && (
                     <div className="mt-1 p-2 bg-blue-100/70 rounded-lg">
-                      {/* Search Input */}
                       <div className="relative flex gap-1">
                         <div className="relative flex-1">
                           <input
@@ -398,7 +426,6 @@ export default function ServicesSidebar({
                         </button>
                       </div>
 
-                      {/* Services List */}
                       <div className="mt-1 space-y-0.5">
                         {selectedLocation &&
                           getPaginatedServices(
@@ -436,7 +463,6 @@ export default function ServicesSidebar({
                           ))}
                       </div>
 
-                      {/* Pagination Controls */}
                       {selectedLocation &&
                         countries
                           .find((country) =>
@@ -487,7 +513,6 @@ export default function ServicesSidebar({
           ))}
         </div>
 
-        {/* Tour Guides Section */}
         <div>
           <button
             onClick={() => setOpenGuide(!openGuide)}
@@ -503,7 +528,6 @@ export default function ServicesSidebar({
 
           {openGuide && (
             <div className="mt-1 space-y-1">
-              {/* Search Bar for Guides */}
               <div className="relative">
                 <input
                   type="text"
@@ -515,7 +539,6 @@ export default function ServicesSidebar({
                 <IoIosSearch className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               </div>
 
-              {/* Language Filter */}
               <div className="flex flex-wrap gap-0.5">
                 {guideLanguages.map((lang) => (
                   <button
@@ -532,7 +555,6 @@ export default function ServicesSidebar({
                 ))}
               </div>
 
-              {/* Region Filter */}
               <div className="flex flex-wrap gap-0.5">
                 {guideRegions.map((region) => (
                   <button
@@ -549,7 +571,6 @@ export default function ServicesSidebar({
                 ))}
               </div>
 
-              {/* Guides List */}
               <div className="space-y-0.5">
                 {filterGuides(guides).map((guide) => (
                   <div
@@ -603,7 +624,6 @@ export default function ServicesSidebar({
           )}
         </div>
 
-        {/* Food Services - Phiên bản đơn giản cho sales */}
         {!isOperator && (
           <div>
             <button
@@ -665,7 +685,6 @@ export default function ServicesSidebar({
         )}
       </div>
 
-      {/* Modal hiển thị thay đổi */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-4 max-w-sm w-full mx-4 shadow-xl">

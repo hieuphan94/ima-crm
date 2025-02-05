@@ -30,7 +30,6 @@ export default function NewTripPage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sheetData, setSheetData] = useState(null);
-  const [selectedCity, setSelectedCity] = useState('hanoi');
 
   const debouncedValidation = useCallback(
     debounce((value) => {
@@ -140,12 +139,10 @@ export default function NewTripPage() {
     setIsResetModalOpen(false);
   };
 
-  const handleTestSheet = async (city = selectedCity) => {
-    if (isLoading) return;
-
+  const fetchLocationServices = async (locationName) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/sheet?city=${city}`);
+      const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
       const data = await response.json();
 
       // Hàm tạo giá random từ 100,000 đến 500,000
@@ -158,11 +155,9 @@ export default function NewTripPage() {
         const randomPrice = getRandomPrice();
         return new VisitService({
           ...serviceData,
-          // Thêm giá random
           price: randomPrice,
-          quotedPrice: randomPrice * 1.2, // Giá báo cao hơn 20%
-          actualPrice: randomPrice * 0.9, // Giá thực tế thấp hơn 10%
-          // Các trường bắt buộc khác
+          quotedPrice: randomPrice * 1.2,
+          actualPrice: randomPrice * 0.9,
           duration: serviceData.duration || 0,
           ticketInfo: serviceData.ticketInfo || {},
           openingHours: serviceData.openingHours || {},
@@ -171,19 +166,12 @@ export default function NewTripPage() {
       });
 
       setSheetData(services);
-      console.log('Services from sheet:', services);
     } catch (error) {
-      console.error('Error fetching sheet data:', error);
-      notifyError('Không thể lấy dữ liệu từ Google Sheet');
+      console.error('Error fetching location services:', error);
+      notifyError('Không thể lấy dữ liệu dịch vụ cho địa điểm này');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleCityChange = (e) => {
-    const city = e.target.value;
-    setSelectedCity(city);
-    handleTestSheet(city);
   };
 
   const handleStarChange = (e) => {
@@ -259,26 +247,7 @@ export default function NewTripPage() {
                   onChange={handleGuestsChange}
                 />
               </div>
-              <div>
-                <select
-                  value={selectedCity}
-                  onChange={handleCityChange}
-                  className="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="hanoi">Hà Nội</option>
-                  <option value="danang">Đà Nẵng</option>
-                  <option value="hochiminh">Hồ Chí Minh</option>
-                </select>
-              </div>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleTestSheet()}
-                  disabled={isLoading}
-                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-                >
-                  {isLoading ? 'Loading...' : 'Test Sheet'}
-                </button>
                 <button
                   type="button"
                   onClick={handlePreview}
@@ -305,7 +274,10 @@ export default function NewTripPage() {
 
         <div className="flex-1 overflow-hidden">
           <div className="flex h-full">
-            <DailySchedule sheetServices={sheetData || []} />
+            <DailySchedule
+              sheetServices={sheetData || []}
+              onFetchLocationServices={fetchLocationServices}
+            />
           </div>
         </div>
       </div>
