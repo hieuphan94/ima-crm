@@ -1,6 +1,6 @@
 'use client';
 import { useDispatch, useSelector } from 'react-redux';
-import ServicesSidebar from '../ServicesSidebar';
+import ServicesSidebar from '../ServicesSidebar/index';
 import DaysContainer from './components/DaysContainer';
 import ScheduleModal from './components/ScheduleModal';
 import TimeSlotsSidebar from './components/TimeSlotsSidebar';
