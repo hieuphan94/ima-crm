@@ -3,6 +3,7 @@
 import TextAlign from '@tiptap/extension-text-align';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import { memo } from 'react';
 import {
   FiAlignCenter,
   FiAlignJustify,
@@ -12,15 +13,20 @@ import {
   FiItalic,
 } from 'react-icons/fi';
 
-const MenuBar = ({ editor }) => {
-  if (!editor) {
-    return null;
-  }
+const MenuBar = memo(({ editor }) => {
+  if (!editor) return null;
+
+  const handleBold = () => editor.chain().focus().toggleBold().run();
+  const handleItalic = () => editor.chain().focus().toggleItalic().run();
+  const handleAlignLeft = () => editor.chain().focus().setTextAlign('left').run();
+  const handleAlignCenter = () => editor.chain().focus().setTextAlign('center').run();
+  const handleAlignRight = () => editor.chain().focus().setTextAlign('right').run();
+  const handleAlignJustify = () => editor.chain().focus().setTextAlign('justify').run();
 
   return (
     <div className="border-b border-gray-200 p-2 flex gap-2">
       <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
+        onClick={handleBold}
         disabled={!editor.can().chain().focus().toggleBold().run()}
         className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}
         title="Bold"
@@ -28,7 +34,7 @@ const MenuBar = ({ editor }) => {
         <FiBold size={16} />
       </button>
       <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
+        onClick={handleItalic}
         disabled={!editor.can().chain().focus().toggleItalic().run()}
         className={`p-2 rounded hover:bg-gray-100 ${
           editor.isActive('italic') ? 'bg-gray-200' : ''
@@ -39,7 +45,7 @@ const MenuBar = ({ editor }) => {
       </button>
       <div className="w-px h-6 bg-gray-200 mx-2" />
       <button
-        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+        onClick={handleAlignLeft}
         className={`p-2 rounded hover:bg-gray-100 ${
           editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200' : ''
         }`}
@@ -48,7 +54,7 @@ const MenuBar = ({ editor }) => {
         <FiAlignLeft size={16} />
       </button>
       <button
-        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+        onClick={handleAlignCenter}
         className={`p-2 rounded hover:bg-gray-100 ${
           editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200' : ''
         }`}
@@ -57,7 +63,7 @@ const MenuBar = ({ editor }) => {
         <FiAlignCenter size={16} />
       </button>
       <button
-        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+        onClick={handleAlignRight}
         className={`p-2 rounded hover:bg-gray-100 ${
           editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200' : ''
         }`}
@@ -66,7 +72,7 @@ const MenuBar = ({ editor }) => {
         <FiAlignRight size={16} />
       </button>
       <button
-        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+        onClick={handleAlignJustify}
         className={`p-2 rounded hover:bg-gray-100 ${
           editor.isActive({ textAlign: 'justify' }) ? 'bg-gray-200' : ''
         }`}
@@ -76,14 +82,16 @@ const MenuBar = ({ editor }) => {
       </button>
     </div>
   );
-};
+});
 
-const TiptapEditor = ({ content = '', onChange }) => {
+MenuBar.displayName = 'MenuBar';
+
+const TiptapEditor = memo(({ content = '', onChange }) => {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3, 4, 5, 6],
+          levels: [1, 2, 3],
         },
       }),
       TextAlign.configure({
@@ -106,9 +114,7 @@ const TiptapEditor = ({ content = '', onChange }) => {
     immediateRender: false,
   });
 
-  if (typeof window === 'undefined') {
-    return null;
-  }
+  if (typeof window === 'undefined') return null;
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -116,6 +122,8 @@ const TiptapEditor = ({ content = '', onChange }) => {
       <EditorContent editor={editor} className="[&_*]:outline-none [&_*]:spellcheck-none" />
     </div>
   );
-};
+});
+
+TiptapEditor.displayName = 'TiptapEditor';
 
 export default TiptapEditor;

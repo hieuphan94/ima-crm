@@ -6,6 +6,7 @@ import {
   updateDayParagraph,
   updateDayTitle,
 } from '@/store/slices/useDailyScheduleSlice';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -304,6 +305,13 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     setIsEditingParagraph(false);
   };
 
+  const debouncedUpdateParagraph = useCallback(
+    debounce((content) => {
+      setEditedParagraph(content);
+    }, 300),
+    []
+  );
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
@@ -517,7 +525,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
           {isEditingParagraph ? (
             <div className="space-y-2">
-              <TiptapEditor content={editedParagraph} onChange={setEditedParagraph} />
+              <TiptapEditor content={editedParagraph} onChange={debouncedUpdateParagraph} />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => {
