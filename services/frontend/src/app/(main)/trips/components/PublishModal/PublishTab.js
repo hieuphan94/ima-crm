@@ -84,7 +84,7 @@ export default function PublishTab() {
       }
 
       // Nên thêm error handling cụ thể cho fetch logo
-      const response = await fetch(`/api/images?path=${encodeURIComponent(selectedBrand.logo)}`);
+      const response = await fetch(`/api/pdf?path=${encodeURIComponent(selectedBrand.logo)}`);
       if (!response.ok) {
         throw new Error('Failed to load brand logo');
       }
