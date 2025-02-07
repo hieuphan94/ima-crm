@@ -3,94 +3,254 @@ import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/
 // Register Font
 Font.register({
   family: 'Roboto',
+  src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
   fonts: [
     {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
       fontWeight: 'normal',
     },
     {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
-      fontWeight: 'normal',
-      fontStyle: 'italic',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf',
+      fontWeight: 'medium',
     },
     {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Bold.ttf',
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
       fontWeight: 'bold',
     },
   ],
 });
 
+// Hoặc sử dụng font mặc định an toàn hơn
+Font.register({
+  family: 'Helvetica',
+  fonts: [
+    {
+      src: 'https://fonts.cdnfonts.com/s/29136/Helvetica.woff',
+      fontWeight: 'normal',
+    },
+    {
+      src: 'https://fonts.cdnfonts.com/s/29136/Helvetica-Bold.woff',
+      fontWeight: 'bold',
+    },
+  ],
+});
+
+const formatHTMLToPDF = (htmlContent) => {
+  console.log('Original HTML:', htmlContent);
+  if (!htmlContent) return [];
+
+  let currentText = htmlContent;
+
+  // 1. Xử lý thẻ p trước
+  currentText = currentText.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1');
+
+  // 2. Xử lý <br>
+  currentText = currentText.replace(/<br\s*\/?>/gi, '\n');
+
+  // 3. Tách text thành mảng dựa trên <strong>, <b>, và <em>
+  const parts = [];
+  // Regex mới bao gồm cả <em>
+  const formatRegex = /<(strong|b|em)>([\s\S]*?)<\/\1>/gi;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = formatRegex.exec(currentText)) !== null) {
+    console.log('Processing format match:', match[1], match[2]);
+
+    // Thêm text thường trước thẻ định dạng
+    if (match.index > lastIndex) {
+      const normalText = currentText
+        .substring(lastIndex, match.index)
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+
+      if (normalText.trim()) {
+        parts.push({
+          type: 'normal',
+          content: normalText,
+        });
+      }
+    }
+
+    // Thêm phần text có định dạng
+    const formattedText = match[2]
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
+    if (formattedText.trim()) {
+      parts.push({
+        type: match[1] === 'em' ? 'italic' : 'bold', // Phân biệt giữa em và strong/b
+        content: formattedText,
+      });
+    }
+
+    lastIndex = formatRegex.lastIndex;
+  }
+
+  // Thêm phần text còn lại
+  if (lastIndex < currentText.length) {
+    const remainingText = currentText
+      .substring(lastIndex)
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+
+    if (remainingText.trim()) {
+      parts.push({
+        type: 'normal',
+        content: remainingText,
+      });
+    }
+  }
+
+  return parts;
+};
+
 const styles = StyleSheet.create({
   page: {
+    padding: 0,
+    fontFamily: 'Helvetica',
+  },
+  headerImage: {
+    width: '100%',
+    height: 100,
+  },
+  footerImage: {
+    width: '100%',
+    height: 100,
+    position: 'absolute',
+    bottom: 0,
+  },
+  content: {
     padding: 40,
-    fontFamily: 'Roboto',
-  },
-  header: {
-    marginBottom: 30,
-    alignItems: 'center',
-  },
-  logo: {
-    width: 200,
-    marginBottom: 20,
+    paddingTop: 70,
+    paddingBottom: 70,
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
+    textAlign: 'center',
   },
   daySection: {
     marginBottom: 20,
+    breakInside: 'avoid',
   },
   dayTitle: {
     fontSize: 18,
     marginBottom: 10,
   },
-  serviceItem: {
-    marginLeft: 20,
-    marginBottom: 5,
+  table: {
+    display: 'table',
+    width: '100%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#000',
+    marginBottom: 10,
+    breakInside: 'avoid',
   },
-  meals: {
-    marginTop: 10,
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#000',
+  },
+  tableHeader: {
+    backgroundColor: '#f0f0f0',
+  },
+  tableCell: {
+    padding: 5,
+    borderRightWidth: 1,
+    borderRightColor: '#000',
+  },
+  timeCell: {
+    width: '20%',
+  },
+  descriptionCell: {
+    width: '80%',
+  },
+  paragraph: {
+    marginVertical: 8,
+  },
+  text: {
+    fontSize: 11,
+    lineHeight: 1.5,
+    fontFamily: 'Times-Roman',
+  },
+  normal: {
+    fontFamily: 'Times-Roman',
+  },
+  bold: {
+    fontFamily: 'Times-Bold',
+    fontWeight: 'bold',
+  },
+  italic: {
+    fontFamily: 'Times-Italic',
     fontStyle: 'italic',
+  },
+  textCenter: {
+    textAlign: 'center',
+  },
+  textLeft: {
+    textAlign: 'left',
+  },
+  textRight: {
+    textAlign: 'right',
+  },
+  textJustify: {
+    textAlign: 'justify',
   },
 });
 
 const PDFDocument = ({ brand, scheduleItems = [] }) => (
   <Document>
-    <Page size="A4" style={styles.page}>
-      <View style={styles.header}>
-        {brand?.logo ? (
-          <Image style={styles.logo} src={brand.logo} />
-        ) : (
-          <Text>No logo available</Text>
-        )}
+    <Page size="A4" style={styles.page} wrap>
+      {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
+
+      <View style={styles.content}>
         <Text style={styles.title}>{brand?.name || 'Trip Schedule'}</Text>
+
+        {scheduleItems.length > 0 ? (
+          scheduleItems.map((day, index) => (
+            <View key={index} style={styles.daySection}>
+              <Text style={styles.dayTitle}>{`Jour ${index + 1}: ${day.title}`}</Text>
+              {day.distance && <Text>Distance: {day.distance}km</Text>}
+
+              {day.paragraphDay?.paragraphTotal && (
+                <View style={styles.paragraph}>
+                  <Text style={styles.text}>
+                    {formatHTMLToPDF(day.paragraphDay.paragraphTotal).map((part, index) => (
+                      <Text
+                        key={index}
+                        style={[
+                          styles.normal,
+                          part.type === 'bold' && styles.bold,
+                          part.type === 'italic' && styles.italic,
+                        ].filter(Boolean)}
+                      >
+                        {part.content}
+                      </Text>
+                    ))}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))
+        ) : (
+          <Text>No schedule items available</Text>
+        )}
       </View>
 
-      {scheduleItems.length > 0 ? (
-        scheduleItems.map((day, index) => (
-          <View key={index} style={styles.daySection}>
-            <Text style={styles.dayTitle}>{day.title}</Text>
-            {day.distance && <Text>Distance: {day.distance}km</Text>}
-
-            {day.services.map((service, sIndex) => (
-              <View key={sIndex} style={styles.serviceItem}>
-                <Text>
-                  {service.time}: {service.description || service.name}
-                </Text>
-              </View>
-            ))}
-
-            <Text style={styles.meals}>
-              {Object.entries(day.meals)
-                .filter(([, included]) => included)
-                .map(([meal]) => meal)
-                .join(' • ')}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text>No schedule items available</Text>
-      )}
+      {brand?.logo && <Image style={styles.footerImage} src={brand.logo} />}
     </Page>
   </Document>
 );
