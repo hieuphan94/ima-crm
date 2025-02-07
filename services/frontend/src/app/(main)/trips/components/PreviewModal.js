@@ -19,9 +19,9 @@ function PreviewModal({ isOpen, onClose }) {
     if (!meals?.included) return 'Không bao gồm bữa ăn';
 
     const mealList = [];
-    if (meals.breakfast) mealList.push('Sáng');
-    if (meals.lunch) mealList.push('Trưa');
-    if (meals.dinner) mealList.push('Tối');
+    if (meals.breakfast.included) mealList.push('Sáng');
+    if (meals.lunch.included) mealList.push('Trưa');
+    if (meals.dinner.included) mealList.push('Tối');
 
     return mealList.length > 0 ? `Bao gồm bữa: ${mealList.join(', ')}` : 'Bao gồm bữa ăn';
   };
@@ -31,9 +31,11 @@ function PreviewModal({ isOpen, onClose }) {
     let total = 0;
     Object.entries(dayData).forEach(([key, value]) => {
       if (!['order', 'titleOfDay', 'distance', 'meals', 'paxChangeOfDay'].includes(key)) {
-        value.forEach((service) => {
-          total += service.price * (dayData.paxChangeOfDay || globalPax);
-        });
+        if (Array.isArray(value)) {
+          value.forEach((service) => {
+            total += service.price * (dayData.paxChangeOfDay || globalPax);
+          });
+        }
       }
     });
     return total;

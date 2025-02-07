@@ -15,6 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import DailySchedule from '../components/DailySchedule';
 import ResetDaysModal from '../components/DailySchedule/components/ResetDaysModal';
 import PreviewModal from '../components/PreviewModal';
+import PublishModal from '../components/PublishModal';
+import TemplateModal from '../components/TemplateModal';
 
 export default function NewTripPage() {
   const dispatch = useDispatch();
@@ -30,6 +32,8 @@ export default function NewTripPage() {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sheetData, setSheetData] = useState(null);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const debouncedValidation = useCallback(
     debounce((value) => {
@@ -200,10 +204,19 @@ export default function NewTripPage() {
 
             {/* Quick Create Form */}
             <form className="flex gap-6 items-end">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsTemplateModalOpen(true)}
+                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                >
+                  Load Template
+                </button>
+              </div>
               <div>
                 <input
                   type="text"
-                  className="w-[300px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-[200px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="VD: Hạ Long 3 ngày 2 đêm"
                 />
               </div>
@@ -221,7 +234,7 @@ export default function NewTripPage() {
               <div className="relative">
                 <input
                   type="text"
-                  className="w-[100px] px-4 py-2 pr-8 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-[80px] px-4 py-2 pr-8 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="Days"
                   value={numberOfDays || ''}
                   onChange={handleDaysChange}
@@ -241,33 +254,19 @@ export default function NewTripPage() {
               <div>
                 <input
                   type="text"
-                  className="w-[100px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className="w-[80px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="Pax"
                   value={globalPax || ''}
                   onChange={handleGuestsChange}
                 />
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handlePreview}
-                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Preview
-                </button>
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50"
-                >
-                  Draft
-                </button>
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
-                >
-                  Xuất bản
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsPublishModalOpen(true)}
+                className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
+              >
+                Publish
+              </button>
             </form>
           </div>
         </div>
@@ -289,6 +288,10 @@ export default function NewTripPage() {
         onClose={() => setIsResetModalOpen(false)}
         onConfirm={handleConfirmReset}
       />
+
+      <TemplateModal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} />
+
+      <PublishModal isOpen={isPublishModalOpen} onClose={() => setIsPublishModalOpen(false)} />
     </>
   );
 }
