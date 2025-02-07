@@ -1,4 +1,5 @@
 'use client';
+import { loadScheduleItems } from '@/store/slices/useDailyScheduleSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import ServicesSidebar from '../ServicesSidebar/index';
 import DaysContainer from './components/DaysContainer';
@@ -55,11 +56,20 @@ export default function DailySchedule({ sheetServices }) {
 
   const { handleDrop, handleDragOver, handleDragLeave } = useDragDrop();
 
+  const handleLoadHistory = (historyData) => {
+    if (!historyData?.scheduleItems) {
+      console.warn('Invalid history data');
+      return;
+    }
+
+    dispatch(loadScheduleItems(historyData.scheduleItems));
+  };
+
   return (
     <div className="flex gap-4 h-full">
       {/* Left Sidebar */}
       <div className="flex-none">
-        <ServicesSidebar sheetServices={sheetServices} />
+        <ServicesSidebar sheetServices={sheetServices} onLoadHistory={handleLoadHistory} />
       </div>
 
       {/* Main Content */}

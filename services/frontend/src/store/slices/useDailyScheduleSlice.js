@@ -448,6 +448,11 @@ const useDailyScheduleSlice = createSlice({
       // Update paragraph
       state.scheduleItems[dayId].paragraphDay.paragraphTotal = paragraphTotal;
     },
+
+    loadScheduleItems: (state, action) => {
+      // Load schedule items from history
+      state.scheduleItems = action.payload;
+    },
   },
 });
 
@@ -470,6 +475,7 @@ export const {
   toggleMealIncluded,
   toggleMealOption,
   updateDayParagraph,
+  loadScheduleItems,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;

@@ -45,7 +45,7 @@ export default function PublishModal({ isOpen, onClose }) {
       case 'preview':
         return <PreviewTab />;
       case 'draft':
-        return <DraftTab />;
+        return <DraftTab onClose={onClose} />;
       case 'publish':
         return <PublishTab />;
       default:
