@@ -14,7 +14,6 @@ import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import DailySchedule from '../components/DailySchedule';
 import ResetDaysModal from '../components/DailySchedule/components/ResetDaysModal';
-import PreviewModal from '../components/PreviewModal';
 import PublishModal from '../components/PublishModal';
 import TemplateModal from '../components/TemplateModal';
 
@@ -280,8 +279,6 @@ export default function NewTripPage() {
           </div>
         </div>
       </div>
-
-      <PreviewModal isOpen={isPreviewModalOpen} onClose={() => setIsPreviewModalOpen(false)} />
 
       <ResetDaysModal
         isOpen={isResetModalOpen}

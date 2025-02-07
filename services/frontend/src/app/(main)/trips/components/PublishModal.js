@@ -10,9 +10,27 @@ const MOCK_HISTORY = [
 ];
 
 const tabs = [
-  { id: 'preview', label: 'Preview', icon: FileText },
-  { id: 'draft', label: 'Draft', icon: FileCheck },
-  { id: 'publish', label: 'Publish', icon: AlertCircle },
+  {
+    id: 'preview',
+    label: 'Preview',
+    icon: FileText,
+    activeClass: 'bg-blue-50 text-blue-600',
+    hoverClass: 'hover:bg-blue-50/50',
+  },
+  {
+    id: 'draft',
+    label: 'Draft',
+    icon: FileCheck,
+    activeClass: 'bg-green-50 text-green-600',
+    hoverClass: 'hover:bg-green-50/50',
+  },
+  {
+    id: 'publish',
+    label: 'Publish',
+    icon: AlertCircle,
+    activeClass: 'bg-purple-50 text-purple-600',
+    hoverClass: 'hover:bg-purple-50/50',
+  },
 ];
 
 export default function PublishModal({ isOpen, onClose }) {
@@ -69,11 +87,13 @@ export default function PublishModal({ isOpen, onClose }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md ${
-                  activeTab === tab.id ? 'bg-white shadow-sm' : 'hover:bg-white/50'
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md transition-all ${
+                  activeTab === tab.id
+                    ? `shadow-sm ${tab.activeClass}`
+                    : `text-gray-600 hover:text-gray-900 ${tab.hoverClass}`
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-4 h-4 ${activeTab === tab.id ? tab.activeClass : ''}`} />
                 {tab.label}
               </button>
             );

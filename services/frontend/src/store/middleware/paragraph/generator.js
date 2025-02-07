@@ -57,10 +57,10 @@ export const generateDescription = (daySchedule) => {
   };
 
   // Sử dụng meals đã được tính toán sẵn
-  const { meals } = daySchedule;
+  const { meals = {} } = daySchedule;
 
   // Thêm bữa sáng nếu có
-  if (meals.breakfast.included) {
+  if (meals?.breakfast?.included) {
     description += `<p>Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.</p>`;
   }
 
@@ -87,7 +87,7 @@ export const generateDescription = (daySchedule) => {
   }
 
   // Thêm bữa trưa nếu có
-  if (meals.lunch.included) {
+  if (meals?.lunch?.included) {
     description += `<p>Déjeuner ${formatVenuePhrase(meals.lunch.type)}.</p>`;
   }
 
@@ -136,7 +136,7 @@ export const generateDescription = (daySchedule) => {
   }
 
   // Thêm bữa tối nếu có
-  if (meals.dinner.included) {
+  if (meals?.dinner?.included) {
     description += `<p>Dîner ${formatVenuePhrase(meals.dinner.type)}.</p>`;
   }
 

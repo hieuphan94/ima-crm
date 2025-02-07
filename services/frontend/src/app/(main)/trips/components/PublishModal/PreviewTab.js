@@ -138,26 +138,32 @@ export default function PreviewTab() {
         const hasServices = Object.entries(dayData).some(
           ([key, value]) => Array.isArray(value) && value.length > 0
         );
+        const hasDayTitle = !!dayData.titleOfDay;
+        const hasValidDistance = dayData.distance && parseFloat(dayData.distance) > 0;
+
+        const isValid = hasServices && hasDayTitle && hasValidDistance;
 
         return (
-          <div key={dayId} className="p-3 border rounded-lg">
+          <div key={dayId} className="p-3 border rounded-lg bg-white">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
-                  className={`w-2 h-2 rounded-full ${hasServices ? 'bg-green-500' : 'bg-red-500'}`}
+                  className={`w-2 h-2 rounded-full ${isValid ? 'bg-green-500' : 'bg-red-500'}`}
                 ></span>
                 <span className="font-medium">Day {dayData.order}</span>
                 {dayData.titleOfDay && (
-                  <span className="text-gray-600">- {dayData.titleOfDay}</span>
+                  <span className="text-gray-600 truncate">- {dayData.titleOfDay}</span>
                 )}
               </div>
-              <span className="text-sm text-gray-500">
-                {hasServices ? 'Complete' : 'Missing activities'}
+              <span className="text-sm text-gray-500 whitespace-nowrap">
+                {isValid ? 'Complete' : 'Missing requirements'}
               </span>
             </div>
-            {!hasServices && (
-              <div className="mt-2 text-sm text-red-500">
-                • Required: Add at least one activity for this day
+            {!isValid && (
+              <div className="mt-2 text-sm text-red-500 flex flex-wrap gap-x-4">
+                {!hasServices && <div>• No activities</div>}
+                {!hasDayTitle && <div>• No title</div>}
+                {!hasValidDistance && <div>• Distance = 0</div>}
               </div>
             )}
           </div>
