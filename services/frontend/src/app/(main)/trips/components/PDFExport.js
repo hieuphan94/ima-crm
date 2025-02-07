@@ -119,36 +119,40 @@ const formatHTMLToPDF = (htmlContent) => {
 
 const styles = StyleSheet.create({
   page: {
-    padding: 0,
-    fontFamily: 'Helvetica',
+    flexDirection: 'column',
+    backgroundColor: 'white',
+  },
+  header: {
+    marginBottom: 20,
   },
   headerImage: {
     width: '100%',
     height: 100,
-  },
-  footerImage: {
-    width: '100%',
-    height: 100,
-    position: 'absolute',
-    bottom: 0,
+    objectFit: 'contain',
   },
   content: {
     padding: 40,
-    paddingTop: 70,
-    paddingBottom: 70,
+    paddingTop: 20,
+    flexGrow: 1,
+    minHeight: '100%',
   },
   title: {
     fontSize: 24,
-    marginBottom: 20,
     textAlign: 'center',
+    backgroundColor: '#927B35',
+    color: 'white',
+    padding: 8,
   },
   daySection: {
-    marginBottom: 20,
     breakInside: 'avoid',
+    marginBottom: 20,
   },
   dayTitle: {
     fontSize: 18,
     marginBottom: 10,
+    backgroundColor: '#FFB800',
+    padding: 8,
+    color: 'black',
   },
   table: {
     display: 'table',
@@ -211,26 +215,32 @@ const styles = StyleSheet.create({
   },
 });
 
-const PDFDocument = ({ brand, scheduleItems = [] }) => (
-  <Document>
-    <Page size="A4" style={styles.page} wrap>
-      {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
+const PDFDocument = ({ brand, scheduleItems = [] }) => {
+  return (
+    <Document>
+      {scheduleItems.map((day, index) => (
+        <Page key={index} size="A4" style={styles.page} wrap={false}>
+          {/* Header luôn xuất hiện ở đầu mỗi trang */}
+          <View style={styles.header} fixed>
+            {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
+            {/* Chỉ hiển thị title ở trang đầu tiên */}
+            {index === 0 && (
+              <Text style={styles.title}>{scheduleItems?.title || 'Trip Schedule'}</Text>
+            )}
+          </View>
 
-      <View style={styles.content}>
-        <Text style={styles.title}>{brand?.name || 'Trip Schedule'}</Text>
-
-        {scheduleItems.length > 0 ? (
-          scheduleItems.map((day, index) => (
-            <View key={index} style={styles.daySection}>
+          {/* Content của ngày */}
+          <View style={styles.content} break>
+            <View style={styles.daySection}>
               <Text style={styles.dayTitle}>{`Jour ${index + 1}: ${day.title}`}</Text>
               {day.distance && <Text>Distance: {day.distance}km</Text>}
 
               {day.paragraphDay?.paragraphTotal && (
                 <View style={styles.paragraph}>
                   <Text style={styles.text}>
-                    {formatHTMLToPDF(day.paragraphDay.paragraphTotal).map((part, index) => (
+                    {formatHTMLToPDF(day.paragraphDay.paragraphTotal).map((part, idx) => (
                       <Text
-                        key={index}
+                        key={idx}
                         style={[
                           styles.normal,
                           part.type === 'bold' && styles.bold,
@@ -244,16 +254,12 @@ const PDFDocument = ({ brand, scheduleItems = [] }) => (
                 </View>
               )}
             </View>
-          ))
-        ) : (
-          <Text>No schedule items available</Text>
-        )}
-      </View>
-
-      {brand?.logo && <Image style={styles.footerImage} src={brand.logo} />}
-    </Page>
-  </Document>
-);
+          </View>
+        </Page>
+      ))}
+    </Document>
+  );
+};
 
 export default PDFDocument;
 export const TripPDFDocument = PDFDocument;
