@@ -8,7 +8,7 @@ import {
 } from '@/store/slices/useDailyScheduleSlice';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FiCheck, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
@@ -80,14 +80,9 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
-  const [editedParagraph, setEditedParagraph] = useState('');
-
-  // Add useEffect to update editedParagraph when daySchedule changes
-  useEffect(() => {
-    if (daySchedule?.paragraphDay?.paragraphTotal) {
-      setEditedParagraph(daySchedule.paragraphDay.paragraphTotal);
-    }
-  }, [daySchedule]);
+  const [editedParagraph, setEditedParagraph] = useState(
+    daySchedule?.paragraphDay?.paragraphTotal || ''
+  );
 
   if (!isOpen || typeof window === 'undefined') return null;
 
@@ -312,6 +307,16 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     []
   );
 
+  const handleStartEditing = () => {
+    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
+    setIsEditingParagraph(true);
+  };
+
+  const handleCancelEdit = () => {
+    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
+    setIsEditingParagraph(false);
+  };
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
@@ -516,7 +521,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
               Présentation du voyage
             </h4>
             <button
-              onClick={() => setIsEditingParagraph(!isEditingParagraph)}
+              onClick={handleStartEditing}
               className="text-blue-600 hover:text-blue-700 text-sm"
             >
               <FiEdit2 size={16} />
@@ -528,10 +533,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
               <TiptapEditor content={editedParagraph} onChange={debouncedUpdateParagraph} />
               <div className="flex justify-end gap-2">
                 <button
-                  onClick={() => {
-                    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
-                    setIsEditingParagraph(false);
-                  }}
+                  onClick={handleCancelEdit}
                   className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
                 >
                   Cancel

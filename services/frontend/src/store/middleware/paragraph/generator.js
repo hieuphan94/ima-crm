@@ -61,12 +61,12 @@ export const generateDescription = (daySchedule) => {
 
   // Thêm bữa sáng nếu có
   if (meals.breakfast.included) {
-    description += `Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.\n\n`;
+    description += `<p>Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.</p>`;
   }
 
   // Morning section
   if (periods.morning.length) {
-    description += 'En matinée, ';
+    description += '<p>En matinée, ';
     // First morning service
     const firstService = periods.morning[0];
     if (firstService?.sentence) {
@@ -83,17 +83,17 @@ export const generateDescription = (daySchedule) => {
           service.sentence.slice(1);
       }
     }
-    description += '\n\n';
+    description += '</p>';
   }
 
   // Thêm bữa trưa nếu có
   if (meals.lunch.included) {
-    description += `Déjeuner ${formatVenuePhrase(meals.lunch.type)}.\n\n`;
+    description += `<p>Déjeuner ${formatVenuePhrase(meals.lunch.type)}.</p>`;
   }
 
   // Afternoon section
   if (periods.afternoon.length) {
-    description += 'En après-midi, ';
+    description += '<p>En après-midi, ';
     // First afternoon service
     const firstService = periods.afternoon[0];
     if (firstService?.sentence) {
@@ -110,11 +110,12 @@ export const generateDescription = (daySchedule) => {
           service.sentence.slice(1);
       }
     }
-    description += '\n\n';
+    description += '</p>';
   }
 
   // Evening section
   if (periods.evening.length) {
+    description += '<p>';
     // First evening service
     const firstService = periods.evening[0];
     if (firstService?.sentence) {
@@ -131,12 +132,12 @@ export const generateDescription = (daySchedule) => {
           service.sentence.slice(1);
       }
     }
-    description += '\n\n';
+    description += '</p>';
   }
 
   // Thêm bữa tối nếu có
   if (meals.dinner.included) {
-    description += `Dîner ${formatVenuePhrase(meals.dinner.type)}.`;
+    description += `<p>Dîner ${formatVenuePhrase(meals.dinner.type)}.</p>`;
   }
 
   return {

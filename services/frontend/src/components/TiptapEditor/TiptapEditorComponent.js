@@ -103,6 +103,11 @@ const TiptapEditorComponent = memo(({ content = '', onChange }) => {
         heading: {
           levels: [1, 2, 3],
         },
+        paragraph: {
+          HTMLAttributes: {
+            class: 'mb-4',
+          },
+        },
       }),
       TextAlign.configure({
         types: ['paragraph', 'heading'],
@@ -120,8 +125,9 @@ const TiptapEditorComponent = memo(({ content = '', onChange }) => {
         spellcheck: 'false',
       },
     },
-    enableCoreExtensions: true,
-    immediateRender: false,
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
   });
 
   if (typeof window === 'undefined') return null;
