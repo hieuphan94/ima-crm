@@ -121,9 +121,11 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: 'white',
+    height: '100%',
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 10,
+    height: 'auto',
   },
   headerImage: {
     width: '100%',
@@ -131,24 +133,28 @@ const styles = StyleSheet.create({
     objectFit: 'contain',
   },
   content: {
-    padding: 40,
-    paddingTop: 20,
+    padding: '40px 40px',
+    paddingTop: 10,
     flexGrow: 1,
-    minHeight: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     textAlign: 'center',
     backgroundColor: '#927B35',
     color: 'white',
     padding: 8,
+    marginBottom: 0,
   },
   daySection: {
     breakInside: 'avoid',
     marginBottom: 20,
+    flexGrow: 1,
   },
   dayTitle: {
-    fontSize: 18,
+    fontSize: 16,
     marginBottom: 10,
     backgroundColor: '#FFB800',
     padding: 8,
