@@ -132,12 +132,11 @@ const useDailyScheduleSlice = createSlice({
           newScheduleItems[id] = {
             ...existingItems[id],
             order,
-            // Giữ lại meals nếu đã có
+            // Update default meal structure
             meals: existingItems[id].meals || {
-              included: true,
-              breakfast: true,
-              lunch: false,
-              dinner: false,
+              breakfast: { included: false, type: '', price: 0 },
+              lunch: { included: false, type: '', price: 0 },
+              dinner: { included: false, type: '', price: 0 },
             },
             // Giữ lại paragraphDay nếu đã có
             paragraphDay: existingItems[id].paragraphDay || {
@@ -150,12 +149,11 @@ const useDailyScheduleSlice = createSlice({
             order,
             distance: 0,
             titleOfDay: '',
-            // Thêm meals mặc định cho ngày mới
+            // New default meal structure
             meals: {
-              included: true,
-              breakfast: true,
-              lunch: false,
-              dinner: false,
+              breakfast: { included: false, type: '', price: 0 },
+              lunch: { included: false, type: '', price: 0 },
+              dinner: { included: false, type: '', price: 0 },
             },
             // Thêm paragraphDay mặc định cho ngày mới
             paragraphDay: {
@@ -189,6 +187,9 @@ const useDailyScheduleSlice = createSlice({
 
       if (!state.scheduleItems[day][time].some((s) => s.id === service.id)) {
         state.scheduleItems[day][time].push(service);
+        // Automatically update meals after adding service
+        const meals = autoMealFromServiceFood(state.scheduleItems[day]);
+        state.scheduleItems[day].meals = meals;
       }
     },
 
@@ -214,6 +215,12 @@ const useDailyScheduleSlice = createSlice({
         } else {
           state.ui.modalData.services = state.scheduleItems[day][time];
         }
+      }
+
+      // Automatically update meals after removing service
+      if (state.scheduleItems[day]) {
+        const meals = autoMealFromServiceFood(state.scheduleItems[day]);
+        state.scheduleItems[day].meals = meals;
       }
     },
 
@@ -242,6 +249,12 @@ const useDailyScheduleSlice = createSlice({
         } else {
           state.ui.modalData.services = newServices;
         }
+      }
+
+      // Automatically update meals after reordering services
+      if (state.scheduleItems[day]) {
+        const meals = autoMealFromServiceFood(state.scheduleItems[day]);
+        state.scheduleItems[day].meals = meals;
       }
     },
 
@@ -381,18 +394,6 @@ const useDailyScheduleSlice = createSlice({
       };
     },
 
-    // Meal
-    setDayMeals: (state, action) => {
-      const { dayId, meals } = action.payload;
-      if (!state.scheduleItems[dayId]) {
-        state.scheduleItems[dayId] = {};
-      }
-      state.scheduleItems[dayId].meals = {
-        ...state.scheduleItems[dayId].meals,
-        ...meals,
-      };
-    },
-
     toggleMealIncluded: (state, action) => {
       const { dayId, included } = action.payload;
       if (!state.scheduleItems[dayId]) {
@@ -444,7 +445,6 @@ const useDailyScheduleSlice = createSlice({
           paragraphTotal: '',
         };
       }
-
       // Update paragraph
       state.scheduleItems[dayId].paragraphDay.paragraphTotal = paragraphTotal;
     },
@@ -467,10 +467,44 @@ export const {
   reorderDays,
   setPaxChangeOfDay,
   resetDays,
-  setDayMeals,
   toggleMealIncluded,
   toggleMealOption,
   updateDayParagraph,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;
+
+// Renamed helper function
+const autoMealFromServiceFood = (dayData) => {
+  // Initialize default meal structure
+  const meals = {
+    breakfast: { included: false, type: '', price: 0 },
+    lunch: { included: false, type: '', price: 0 },
+    dinner: { included: false, type: '', price: 0 },
+  };
+
+  // Get all time slots for the day
+  const timeSlots = Object.entries(dayData);
+
+  // Analyze each time slot for food services
+  timeSlots.forEach(([time, services]) => {
+    if (Array.isArray(services)) {
+      services.forEach((service) => {
+        if (service.type === 'food' && service.meal) {
+          const { mealType, venueType, price } = service.meal;
+
+          // Map mealType to our structure (breakfast, lunch, dinner)
+          if (meals[mealType]) {
+            meals[mealType] = {
+              included: true,
+              type: venueType || '',
+              price: price || 0,
+            };
+          }
+        }
+      });
+    }
+  });
+
+  return meals;
+};

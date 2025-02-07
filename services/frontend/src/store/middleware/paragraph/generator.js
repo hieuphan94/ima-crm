@@ -24,26 +24,17 @@ export const generateDescription = (daySchedule) => {
   let description = '';
   availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
 
-  // Phân loại services theo thời gian
+  // Phân loại visit services theo thời gian
   const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
-  const services = {
-    food: [],
-    visit: [],
-  };
+  const visitServices = [];
 
-  // Phân loại services
+  // Chỉ lấy visit services
   timeKeys.forEach((timeKey) => {
     const items = daySchedule[timeKey] || [];
     items.forEach((item) => {
       const hour = parseInt(timeKey.split(':')[0]);
-      if (item.type === 'food') {
-        services.food.push({
-          ...item,
-          hour,
-          time: timeKey,
-        });
-      } else {
-        services.visit.push({
+      if (item.type !== 'food') {
+        visitServices.push({
           ...item,
           hour,
           time: timeKey,
@@ -52,29 +43,25 @@ export const generateDescription = (daySchedule) => {
     });
   });
 
-  // Phân loại food theo bữa ăn
-  const meals = {
-    breakfast: services.food.find((s) => s.meal?.mealType === 'breakfast'),
-    lunch: services.food.find((s) => s.meal?.mealType === 'lunch'),
-    dinner: services.food.find((s) => s.meal?.mealType === 'dinner'),
-  };
-
   // Phân loại visit theo thời gian
   const periods = {
-    morning: services.visit
+    morning: visitServices
       .filter((s) => s.hour >= 6 && s.hour < 12)
       .sort((a, b) => a.hour - b.hour),
-    afternoon: services.visit
+    afternoon: visitServices
       .filter((s) => s.hour >= 12 && s.hour < 17)
       .sort((a, b) => a.hour - b.hour),
-    evening: services.visit
+    evening: visitServices
       .filter((s) => s.hour >= 17 && s.hour < 21)
       .sort((a, b) => a.hour - b.hour),
   };
 
+  // Sử dụng meals đã được tính toán sẵn
+  const { meals } = daySchedule;
+
   // Thêm bữa sáng nếu có
-  if (meals.breakfast) {
-    description += `Petit déjeuner ${formatVenuePhrase(meals.breakfast.meal.venueType)}.\n\n`;
+  if (meals.breakfast.included) {
+    description += `Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.\n\n`;
   }
 
   // Morning section
@@ -90,7 +77,7 @@ export const generateDescription = (daySchedule) => {
       const service = periods.morning[i];
       if (service?.sentence) {
         description +=
-          '. ' +
+          ' ' +
           getNextConnector() +
           service.sentence.charAt(0).toLowerCase() +
           service.sentence.slice(1);
@@ -100,8 +87,8 @@ export const generateDescription = (daySchedule) => {
   }
 
   // Thêm bữa trưa nếu có
-  if (meals.lunch) {
-    description += `Déjeuner ${formatVenuePhrase(meals.lunch.meal.venueType)}.\n\n`;
+  if (meals.lunch.included) {
+    description += `Déjeuner ${formatVenuePhrase(meals.lunch.type)}.\n\n`;
   }
 
   // Afternoon section
@@ -148,8 +135,8 @@ export const generateDescription = (daySchedule) => {
   }
 
   // Thêm bữa tối nếu có
-  if (meals.dinner) {
-    description += `Dîner ${formatVenuePhrase(meals.dinner.meal.venueType)}.`;
+  if (meals.dinner.included) {
+    description += `Dîner ${formatVenuePhrase(meals.dinner.type)}.`;
   }
 
   return {
@@ -168,22 +155,4 @@ const formatVenuePhrase = (venueType) => {
     [FoodVenueType.FREE_CHOICE]: 'libre',
   };
   return venuePhrases[venueType] || `à l'hôtel`;
-};
-
-// New helper function to get meal types
-const getMealTypes = (daySchedule) => {
-  if (!daySchedule) return [];
-
-  return Object.keys(daySchedule)
-    .filter((key) => /^\d/.test(key))
-    .flatMap((timeKey) => {
-      const services = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-      return services
-        .filter((service) => service.type === 'food' && service.meal?.mealType)
-        .map((service) => {
-          const mealType = service.meal.mealType;
-          const venueType = service.meal.venueType || 'hotel';
-          return { mealType, venueType };
-        });
-    });
 };

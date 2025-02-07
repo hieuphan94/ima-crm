@@ -1,4 +1,4 @@
-import { FoodVenueType, MealType } from '../models/enums';
+import { FoodVenueType, MealType } from '@/data/models/enums';
 
 export const BaseMealConfig = {
   [MealType.BREAKFAST]: {

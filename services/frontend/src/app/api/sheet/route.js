@@ -47,7 +47,7 @@ export async function GET(request) {
     }
 
     // Lấy toàn bộ dữ liệu từ sheet
-    const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:D53');
+    const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:D323');
 
     // Validate sheet data
     if (!Array.isArray(data) || data.length < 2) {

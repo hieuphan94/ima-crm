@@ -3,15 +3,15 @@ import { MealType } from '@/data/models/enums';
 export const mealTypeColors = {
   [MealType.BREAKFAST]: {
     header: 'text-amber-600 bg-amber-50',
-    item: 'hover:bg-amber-50 border-amber-100',
+    item: 'hover:bg-amber-50 border-amber-400',
   },
   [MealType.LUNCH]: {
     header: 'text-emerald-600 bg-emerald-50',
-    item: 'hover:bg-emerald-50 border-emerald-100',
+    item: 'hover:bg-emerald-50 border-emerald-400',
   },
   [MealType.DINNER]: {
     header: 'text-indigo-600 bg-indigo-50',
-    item: 'hover:bg-indigo-50 border-indigo-100',
+    item: 'hover:bg-indigo-50 border-indigo-400',
   },
 };
 

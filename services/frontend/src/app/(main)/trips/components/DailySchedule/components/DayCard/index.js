@@ -22,10 +22,6 @@ const DayCard = memo(function DayCard({
   const [paxValue, setPaxValue] = useState(daySchedule?.paxChangeOfDay || '');
   const [isDragging, setIsDragging] = useState(false);
 
-  // useEffect(() => {
-  //   setPaxValue(daySchedule?.paxChangeOfDay || '');
-  // }, [daySchedule?.paxChangeOfDay]);
-
   const handleDragStart = (e) => {
     // Chỉ áp dụng animation khi kéo từ DayHeader
     const isDayHeader = e.target.closest('.day-header');
@@ -46,7 +42,7 @@ const DayCard = memo(function DayCard({
 
   return (
     <div
-      className="day-card-container"
+      className="day-card-container w-[150px]"
       draggable="true"
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
@@ -99,7 +95,6 @@ const DayCard = memo(function DayCard({
           onRemoveService={onRemoveService}
         />
         <DistancePrice dayId={dayId} />
-        {/* <Meal dayId={dayId} /> */}
       </div>
     </div>
   );
