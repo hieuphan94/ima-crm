@@ -1,8 +1,13 @@
 'use client';
 
-import { removeDay, updateDayTitle } from '@/store/slices/useDailyScheduleSlice';
+import TiptapEditor from '@/components/TiptapEditor';
+import {
+  removeDay,
+  updateDayParagraph,
+  updateDayTitle,
+} from '@/store/slices/useDailyScheduleSlice';
 import PropTypes from 'prop-types';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FiCheck, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
@@ -73,6 +78,15 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   const [editedTitle, setEditedTitle] = useState(titleOfDay || '');
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
+  const [isEditingParagraph, setIsEditingParagraph] = useState(false);
+  const [editedParagraph, setEditedParagraph] = useState('');
+
+  // Add useEffect to update editedParagraph when daySchedule changes
+  useEffect(() => {
+    if (daySchedule?.paragraphDay?.paragraphTotal) {
+      setEditedParagraph(daySchedule.paragraphDay.paragraphTotal);
+    }
+  }, [daySchedule]);
 
   if (!isOpen || typeof window === 'undefined') return null;
 
@@ -280,6 +294,16 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     []
   );
 
+  const handleSaveParagraph = () => {
+    dispatch(
+      updateDayParagraph({
+        dayId,
+        paragraphTotal: editedParagraph,
+      })
+    );
+    setIsEditingParagraph(false);
+  };
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
@@ -479,18 +503,47 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
         {/* Paragraph Section */}
         <div className="p-2 border-t border-gray-200">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-2">
             <h4 className="text-[12px] font-medium text-blue-900 bg-gray-200 p-1.5 rounded-lg">
               Présentation du voyage
             </h4>
+            <button
+              onClick={() => setIsEditingParagraph(!isEditingParagraph)}
+              className="text-blue-600 hover:text-blue-700 text-sm"
+            >
+              <FiEdit2 size={16} />
+            </button>
           </div>
 
-          <div
-            className="text-[11px] text-blue-800 leading-relaxed bg-blue-50 p-3 rounded-lg"
-            dangerouslySetInnerHTML={{
-              __html: daySchedule?.paragraphDay?.paragraphTotal || '',
-            }}
-          />
+          {isEditingParagraph ? (
+            <div className="space-y-2">
+              <TiptapEditor content={editedParagraph} onChange={setEditedParagraph} />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
+                    setIsEditingParagraph(false);
+                  }}
+                  className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveParagraph}
+                  className="px-3 py-1 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="text-[11px] text-blue-800 leading-relaxed bg-blue-50 p-3 rounded-lg"
+              dangerouslySetInnerHTML={{
+                __html: daySchedule?.paragraphDay?.paragraphTotal || '',
+              }}
+            />
+          )}
         </div>
       </div>
 
