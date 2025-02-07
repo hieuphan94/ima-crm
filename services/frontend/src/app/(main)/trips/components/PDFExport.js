@@ -41,8 +41,8 @@ const formatHTMLToPDF = (htmlContent) => {
 
   let currentText = htmlContent;
 
-  // 1. Xử lý thẻ p trước
-  currentText = currentText.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1');
+  // 1. Xử lý thẻ p - thêm xuống dòng sau mỗi thẻ p
+  currentText = currentText.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '$1\n\n');
 
   // 2. Xử lý <br>
   currentText = currentText.replace(/<br\s*\/?>/gi, '\n');
