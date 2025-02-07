@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    NEXT_PUBLIC_REDUX_PERSIST_SSR_DISABLE: "true"
+    NEXT_PUBLIC_REDUX_PERSIST_SSR_DISABLE: 'true',
   },
   images: {
     // Định nghĩa các domain cho phép load ảnh
