@@ -1,5 +1,8 @@
 import { AlertCircle, FileCheck, FileText, X } from 'lucide-react';
 import { useState } from 'react';
+import DraftTab from './PublishModal/DraftTab';
+import PreviewTab from './PublishModal/PreviewTab';
+import PublishTab from './PublishModal/PublishTab';
 
 const MOCK_HISTORY = [
   { id: 1, date: '2024-03-20 15:30', user: 'John Doe', action: 'Updated day 1 schedule' },
@@ -13,7 +16,7 @@ const tabs = [
 ];
 
 export default function PublishModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('preview');
+  const [activeTab, setActiveTab] = useState('draft');
   const [selectedFormat, setSelectedFormat] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState(null);
 
@@ -22,101 +25,29 @@ export default function PublishModal({ isOpen, onClose }) {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'preview':
-        return (
-          <div className="space-y-4">
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <h3 className="font-semibold mb-2">Validation Status</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Day 1: Complete
-                </li>
-                <li className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                  Day 2: Missing activities
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Trip Details</h3>
-              {/* Add your trip preview content here */}
-            </div>
-          </div>
-        );
-
+        return <PreviewTab />;
       case 'draft':
-        return (
-          <div className="space-y-4">
-            <h3 className="font-semibold">Edit History</h3>
-            <div className="space-y-3">
-              {MOCK_HISTORY.map((item) => (
-                <div key={item.id} className="p-3 border rounded-lg">
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>{item.user}</span>
-                    <span>{item.date}</span>
-                  </div>
-                  <div className="mt-1">{item.action}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
+        return <DraftTab />;
       case 'publish':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold mb-3">Export Format</h3>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setSelectedFormat('pdf')}
-                  className={`p-4 border rounded-lg flex-1 ${
-                    selectedFormat === 'pdf' ? 'border-primary bg-primary/5' : ''
-                  }`}
-                >
-                  PDF Format
-                </button>
-                <button
-                  onClick={() => setSelectedFormat('doc')}
-                  className={`p-4 border rounded-lg flex-1 ${
-                    selectedFormat === 'doc' ? 'border-primary bg-primary/5' : ''
-                  }`}
-                >
-                  DOC Format
-                </button>
-              </div>
-            </div>
+        return <PublishTab />;
+      default:
+        return null;
+    }
+  };
 
-            {selectedFormat === 'pdf' && (
-              <div>
-                <h3 className="font-semibold mb-3">Brand Options</h3>
-                <div className="grid grid-cols-3 gap-4">
-                  {['Brand A', 'Brand B', 'Brand C'].map((brand) => (
-                    <button
-                      key={brand}
-                      onClick={() => setSelectedBrand(brand)}
-                      className={`p-4 border rounded-lg ${
-                        selectedBrand === brand ? 'border-primary bg-primary/5' : ''
-                      }`}
-                    >
-                      {brand}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div>
-              <h3 className="font-semibold mb-3">Web Publishing</h3>
-              <div className="p-4 border rounded-lg">
-                <label className="flex items-center gap-2">
-                  <input type="checkbox" className="rounded" />
-                  Publish to website
-                </label>
-              </div>
-            </div>
-          </div>
-        );
+  const handlePublish = async () => {
+    if (activeTab === 'publish') {
+      try {
+        // Add your publish logic here
+        console.log('Publishing...');
+        // Close modal after successful publish
+        onClose();
+      } catch (error) {
+        console.error('Publish failed:', error);
+        alert('Failed to publish. Please try again.');
+      }
+    } else {
+      setActiveTab('publish');
     }
   };
 
@@ -158,7 +89,10 @@ export default function PublishModal({ isOpen, onClose }) {
           >
             Cancel
           </button>
-          <button className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90">
+          <button
+            onClick={handlePublish}
+            className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
+          >
             {activeTab === 'publish' ? 'Publish' : 'Continue'}
           </button>
         </div>

@@ -4,21 +4,46 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_REDUX_PERSIST_SSR_DISABLE: 'true',
   },
+  // Cấu hình cho @react-pdf/renderer
+  transpilePackages: ['@react-pdf/renderer'],
+  webpack: (config) => {
+    config.resolve.alias.canvas = false;
+    config.resolve.alias.encoding = false;
+    return config;
+  },
   images: {
-    // Định nghĩa các domain cho phép load ảnh
+    domains: ['imagetravel.vn', 'aucoeurvietnam.com', 'mekongvillages.com', 'cdnjs.cloudflare.com'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**', // Nên giới hạn cụ thể các domain được phép
+        hostname: 'imagetravel.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'aucoeurvietnam.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mekongvillages.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdnjs.cloudflare.com',
       },
     ],
-    // Cấu hình device sizes để tối ưu responsive images
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    // Cấu hình image sizes
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Định dạng ảnh được hỗ trợ
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
     formats: ['image/webp'],
     minimumCacheTTL: 60,
+    unoptimized: true,
+  },
+  // Thêm cấu hình cho API routes
+  experimental: {
+    serverActions: true,
+  },
+  // Cho phép đọc file từ public folder
+  publicRuntimeConfig: {
+    staticFolder: '/public',
   },
 };
 
