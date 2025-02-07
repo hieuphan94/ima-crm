@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: 'white',
-    height: '100%',
   },
   header: {
     marginBottom: 10,
@@ -135,26 +134,20 @@ const styles = StyleSheet.create({
   content: {
     padding: '40px 40px',
     paddingTop: 10,
-    flexGrow: 1,
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     textAlign: 'center',
     backgroundColor: '#927B35',
     color: 'white',
     padding: 8,
-    marginBottom: 0,
+    marginBottom: 20,
   },
   daySection: {
-    breakInside: 'avoid',
     marginBottom: 20,
-    flexGrow: 1,
   },
   dayTitle: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 10,
     backgroundColor: '#FFB800',
     padding: 8,
@@ -224,23 +217,22 @@ const styles = StyleSheet.create({
 const PDFDocument = ({ brand, scheduleItems = [] }) => {
   return (
     <Document>
-      {scheduleItems.map((day, index) => (
-        <Page key={index} size="A4" style={styles.page} wrap={false}>
-          {/* Header luôn xuất hiện ở đầu mỗi trang */}
-          <View style={styles.header} fixed>
-            {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
-            {/* Chỉ hiển thị title ở trang đầu tiên */}
-            {index === 0 && (
-              <Text style={styles.title}>{scheduleItems?.title || 'Trip Schedule'}</Text>
-            )}
-          </View>
+      <Page size="A4" style={styles.page}>
+        {/* Header cố định ở mỗi trang */}
+        <View style={styles.header} fixed>
+          {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
+        </View>
 
-          {/* Content của ngày */}
-          <View style={styles.content} break>
-            <View style={styles.daySection}>
-              <Text style={styles.dayTitle}>{`Jour ${index + 1}: ${day.title}`}</Text>
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Title chỉ xuất hiện một lần ở đầu */}
+          <Text style={styles.title}>{scheduleItems?.title || 'Trip Schedule'}</Text>
+
+          {/* Các ngày sẽ được render liên tục */}
+          {scheduleItems.map((day, dayIndex) => (
+            <View key={dayIndex} style={styles.daySection}>
+              <Text style={styles.dayTitle}>{`Jour ${dayIndex + 1}: ${day.title}`}</Text>
               {day.distance && <Text>Distance: {day.distance}km</Text>}
-
               {day.paragraphDay?.paragraphTotal && (
                 <View style={styles.paragraph}>
                   <Text style={styles.text}>
@@ -260,9 +252,9 @@ const PDFDocument = ({ brand, scheduleItems = [] }) => {
                 </View>
               )}
             </View>
-          </View>
-        </Page>
-      ))}
+          ))}
+        </View>
+      </Page>
     </Document>
   );
 };
