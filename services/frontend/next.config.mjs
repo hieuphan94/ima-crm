@@ -37,10 +37,6 @@ const nextConfig = {
     minimumCacheTTL: 60,
     unoptimized: true,
   },
-  // Thêm cấu hình cho API routes
-  experimental: {
-    serverActions: true,
-  },
   // Cho phép đọc file từ public folder
   publicRuntimeConfig: {
     staticFolder: '/public',

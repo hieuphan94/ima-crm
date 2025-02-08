@@ -118,68 +118,63 @@ const formatHTMLToPDF = (htmlContent) => {
 };
 
 const styles = StyleSheet.create({
-  page: {
+  coverPage: {
+    position: 'relative',
+    padding: 0,
+  },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  coverTitleContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: 40,
+    right: 40,
+    padding: 20,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    transform: 'translateY(-50%)',
+  },
+  coverTitle: {
+    fontSize: 32,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontFamily: 'Helvetica-Bold',
+  },
+  contentPage: {
     flexDirection: 'column',
     backgroundColor: 'white',
   },
-  header: {
-    marginBottom: 10,
-    height: 'auto',
-  },
-  headerImage: {
+  logoHeader: {
+    marginBottom: 20,
+    justifyContent: 'center',
     width: '100%',
-    height: 100,
-    objectFit: 'contain',
+  },
+  logoImage: {
+    height: 'auto',
+    maxWidth: '100%',
+    objectFit: 'cover',
   },
   content: {
-    padding: '40px 40px',
-    paddingTop: 10,
-  },
-  title: {
-    fontSize: 24,
-    textAlign: 'center',
-    backgroundColor: '#927B35',
-    color: 'white',
-    padding: 8,
-    marginBottom: 20,
+    flex: 1,
   },
   daySection: {
     marginBottom: 20,
+    padding: 40,
+  },
+  dayTitleContainer: {
+    marginBottom: 10,
+    padding: 8,
+    borderRadius: 4,
   },
   dayTitle: {
     fontSize: 18,
-    marginBottom: 10,
-    backgroundColor: '#FFB800',
-    padding: 8,
-    color: 'black',
   },
-  table: {
-    display: 'table',
-    width: '100%',
-    borderStyle: 'solid',
-    borderWidth: 1,
-    borderColor: '#000',
-    marginBottom: 10,
-    breakInside: 'avoid',
-  },
-  tableRow: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#000',
-  },
-  tableHeader: {
-    backgroundColor: '#f0f0f0',
-  },
-  tableCell: {
-    padding: 5,
-    borderRightWidth: 1,
-    borderRightColor: '#000',
-  },
-  timeCell: {
-    width: '20%',
-  },
-  descriptionCell: {
-    width: '80%',
+  distanceText: {
+    fontSize: 12,
+    marginBottom: 8,
   },
   paragraph: {
     marginVertical: 8,
@@ -187,52 +182,114 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 11,
     lineHeight: 1.5,
-    fontFamily: 'Times-Roman',
   },
   normal: {
     fontFamily: 'Times-Roman',
   },
   bold: {
     fontFamily: 'Times-Bold',
-    fontWeight: 'bold',
   },
   italic: {
     fontFamily: 'Times-Italic',
-    fontStyle: 'italic',
   },
-  textCenter: {
-    textAlign: 'center',
+  defaultCover: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  textLeft: {
-    textAlign: 'left',
-  },
-  textRight: {
-    textAlign: 'right',
-  },
-  textJustify: {
-    textAlign: 'justify',
+  defaultCoverLogo: {
+    maxWidth: '80%',
+    height: 'auto',
+    objectFit: 'contain',
   },
 });
 
-const PDFDocument = ({ brand, scheduleItems = [] }) => {
+const PDFDocument = ({
+  brand,
+  scheduleItems = [],
+  tripTitleColors = { text: '#000000', background: '#FFFFFF' },
+  dayTitleColors = { text: '#000000', background: '#FFFFFF' },
+  headerImage = null,
+}) => {
+  // Validate scheduleItems
+  if (!Array.isArray(scheduleItems) || scheduleItems.length === 0) {
+    scheduleItems = [
+      {
+        title: 'No schedule items',
+        paragraphDay: { paragraphTotal: 'No content available' },
+      },
+    ];
+  }
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      {/* Cover page */}
+      <Page size="A4" style={styles.coverPage}>
+        <View style={{ position: 'relative', width: '100%', height: '100%' }}>
+          {headerImage ? (
+            <>
+              <Image style={styles.coverImage} src={headerImage} />
+              <View
+                style={[
+                  styles.coverTitleContainer,
+                  { backgroundColor: tripTitleColors.background },
+                ]}
+              >
+                <Text style={[styles.coverTitle, { color: tripTitleColors.text }]}>
+                  {scheduleItems?.title || 'Trip Schedule'}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.defaultCover}>
+                {brand?.logo && <Image style={styles.defaultCoverLogo} src={brand.logo} />}
+              </View>
+              <View
+                style={[
+                  styles.coverTitleContainer,
+                  { backgroundColor: tripTitleColors.background },
+                ]}
+              >
+                <Text style={[styles.coverTitle, { color: tripTitleColors.text }]}>
+                  {scheduleItems?.title || 'Trip Schedule'}
+                </Text>
+              </View>
+            </>
+          )}
+        </View>
+      </Page>
+
+      {/* Content page with fixed header */}
+      <Page size="A4" style={styles.contentPage}>
         {/* Header cố định ở mỗi trang */}
-        <View style={styles.header} fixed>
-          {brand?.logo && <Image style={styles.headerImage} src={brand.logo} />}
+        <View style={styles.logoHeader} fixed>
+          {brand?.logo && <Image style={styles.logoImage} src={brand.logo} />}
         </View>
 
         {/* Content */}
         <View style={styles.content}>
           {/* Title chỉ xuất hiện một lần ở đầu */}
-          <Text style={styles.title}>{scheduleItems?.title || 'Trip Schedule'}</Text>
+          <Text style={[styles.dayTitle, { marginBottom: 20, textAlign: 'center' }]}>
+            {scheduleItems?.title || 'Trip Schedule'}
+          </Text>
 
           {/* Các ngày sẽ được render liên tục */}
           {scheduleItems.map((day, dayIndex) => (
             <View key={dayIndex} style={styles.daySection}>
-              <Text style={styles.dayTitle}>{`Jour ${dayIndex + 1}: ${day.title}`}</Text>
-              {day.distance && <Text>Distance: {day.distance}km</Text>}
+              <View
+                style={[styles.dayTitleContainer, { backgroundColor: dayTitleColors.background }]}
+              >
+                <Text style={[styles.dayTitle, { color: dayTitleColors.text }]}>
+                  {`Jour ${dayIndex + 1}: ${day.title}`}
+                </Text>
+              </View>
+              {day.distance && <Text style={styles.distanceText}>Distance: {day.distance}km</Text>}
               {day.paragraphDay?.paragraphTotal && (
                 <View style={styles.paragraph}>
                   <Text style={styles.text}>

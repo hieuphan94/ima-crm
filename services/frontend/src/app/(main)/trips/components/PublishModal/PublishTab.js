@@ -24,10 +24,66 @@ const brandOptions = [
   },
 ];
 
+const ColorPicker = ({ label, textColor, bgColor, onChangeText, onChangeBg }) => {
+  return (
+    <div className="p-3 border rounded-lg">
+      <label className="block text-sm font-medium mb-2">{label}</label>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-3">
+          <span className="text-xs w-20">Text Color:</span>
+          <input
+            type="color"
+            value={textColor}
+            onChange={(e) => onChangeText(e.target.value)}
+            className="w-8 h-8 rounded cursor-pointer"
+            title="Text Color"
+          />
+          <input
+            type="text"
+            value={textColor}
+            onChange={(e) => onChangeText(e.target.value)}
+            className="w-20 px-2 py-1 border rounded text-xs"
+            placeholder="Text"
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-xs w-20">Background:</span>
+          <input
+            type="color"
+            value={bgColor}
+            onChange={(e) => onChangeBg(e.target.value)}
+            className="w-8 h-8 rounded cursor-pointer"
+            title="Background Color"
+          />
+          <input
+            type="text"
+            value={bgColor}
+            onChange={(e) => onChangeBg(e.target.value)}
+            className="w-20 px-2 py-1 border rounded text-xs"
+            placeholder="Background"
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function PublishTab() {
   const [selectedFormat, setSelectedFormat] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [pdfBlob, setPdfBlob] = useState(null);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [tripTitleColors, setTripTitleColors] = useState({
+    text: '#000000',
+    background: '#FFFFFF',
+  });
+  const [dayTitleColors, setDayTitleColors] = useState({
+    text: '#000000',
+    background: '#FFFFFF',
+  });
+  const [headerImage, setHeaderImage] = useState(null);
+  const [headerImagePreview, setHeaderImagePreview] = useState(null);
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -69,7 +125,25 @@ export default function PublishTab() {
     console.log('Formatted Schedule Items:', formattedScheduleItems);
   }, [formattedScheduleItems]);
 
-  const handleDownloadPDF = async () => {
+  const handleHeaderImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (e.g., max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size should not exceed 5MB');
+        return;
+      }
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+      setHeaderImage(file);
+      setHeaderImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCreatePDF = async () => {
     if (!selectedBrand) {
       alert('Please select a brand first');
       return;
@@ -77,33 +151,51 @@ export default function PublishTab() {
 
     try {
       setIsLoading(true);
+      setPdfBlob(null);
+      setPdfUrl(null);
 
-      // Nên thêm validation cho formattedScheduleItems
       if (formattedScheduleItems.length === 0) {
         throw new Error('No schedule items to export');
       }
 
-      // Nên thêm error handling cụ thể cho fetch logo
-      const response = await fetch(`/api/pdf?path=${encodeURIComponent(selectedBrand.logo)}`);
-      if (!response.ok) {
-        throw new Error('Failed to load brand logo');
-      }
-      const data = await response.json();
+      // Lấy brand logo và convert sang base64
+      const logoResponse = await fetch(selectedBrand.logo);
+      const logoBlob = await logoResponse.blob();
+      const base64Logo = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(logoBlob);
+      });
 
       const brandWithBase64Logo = {
         ...selectedBrand,
-        logo: data.data,
+        logo: base64Logo,
       };
 
-      // Generate PDF using react-pdf
+      // Xử lý header image nếu có
+      let headerImageBase64 = null;
+      if (headerImage) {
+        const reader = new FileReader();
+        headerImageBase64 = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(headerImage);
+        });
+      }
+
+      // Tạo PDF với base64 images
       const blob = await pdf(
-        <TripPDFDocument brand={brandWithBase64Logo} scheduleItems={formattedScheduleItems} />
+        <TripPDFDocument
+          brand={brandWithBase64Logo}
+          scheduleItems={formattedScheduleItems}
+          tripTitleColors={tripTitleColors}
+          dayTitleColors={dayTitleColors}
+          headerImage={headerImageBase64}
+        />
       ).toBlob();
 
-      // Download using FileSaver
-      const fileName = `trip-${selectedBrand.id}-${Date.now()}.pdf`;
-      FileSaver.saveAs(blob, fileName);
-      console.log('PDF generated successfully:', fileName);
+      const url = URL.createObjectURL(blob);
+      setPdfBlob(blob);
+      setPdfUrl(url);
     } catch (error) {
       console.error('PDF generation error:', error);
       alert(`Failed to generate PDF: ${error.message}`);
@@ -111,6 +203,25 @@ export default function PublishTab() {
       setIsLoading(false);
     }
   };
+
+  const handleDownloadPDF = () => {
+    if (!pdfBlob) return;
+    const fileName = `trip-${selectedBrand.id}-${Date.now()}.pdf`;
+    FileSaver.saveAs(pdfBlob, fileName);
+    console.log('PDF downloaded successfully:', fileName);
+  };
+
+  // Cleanup URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
+      if (headerImagePreview) {
+        URL.revokeObjectURL(headerImagePreview);
+      }
+    };
+  }, [pdfUrl, headerImagePreview]);
 
   return (
     <div className="space-y-6">
@@ -166,15 +277,121 @@ export default function PublishTab() {
             </div>
           </div>
 
+          <div className="space-y-3">
+            <h3 className="font-semibold">Design Options</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2 space-y-2">
+                <ColorPicker
+                  label="Trip Title Colors"
+                  textColor={tripTitleColors.text}
+                  bgColor={tripTitleColors.background}
+                  onChangeText={(color) => setTripTitleColors((prev) => ({ ...prev, text: color }))}
+                  onChangeBg={(color) =>
+                    setTripTitleColors((prev) => ({ ...prev, background: color }))
+                  }
+                />
+                <ColorPicker
+                  label="Day Title Colors"
+                  textColor={dayTitleColors.text}
+                  bgColor={dayTitleColors.background}
+                  onChangeText={(color) => setDayTitleColors((prev) => ({ ...prev, text: color }))}
+                  onChangeBg={(color) =>
+                    setDayTitleColors((prev) => ({ ...prev, background: color }))
+                  }
+                />
+              </div>
+
+              <div className="border rounded-lg p-3">
+                <label className="block text-sm font-medium mb-2">Header Image</label>
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleHeaderImageChange}
+                    className="hidden"
+                    id="header-image-input"
+                  />
+                  <label
+                    htmlFor="header-image-input"
+                    className="block w-full p-2 text-center border-2 border-dashed rounded-lg cursor-pointer hover:border-primary text-sm"
+                  >
+                    {headerImage ? 'Change Image' : 'Upload Image'}
+                  </label>
+
+                  {headerImagePreview && (
+                    <div className="relative w-full h-24">
+                      <Image
+                        src={headerImagePreview}
+                        alt="Header preview"
+                        fill
+                        className="object-contain rounded-lg"
+                      />
+                      <button
+                        onClick={() => {
+                          setHeaderImage(null);
+                          setHeaderImagePreview(null);
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        title="Remove image"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <button
-              onClick={handleDownloadPDF}
+              onClick={handleCreatePDF}
               disabled={!selectedBrand || isLoading}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50"
             >
-              {isLoading ? 'Generating...' : 'Download PDF'}
+              {isLoading ? 'Generating...' : 'Create PDF'}
             </button>
+
+            {pdfBlob && (
+              <>
+                <button
+                  onClick={() => window.open(pdfUrl, '_blank')}
+                  className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90"
+                >
+                  View PDF
+                </button>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                >
+                  Download PDF
+                </button>
+              </>
+            )}
           </div>
+
+          {pdfUrl && (
+            <div className="border rounded-lg p-4">
+              <h3 className="font-semibold mb-3">PDF Preview</h3>
+              <iframe
+                src={pdfUrl}
+                className="w-full h-[600px] border rounded"
+                title="PDF Preview"
+              />
+            </div>
+          )}
         </>
       )}
 
