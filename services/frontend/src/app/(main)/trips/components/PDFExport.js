@@ -133,12 +133,12 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     padding: 20,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     transform: 'translateY(-50%)',
   },
   coverTitle: {
-    fontSize: 32,
+    fontSize: 20,
     textAlign: 'center',
     fontWeight: 'bold',
     fontFamily: 'Helvetica-Bold',
@@ -162,15 +162,15 @@ const styles = StyleSheet.create({
   },
   daySection: {
     marginBottom: 20,
-    padding: 40,
+    padding: 20,
   },
   dayTitleContainer: {
     marginBottom: 10,
     padding: 8,
-    borderRadius: 4,
+    borderRadius: 2,
   },
   dayTitle: {
-    fontSize: 18,
+    fontSize: 14,
   },
   distanceText: {
     fontSize: 12,
@@ -234,31 +234,14 @@ const PDFDocument = ({
           {headerImage ? (
             <>
               <Image style={styles.coverImage} src={headerImage} />
-              <View
-                style={[
-                  styles.coverTitleContainer,
-                  { backgroundColor: tripTitleColors.background },
-                ]}
-              >
-                <Text style={[styles.coverTitle, { color: tripTitleColors.text }]}>
-                  {scheduleItems?.title || 'Trip Schedule'}
-                </Text>
+              <View style={[styles.coverTitleContainer]}>
+                <Text style={[styles.coverTitle]}>{scheduleItems?.title || 'Trip Schedule'}</Text>
               </View>
             </>
           ) : (
             <>
-              <View style={styles.defaultCover}>
-                {brand?.logo && <Image style={styles.defaultCoverLogo} src={brand.logo} />}
-              </View>
-              <View
-                style={[
-                  styles.coverTitleContainer,
-                  { backgroundColor: tripTitleColors.background },
-                ]}
-              >
-                <Text style={[styles.coverTitle, { color: tripTitleColors.text }]}>
-                  {scheduleItems?.title || 'Trip Schedule'}
-                </Text>
+              <View style={[styles.coverTitleContainer]}>
+                <Text style={[styles.coverTitle]}>{scheduleItems?.title || 'Trip Schedule'}</Text>
               </View>
             </>
           )}
@@ -275,7 +258,18 @@ const PDFDocument = ({
         {/* Content */}
         <View style={styles.content}>
           {/* Title chỉ xuất hiện một lần ở đầu */}
-          <Text style={[styles.dayTitle, { marginBottom: 20, textAlign: 'center' }]}>
+          <Text
+            style={[
+              { backgroundColor: tripTitleColors.background },
+              { color: tripTitleColors.text },
+              {
+                textAlign: 'center',
+                fontFamily: 'Helvetica-Bold',
+                fontSize: 16,
+                padding: 10,
+              },
+            ]}
+          >
             {scheduleItems?.title || 'Trip Schedule'}
           </Text>
 
