@@ -90,6 +90,7 @@ export default function PublishTab() {
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
+  const scheduleInfo = useSelector((state) => state.dailySchedule.scheduleInfo);
 
   // Format dữ liệu với useMemo
   const formattedScheduleItems = useMemo(() => {
@@ -99,7 +100,7 @@ export default function PublishTab() {
       .sort(([, a], [, b]) => a.order - b.order)
       .map(([dayId, dayData]) => ({
         dayId,
-        title: dayData.titleOfDay || `Day ${dayData.order}`,
+        titleOfDay: dayData.titleOfDay || `Day ${dayData.order}`,
         distance: dayData.distance || 0,
         meals: dayData.meals || {},
         paragraphDay: dayData.paragraphDay || {},
@@ -155,11 +156,10 @@ export default function PublishTab() {
       return;
     }
 
-    // Add validation check
-    if (!isScheduleValid(scheduleData.scheduleItems)) {
-      setValidationError(
-        'Please complete all required information for each day (including activities, title, distance, and meals) before creating PDF'
-      );
+    // Add validation check with full scheduleData
+    const validation = isScheduleValid(scheduleData);
+    if (!validation.isValid) {
+      setValidationError(validation.error);
       return;
     }
 
@@ -201,6 +201,7 @@ export default function PublishTab() {
         <TripPDFDocument
           brand={brandWithBase64Logo}
           scheduleItems={formattedScheduleItems}
+          scheduleInfo={scheduleInfo}
           tripTitleColors={tripTitleColors}
           dayTitleColors={dayTitleColors}
           headerImage={headerImageBase64}

@@ -15,10 +15,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
 import { EXCHANGE_RATE } from '../../utils/constants';
 import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
-import DayNameModal from './DayNameModal';
 import DeleteDayModal from './DeleteDayModal';
 
-// Tách component cho phần template giống DayNameModal
 const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -556,18 +554,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
           )}
         </div>
       </div>
-
-      {/* Modals */}
-      {isNameModalOpen && (
-        <DayNameModal
-          isOpen={isNameModalOpen}
-          onClose={() => setIsNameModalOpen(false)}
-          order={order}
-          dayId={dayId}
-          initialName={titleOfDay}
-          onSave={handleSaveDayName}
-        />
-      )}
 
       {/* Delete Confirmation Modal */}
       <DeleteDayModal

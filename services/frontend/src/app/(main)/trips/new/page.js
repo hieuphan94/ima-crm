@@ -4,6 +4,7 @@ import { VisitService } from '@/data/models';
 import { useUI } from '@/hooks/useUI';
 import {
   resetDays,
+  setScheduleTitle,
   setSettingsSchedule,
   setStarRating,
 } from '@/store/slices/useDailyScheduleSlice';
@@ -23,12 +24,12 @@ export default function NewTripPage() {
     (state) => state.dailySchedule.settings
   );
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
+  const { title } = useSelector((state) => state.dailySchedule.scheduleInfo);
 
   const router = useRouter();
   const { notifyError } = useUI();
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sheetData, setSheetData] = useState(null);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
@@ -129,10 +130,6 @@ export default function NewTripPage() {
     debouncedUpdateSettings('globalPax', numValue);
   };
 
-  const handlePreview = () => {
-    setIsPreviewModalOpen(true);
-  };
-
   const handleReset = () => {
     setIsResetModalOpen(true);
   };
@@ -181,6 +178,10 @@ export default function NewTripPage() {
     dispatch(setStarRating(parseInt(e.target.value, 10)));
   };
 
+  const handleTitleChange = (e) => {
+    dispatch(setScheduleTitle(e.target.value));
+  };
+
   return (
     <>
       <div className="h-full flex flex-col overflow-hidden">
@@ -215,6 +216,8 @@ export default function NewTripPage() {
               <div>
                 <input
                   type="text"
+                  value={title}
+                  onChange={handleTitleChange}
                   className="w-[200px] px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
                   placeholder="VD: Hạ Long 3 ngày 2 đêm"
                 />

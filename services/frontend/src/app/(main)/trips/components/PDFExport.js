@@ -1,38 +1,23 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 
-// Register Font
+// Register Font - Noto Sans Vietnamese từ local
 Font.register({
-  family: 'Roboto',
-  src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
-  fonts: [
-    {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-regular-webfont.ttf',
-      fontWeight: 'normal',
-    },
-    {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-medium-webfont.ttf',
-      fontWeight: 'medium',
-    },
-    {
-      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
-      fontWeight: 'bold',
-    },
-  ],
+  family: 'NotoSansVietnamese',
+  src: '/fonts/NotoSans-Regular.ttf',
+  fontWeight: 'normal',
 });
 
-// Hoặc sử dụng font mặc định an toàn hơn
 Font.register({
-  family: 'Helvetica',
-  fonts: [
-    {
-      src: 'https://fonts.cdnfonts.com/s/29136/Helvetica.woff',
-      fontWeight: 'normal',
-    },
-    {
-      src: 'https://fonts.cdnfonts.com/s/29136/Helvetica-Bold.woff',
-      fontWeight: 'bold',
-    },
-  ],
+  family: 'NotoSansVietnamese',
+  src: '/fonts/NotoSans-Bold.ttf',
+  fontWeight: 'bold',
+});
+
+// Sử dụng NotoSans SemiCondensed cho italic
+Font.register({
+  family: 'NotoSansVietnamese',
+  src: '/fonts/NotoSans_SemiCondensed-ThinItalic.ttf', // Đổi tên file theo đúng font bạn có
+  fontStyle: 'italic',
 });
 
 const formatHTMLToPDF = (htmlContent) => {
@@ -140,15 +125,16 @@ const styles = StyleSheet.create({
   coverTitle: {
     fontSize: 20,
     textAlign: 'center',
+    color: 'black',
     fontWeight: 'bold',
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'NotoSansVietnamese',
   },
   contentPage: {
     flexDirection: 'column',
     backgroundColor: 'white',
   },
   logoHeader: {
-    marginBottom: 20,
+    marginBottom: 10,
     justifyContent: 'center',
     width: '100%',
   },
@@ -159,10 +145,10 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    padding: 20,
   },
   daySection: {
-    marginBottom: 20,
-    padding: 20,
+    marginBottom: 10,
   },
   dayTitleContainer: {
     marginBottom: 10,
@@ -171,10 +157,8 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontSize: 14,
-  },
-  distanceText: {
-    fontSize: 12,
-    marginBottom: 8,
+    fontFamily: 'NotoSansVietnamese',
+    fontWeight: 'bold',
   },
   paragraph: {
     marginVertical: 8,
@@ -182,15 +166,19 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 11,
     lineHeight: 1.5,
+    fontFamily: 'NotoSansVietnamese',
   },
   normal: {
-    fontFamily: 'Times-Roman',
+    fontFamily: 'NotoSansVietnamese',
+    fontWeight: 'normal',
   },
   bold: {
-    fontFamily: 'Times-Bold',
+    fontFamily: 'NotoSansVietnamese',
+    fontWeight: 'bold',
   },
   italic: {
-    fontFamily: 'Times-Italic',
+    fontFamily: 'NotoSansVietnamese',
+    fontStyle: 'italic',
   },
   defaultCover: {
     position: 'absolute',
@@ -212,6 +200,7 @@ const styles = StyleSheet.create({
 const PDFDocument = ({
   brand,
   scheduleItems = [],
+  scheduleInfo = {},
   tripTitleColors = { text: '#000000', background: '#FFFFFF' },
   dayTitleColors = { text: '#000000', background: '#FFFFFF' },
   headerImage = null,
@@ -226,6 +215,10 @@ const PDFDocument = ({
     ];
   }
 
+  // Get title from scheduleInfo
+  const tripTitle = scheduleInfo?.title || 'Trip Schedule';
+  console.log('scheduleItems', scheduleItems);
+
   return (
     <Document>
       {/* Cover page */}
@@ -235,13 +228,13 @@ const PDFDocument = ({
             <>
               <Image style={styles.coverImage} src={headerImage} />
               <View style={[styles.coverTitleContainer]}>
-                <Text style={[styles.coverTitle]}>{scheduleItems?.title || 'Trip Schedule'}</Text>
+                <Text style={[styles.coverTitle]}>{tripTitle}</Text>
               </View>
             </>
           ) : (
             <>
               <View style={[styles.coverTitleContainer]}>
-                <Text style={[styles.coverTitle]}>{scheduleItems?.title || 'Trip Schedule'}</Text>
+                <Text style={[styles.coverTitle]}>{tripTitle}</Text>
               </View>
             </>
           )}
@@ -264,13 +257,15 @@ const PDFDocument = ({
               { color: tripTitleColors.text },
               {
                 textAlign: 'center',
-                fontFamily: 'Helvetica-Bold',
+                fontWeight: 'bold',
+                fontFamily: 'NotoSansVietnamese',
                 fontSize: 16,
                 padding: 10,
+                borderRadius: 2,
               },
             ]}
           >
-            {scheduleItems?.title || 'Trip Schedule'}
+            {tripTitle}
           </Text>
 
           {/* Các ngày sẽ được render liên tục */}
@@ -280,10 +275,9 @@ const PDFDocument = ({
                 style={[styles.dayTitleContainer, { backgroundColor: dayTitleColors.background }]}
               >
                 <Text style={[styles.dayTitle, { color: dayTitleColors.text }]}>
-                  {`Jour ${dayIndex + 1}: ${day.title}`}
+                  {`Jour ${dayIndex + 1}: ${day.titleOfDay || ''} | Distance: ${day.distance}km`}
                 </Text>
               </View>
-              {day.distance && <Text style={styles.distanceText}>Distance: {day.distance}km</Text>}
               {day.paragraphDay?.paragraphTotal && (
                 <View style={styles.paragraph}>
                   <Text style={styles.text}>

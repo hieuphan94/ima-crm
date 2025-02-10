@@ -10,6 +10,7 @@ const previewTabs = [
 
 export default function PreviewTab() {
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
+  const scheduleInfo = useSelector((state) => state.dailySchedule.scheduleInfo);
   const [expandedDays, setExpandedDays] = useState({});
   const [activePreviewTab, setActivePreviewTab] = useState('validation');
 
@@ -134,6 +135,26 @@ export default function PreviewTab() {
 
   const renderValidationStatus = () => (
     <div className="space-y-3">
+      <div className="p-3 border rounded-lg bg-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span
+              className={`w-2 h-2 rounded-full ${scheduleInfo?.title?.trim() ? 'bg-green-500' : 'bg-red-500'}`}
+            ></span>
+            <span className="font-medium">Trip Title</span>
+            {scheduleInfo?.title && (
+              <span className="text-gray-600 truncate">- {scheduleInfo.title}</span>
+            )}
+          </div>
+          <span className="text-sm text-gray-500 whitespace-nowrap">
+            {scheduleInfo?.title?.trim() ? 'Complete' : 'Missing requirement'}
+          </span>
+        </div>
+        {!scheduleInfo?.title?.trim() && (
+          <div className="mt-2 text-sm text-red-500">• Trip title is required</div>
+        )}
+      </div>
+
       {sortedDays.map(([dayId, dayData]) => {
         const hasServices = Object.entries(dayData).some(
           ([key, value]) => Array.isArray(value) && value.length > 0
@@ -141,19 +162,14 @@ export default function PreviewTab() {
         const hasDayTitle = !!dayData.titleOfDay;
         const hasValidDistance = dayData.distance && parseFloat(dayData.distance) > 0;
 
-        // Add meal validation
-        const hasMeals =
-          dayData.meals &&
-          Object.entries(dayData.meals).some(
-            ([, mealDetails]) => mealDetails.included && mealDetails.type
-          );
+        // Check all meals are included and have types specified
         const hasAllMeals =
           dayData.meals &&
           ['breakfast', 'lunch', 'dinner'].every(
             (meal) => dayData.meals[meal]?.included && dayData.meals[meal]?.type
           );
 
-        const isValid = hasServices && hasDayTitle && hasValidDistance && hasMeals;
+        const isValid = hasServices && hasDayTitle && hasValidDistance && hasAllMeals;
 
         return (
           <div key={dayId} className="p-3 border rounded-lg bg-white">
@@ -176,8 +192,16 @@ export default function PreviewTab() {
                 {!hasServices && <div>• No activities</div>}
                 {!hasDayTitle && <div>• No title</div>}
                 {!hasValidDistance && <div>• Distance = 0</div>}
-                {!hasMeals && <div>• No meals specified</div>}
-                {hasMeals && !hasAllMeals && <div>• Missing some meals</div>}
+                {!hasAllMeals && (
+                  <div>
+                    • Missing meals:{' '}
+                    {['breakfast', 'lunch', 'dinner']
+                      .filter(
+                        (meal) => !dayData.meals?.[meal]?.included || !dayData.meals?.[meal]?.type
+                      )
+                      .join(', ')}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -281,20 +305,76 @@ export default function PreviewTab() {
   );
 }
 
-// Add a new export for validation status
-export const isScheduleValid = (scheduleItems) => {
-  return Object.values(scheduleItems).every((dayData) => {
-    const hasServices = Object.entries(dayData).some(
-      ([key, value]) => Array.isArray(value) && value.length > 0
-    );
-    const hasDayTitle = !!dayData.titleOfDay;
-    const hasValidDistance = dayData.distance && parseFloat(dayData.distance) > 0;
-    const hasMeals =
-      dayData.meals &&
-      Object.entries(dayData.meals).some(
-        ([, mealDetails]) => mealDetails.included && mealDetails.type
+export const isScheduleValid = (scheduleData) => {
+  const errors = [];
+
+  // Check trip title
+  if (!scheduleData.scheduleInfo?.title?.trim()) {
+    errors.push('Trip title is required');
+  }
+
+  // Check schedule items
+  const dayErrors = Object.entries(scheduleData.scheduleItems)
+    .map(([, dayData]) => {
+      const dayErrors = [];
+
+      // Check services
+      const hasServices = Object.entries(dayData).some(
+        ([key, value]) => Array.isArray(value) && value.length > 0
+      );
+      if (!hasServices) {
+        dayErrors.push('activities');
+      }
+
+      // Check day title
+      if (!dayData.titleOfDay) {
+        dayErrors.push('title');
+      }
+
+      // Check distance
+      if (!dayData.distance || parseFloat(dayData.distance) <= 0) {
+        dayErrors.push('distance');
+      }
+
+      // Check all meals
+      const missingMeals = ['breakfast', 'lunch', 'dinner'].filter(
+        (meal) => !dayData.meals?.[meal]?.included || !dayData.meals?.[meal]?.type
       );
 
-    return hasServices && hasDayTitle && hasValidDistance && hasMeals;
-  });
+      if (missingMeals.length > 0) {
+        dayErrors.push(`meals (${missingMeals.join(', ')})`);
+      }
+
+      return {
+        day: `Day ${dayData.order}`,
+        missing: dayErrors,
+      };
+    })
+    .filter((day) => day.missing.length > 0);
+
+  // Build error message
+  if (errors.length > 0 || dayErrors.length > 0) {
+    let errorMessage = '';
+
+    if (errors.length > 0) {
+      errorMessage += errors.join(', ') + '. ';
+    }
+
+    if (dayErrors.length > 0) {
+      errorMessage += dayErrors
+        .map((day) => `${day.day} is missing: ${day.missing.join(', ')}`)
+        .join('. ');
+      errorMessage += '. Please check the Preview tab for more details.';
+    }
+
+    return {
+      isValid: false,
+      error: errorMessage,
+    };
+  }
+
+  return {
+    isValid: true,
+    error: null,
+  };
 };

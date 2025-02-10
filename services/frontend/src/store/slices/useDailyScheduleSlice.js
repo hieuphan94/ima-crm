@@ -453,6 +453,10 @@ const useDailyScheduleSlice = createSlice({
       // Load schedule items from history
       state.scheduleItems = action.payload;
     },
+
+    setScheduleTitle: (state, action) => {
+      state.scheduleInfo.title = action.payload;
+    },
   },
 });
 
@@ -476,6 +480,7 @@ export const {
   toggleMealOption,
   updateDayParagraph,
   loadScheduleItems,
+  setScheduleTitle,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;
