@@ -61,6 +61,8 @@ export const generateDescription = (daySchedule) => {
         return `<strong>${word}</strong>`;
       }
 
+      console.log('word', word);
+
       return word;
     });
 
