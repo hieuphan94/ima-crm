@@ -1,5 +1,9 @@
-import { loadScheduleItems } from '@/store/slices/useDailyScheduleSlice';
-import { CheckCircle, Clock, RotateCcw, Save } from 'lucide-react';
+import {
+  loadScheduleItems,
+  setScheduleTitle,
+  setSettingsSchedule,
+} from '@/store/slices/useDailyScheduleSlice';
+import { AlertCircle, CheckCircle, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -27,9 +31,156 @@ const MOCK_AUTO_HISTORY = [
   },
 ];
 
+// Validation function cải tiến
+const validateVersion = (version) => {
+  if (!version) {
+    console.log('Version is null or undefined');
+    return false;
+  }
+
+  // Log chi tiết từng field để debug
+  console.log('Validating version:', {
+    hasScheduleData: !!version.scheduleData,
+    scheduleDataEmpty: Object.keys(version.scheduleData || {}).length === 0,
+    hasTripInfo: !!version.tripInfo,
+    pax: version.tripInfo?.pax,
+    numberOfDays: version.tripInfo?.numberOfDays,
+    title: version.tripInfo?.title,
+    starRating: version.tripInfo?.starRating,
+  });
+
+  // Kiểm tra scheduleData không rỗng
+  if (!version.scheduleData || Object.keys(version.scheduleData).length === 0) {
+    console.log('Schedule data is empty');
+    return false;
+  }
+
+  // Kiểm tra các trường bắt buộc
+  const requiredFields = [
+    'scheduleData',
+    'tripInfo',
+    'tripInfo.pax',
+    'tripInfo.numberOfDays',
+    'tripInfo.title',
+    'tripInfo.starRating',
+  ];
+
+  const validationResults = requiredFields.map((field) => {
+    const fields = field.split('.');
+    let value = version;
+    for (const f of fields) {
+      value = value?.[f];
+    }
+    const isValid = value !== undefined && value !== null;
+    console.log(`Validating ${field}:`, { value, isValid });
+    return isValid;
+  });
+
+  return validationResults.every((result) => result === true);
+};
+
+// Cleanup function
+const cleanupOldVersions = (history) => {
+  return history.slice(0, 20).sort((a, b) => new Date(b.date) - new Date(a.date));
+};
+
+const formatVersionInfo = (version) => {
+  const tripInfo = version.tripInfo || {};
+  const summary = `${tripInfo.title || 'Untitled'} (${tripInfo.numberOfDays || 0} days, ${tripInfo.pax || 0} pax, ${tripInfo.starRating || 0}★)`;
+
+  // Giới hạn độ dài của summary
+  const maxLength = 50;
+  return summary.length > maxLength ? summary.substring(0, maxLength) + '...' : summary;
+};
+
+const styles = {
+  versionItem: {
+    padding: '12px',
+    borderBottom: '1px solid #eee',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  versionHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  versionDate: {
+    color: '#666',
+    fontSize: '0.9em',
+  },
+  versionContent: {
+    fontSize: '1em',
+    color: '#333',
+  },
+  versionActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '8px',
+  },
+  button: {
+    padding: '6px 12px',
+    backgroundColor: '#1976d2',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '0.9em',
+    fontWeight: '500',
+    '&:hover': {
+      backgroundColor: '#1565c0',
+    },
+  },
+  badge: {
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '0.8em',
+    fontWeight: 'bold',
+  },
+  badgePrimary: {
+    backgroundColor: '#e3f2fd',
+    color: '#1976d2',
+  },
+  badgeSecondary: {
+    backgroundColor: '#f5f5f5',
+    color: '#666',
+  },
+  successMessage: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 12px',
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    borderRadius: '4px',
+    marginTop: '8px',
+  },
+  errorMessage: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 12px',
+    backgroundColor: '#ffebee',
+    color: '#c62828',
+    borderRadius: '4px',
+    marginTop: '8px',
+  },
+};
+
 export default function DraftTab({ onClose }) {
   const dispatch = useDispatch();
+
+  // Di chuyển tất cả useSelector vào trong component
   const currentSchedule = useSelector((state) => state.dailySchedule.scheduleItems);
+  const globalPax = useSelector((state) => state.dailySchedule.settings.globalPax);
+  const numberOfDays = useSelector((state) => state.dailySchedule.settings.numberOfDays);
+  const tripTitle = useSelector((state) => state.dailySchedule.scheduleInfo.title);
+  const starRating = useSelector((state) => {
+    const rating = state.dailySchedule.settings.starRating;
+    return rating !== undefined && rating !== null ? rating : 4;
+  });
+
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState('');
@@ -38,101 +189,197 @@ export default function DraftTab({ onClose }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [loadSuccess, setLoadSuccess] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   // Load history from localStorage when component mounts
   useEffect(() => {
-    const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
-    setHistory(savedHistory);
+    try {
+      const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
+      setHistory(cleanupOldVersions(savedHistory));
+    } catch (error) {
+      console.error('Error loading history:', error);
+      setHistory([]);
+    }
   }, []);
 
-  // Auto save mỗi 1 giờ
-  useEffect(() => {
-    const autoSaveInterval = setInterval(() => {
+  const handleManualSave = () => {
+    try {
+      // Log state trước khi save
+      console.log('Save state:', {
+        currentSchedule,
+        globalPax,
+        numberOfDays,
+        tripTitle,
+        starRating,
+      });
+
+      if (!currentSchedule || Object.keys(currentSchedule).length === 0) {
+        throw new Error('Schedule data is empty');
+      }
+
+      const versionName = saveName.trim() || `Trip-Code-${Math.random().toString(36).substr(2, 6)}`;
+
       const newVersion = {
         id: Date.now(),
         date: new Date().toISOString().replace('T', ' ').substr(0, 19),
-        type: 'auto',
-        changes: 'Auto saved version',
+        type: 'manual',
+        changes: `Manually saved - ${versionName}`,
         scheduleData: currentSchedule,
+        tripInfo: {
+          pax: globalPax,
+          numberOfDays: numberOfDays,
+          title: tripTitle,
+          starRating: starRating,
+        },
       };
 
-      // Lấy history hiện tại
-      const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
+      console.log('New version:', newVersion);
 
-      // Thêm version mới vào đầu mảng
-      let updatedHistory = [newVersion, ...savedHistory];
-
-      // Giới hạn số lượng history là 20
-      if (updatedHistory.length > 20) {
-        updatedHistory = updatedHistory.slice(0, 20);
+      const isValid = validateVersion(newVersion);
+      if (!isValid) {
+        throw new Error('Invalid version data structure');
       }
 
-      // Lưu lại vào localStorage
+      const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
+      const updatedHistory = cleanupOldVersions([newVersion, ...savedHistory]);
+
       localStorage.setItem('tripHistory', JSON.stringify(updatedHistory));
-
-      // Cập nhật state
       setHistory(updatedHistory);
-    }, 3600000); // 1 giờ = 3600000 ms
 
-    // Cleanup function
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setSaveModalOpen(false);
+        setSaveName('');
+      }, 1500);
+    } catch (error) {
+      console.error('Save error:', {
+        message: error.message,
+        currentState: {
+          hasSchedule: !!currentSchedule,
+          scheduleKeys: Object.keys(currentSchedule || {}),
+          pax: globalPax,
+          days: numberOfDays,
+          title: tripTitle,
+          rating: starRating,
+        },
+      });
+
+      setLoadError(`Failed to save version: ${error.message}`);
+      setTimeout(() => setLoadError(null), 3000);
+    }
+  };
+
+  // Auto save
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      try {
+        const newVersion = {
+          id: Date.now(),
+          date: new Date().toISOString().replace('T', ' ').substr(0, 19),
+          type: 'auto',
+          changes: 'Auto saved version',
+          scheduleData: currentSchedule,
+          tripInfo: {
+            pax: globalPax,
+            numberOfDays: numberOfDays,
+            title: tripTitle,
+            starRating: starRating,
+          },
+        };
+
+        if (!validateVersion(newVersion)) {
+          throw new Error('Invalid auto-save data');
+        }
+
+        const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
+        const updatedHistory = cleanupOldVersions([newVersion, ...savedHistory]);
+
+        localStorage.setItem('tripHistory', JSON.stringify(updatedHistory));
+        setHistory(updatedHistory);
+      } catch (error) {
+        console.error('Auto-save error:', error);
+      }
+    }, 3600000);
+
     return () => clearInterval(autoSaveInterval);
-  }, [currentSchedule]); // Dependency array includes currentSchedule
+  }, [currentSchedule, globalPax, numberOfDays, tripTitle, starRating]);
 
   // Tính toán số trang và danh sách items cho trang hiện tại
   const totalPages = Math.ceil(history.length / itemsPerPage);
   const currentItems = history.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleLoadVersion = (version) => {
-    setSelectedVersion(version);
-    if (version && version.scheduleData) {
+    try {
+      console.log('Loading version:', version);
+
+      if (!validateVersion(version)) {
+        throw new Error('Invalid version data structure');
+      }
+
+      // Load schedule items
       dispatch(loadScheduleItems(version.scheduleData));
-      // Hiển thị modal thành công
+
+      // Load title
+      dispatch(setScheduleTitle(version.tripInfo.title));
+
+      // Load all settings together (numberOfDays, globalPax, starRating)
+      dispatch(
+        setSettingsSchedule({
+          numberOfDays: version.tripInfo.numberOfDays,
+          globalPax: version.tripInfo.pax,
+          starRating: version.tripInfo.starRating || 4, // fallback to 4 if not set
+        })
+      );
+
       setLoadSuccess(true);
-      // Đóng sau 1.5s
       setTimeout(() => {
         setLoadSuccess(false);
         onClose?.();
       }, 1500);
-    } else {
-      console.warn('Invalid schedule data in version:', version);
+    } catch (error) {
+      console.error('Load error:', error);
+      setLoadError(`Failed to load version: ${error.message}`);
+      setTimeout(() => setLoadError(null), 3000);
     }
-  };
-
-  const handleManualSave = () => {
-    // Tạo tên version mới nếu không có tên được nhập
-    const versionName = saveName.trim() || `Trip-Code-${Math.random().toString(36).substr(2, 6)}`;
-
-    // Tạo object chứa thông tin version mới
-    const newVersion = {
-      id: Date.now(),
-      date: new Date().toISOString().replace('T', ' ').substr(0, 19),
-      type: 'manual',
-      changes: `Manually saved - ${versionName}`,
-      scheduleData: currentSchedule,
-    };
-
-    // Lấy history hiện tại từ localStorage
-    const savedHistory = JSON.parse(localStorage.getItem('tripHistory') || '[]');
-
-    // Thêm version mới vào đầu mảng
-    const updatedHistory = [newVersion, ...savedHistory];
-
-    // Lưu lại vào localStorage
-    localStorage.setItem('tripHistory', JSON.stringify(updatedHistory));
-
-    // Update history state after saving
-    setHistory(updatedHistory);
-
-    setSaveSuccess(true);
-    setTimeout(() => {
-      setSaveSuccess(false);
-      setSaveModalOpen(false);
-      setSaveName('');
-    }, 1500);
   };
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  // Di chuyển renderVersionItem vào trong component
+  const renderVersionItem = (version) => {
+    const date = new Date(version.date).toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+
+    return (
+      <div key={version.id} style={styles.versionItem}>
+        <div style={styles.versionHeader}>
+          <span style={styles.versionDate}>{date}</span>
+          <span
+            style={{
+              ...styles.badge,
+              ...(version.type === 'manual' ? styles.badgePrimary : styles.badgeSecondary),
+            }}
+          >
+            {version.type === 'manual' ? 'Manual save' : 'Auto save'}
+          </span>
+        </div>
+        <div style={styles.versionContent}>{formatVersionInfo(version)}</div>
+        <div style={styles.versionActions}>
+          <button onClick={() => handleLoadVersion(version)} style={styles.button}>
+            Load
+          </button>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -148,35 +395,16 @@ export default function DraftTab({ onClose }) {
         </button>
       </div>
 
+      {/* Error Message */}
+      {loadError && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500" />
+          <span className="text-red-700 text-sm">{loadError}</span>
+        </div>
+      )}
+
       {/* History List */}
-      <div className="space-y-2">
-        {currentItems.map((item) => (
-          <div
-            key={item.id}
-            className={`px-4 py-2 border rounded-lg hover:border-primary/30 transition-colors ${
-              selectedVersion?.id === item.id ? 'border-primary bg-primary/5' : 'border-gray-200'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1">
-                <Clock className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-600 min-w-[150px]">{item.date}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 min-w-[80px] text-center">
-                  {item.type === 'auto' ? 'Auto saved' : 'Manual save'}
-                </span>
-                <span className="text-sm text-gray-600 truncate">{item.changes}</span>
-              </div>
-              <button
-                onClick={() => handleLoadVersion(item)}
-                className="text-sm text-primary hover:text-primary/80 flex items-center gap-1 ml-4"
-              >
-                <RotateCcw className="w-3 h-3" />
-                Load
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="space-y-2">{currentItems.map((item) => renderVersionItem(item))}</div>
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -254,6 +482,21 @@ export default function DraftTab({ onClose }) {
               <p className="text-lg font-medium">Loaded Successfully!</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Thêm thông báo success/error */}
+      {loadSuccess && (
+        <div style={styles.successMessage}>
+          <CheckCircle size={16} />
+          Version loaded successfully
+        </div>
+      )}
+
+      {loadError && (
+        <div style={styles.errorMessage}>
+          <AlertCircle size={16} />
+          {loadError}
         </div>
       )}
     </div>

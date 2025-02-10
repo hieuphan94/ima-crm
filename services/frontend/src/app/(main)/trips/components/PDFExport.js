@@ -195,12 +195,36 @@ const styles = StyleSheet.create({
     height: 'auto',
     objectFit: 'contain',
   },
+  tripInfoContainer: {
+    marginBottom: 20,
+  },
+  tripTitle: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontFamily: 'NotoSansVietnamese',
+    fontSize: 16,
+    padding: 10,
+    borderRadius: 2,
+  },
+  tripMetaInfo: {
+    marginTop: 8,
+    padding: 5,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 2,
+  },
+  metaInfoText: {
+    textAlign: 'center',
+    fontSize: 12,
+    fontFamily: 'NotoSansVietnamese',
+    color: '#666666',
+  },
 });
 
 const PDFDocument = ({
   brand,
   scheduleItems = [],
   scheduleInfo = {},
+  settings = {},
   tripTitleColors = { text: '#000000', background: '#FFFFFF' },
   dayTitleColors = { text: '#000000', background: '#FFFFFF' },
   headerImage = null,
@@ -215,9 +239,20 @@ const PDFDocument = ({
     ];
   }
 
-  // Get title from scheduleInfo
+  console.log('scheduleInfo', scheduleInfo);
+
+  // Lấy thông tin từ scheduleInfo và settings
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
-  console.log('scheduleItems', scheduleItems);
+  const globalPax = settings?.globalPax || 1;
+  const numberOfDays = settings?.numberOfDays || 1;
+  const starRating = settings?.starRating || 4;
+
+  console.log('PDF Export Data:', {
+    tripTitle,
+    globalPax,
+    numberOfDays,
+    starRating,
+  });
 
   return (
     <Document>
@@ -250,23 +285,24 @@ const PDFDocument = ({
 
         {/* Content */}
         <View style={styles.content}>
-          {/* Title chỉ xuất hiện một lần ở đầu */}
-          <Text
-            style={[
-              { backgroundColor: tripTitleColors.background },
-              { color: tripTitleColors.text },
-              {
-                textAlign: 'center',
-                fontWeight: 'bold',
-                fontFamily: 'NotoSansVietnamese',
-                fontSize: 16,
-                padding: 10,
-                borderRadius: 2,
-              },
-            ]}
-          >
-            {tripTitle}
-          </Text>
+          {/* Title section with trip info */}
+          <View style={styles.tripInfoContainer}>
+            <Text
+              style={[
+                { backgroundColor: tripTitleColors.background },
+                { color: tripTitleColors.text },
+                styles.tripTitle,
+              ]}
+            >
+              {tripTitle}
+            </Text>
+
+            <View style={styles.tripMetaInfo}>
+              <Text style={styles.metaInfoText}>
+                {`${numberOfDays} days`} • {`${globalPax} paxs`} • {`${starRating} *`}
+              </Text>
+            </View>
+          </View>
 
           {/* Các ngày sẽ được render liên tục */}
           {scheduleItems.map((day, dayIndex) => (

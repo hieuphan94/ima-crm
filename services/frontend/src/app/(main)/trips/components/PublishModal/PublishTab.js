@@ -125,7 +125,7 @@ export default function PublishTab() {
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
   const scheduleInfo = useSelector((state) => state.dailySchedule.scheduleInfo);
-
+  const settings = useSelector((state) => state.dailySchedule.settings);
   // Format dữ liệu với useMemo
   const formattedScheduleItems = useMemo(() => {
     if (!scheduleData.scheduleItems) return [];
@@ -247,6 +247,7 @@ export default function PublishTab() {
           brand={brandWithBase64Logo}
           scheduleItems={formattedScheduleItems}
           scheduleInfo={scheduleInfo}
+          settings={settings}
           tripTitleColors={tripTitleColors}
           dayTitleColors={dayTitleColors}
           headerImage={headerImageBase64}

@@ -221,6 +221,11 @@ export default function PreviewTab() {
             <div className="flex items-center gap-4">
               <span className="font-medium">Day {dayData.order}</span>
               {dayData.titleOfDay && <span className="text-gray-600">- {dayData.titleOfDay}</span>}
+              {dayData.paxChangeOfDay && (
+                <span className="text-gray-600 truncate">
+                  - Pax Change: {dayData.paxChangeOfDay}
+                </span>
+              )}
             </div>
             {expandedDays[dayId] ? (
               <ChevronUp className="w-5 h-5 text-gray-500" />
