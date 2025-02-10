@@ -4,11 +4,6 @@ import DraftTab from './PublishModal/DraftTab';
 import PreviewTab from './PublishModal/PreviewTab';
 import PublishTab from './PublishModal/PublishTab';
 
-const MOCK_HISTORY = [
-  { id: 1, date: '2024-03-20 15:30', user: 'John Doe', action: 'Updated day 1 schedule' },
-  { id: 2, date: '2024-03-19 14:20', user: 'Jane Smith', action: 'Modified pax count' },
-];
-
 const tabs = [
   {
     id: 'preview',
@@ -34,9 +29,7 @@ const tabs = [
 ];
 
 export default function PublishModal({ isOpen, onClose }) {
-  const [activeTab, setActiveTab] = useState('draft');
-  const [selectedFormat, setSelectedFormat] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
+  const [activeTab, setActiveTab] = useState('preview');
 
   if (!isOpen) return null;
 

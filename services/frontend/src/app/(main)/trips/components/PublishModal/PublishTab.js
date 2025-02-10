@@ -1,9 +1,11 @@
 import { pdf } from '@react-pdf/renderer';
 import FileSaver from 'file-saver';
+import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { TripPDFDocument } from '../PDFExport';
+import { isScheduleValid } from './PreviewTab';
 
 // Cấu hình brand options với local URLs
 const brandOptions = [
@@ -35,7 +37,7 @@ const ColorPicker = ({ label, textColor, bgColor, onChangeText, onChangeBg }) =>
             type="color"
             value={textColor}
             onChange={(e) => onChangeText(e.target.value)}
-            className="w-8 h-8 rounded cursor-pointer"
+            className="w-6 h-6 rounded cursor-pointer"
             title="Text Color"
           />
           <input
@@ -52,7 +54,7 @@ const ColorPicker = ({ label, textColor, bgColor, onChangeText, onChangeBg }) =>
             type="color"
             value={bgColor}
             onChange={(e) => onChangeBg(e.target.value)}
-            className="w-8 h-8 rounded cursor-pointer"
+            className="w-6 h-6 rounded cursor-pointer"
             title="Background Color"
           />
           <input
@@ -84,6 +86,7 @@ export default function PublishTab() {
   });
   const [headerImage, setHeaderImage] = useState(null);
   const [headerImagePreview, setHeaderImagePreview] = useState(null);
+  const [validationError, setValidationError] = useState(null);
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -144,8 +147,19 @@ export default function PublishTab() {
   };
 
   const handleCreatePDF = async () => {
+    // Reset validation error
+    setValidationError(null);
+
     if (!selectedBrand) {
-      alert('Please select a brand first');
+      setValidationError('Please select a brand first');
+      return;
+    }
+
+    // Add validation check
+    if (!isScheduleValid(scheduleData.scheduleItems)) {
+      setValidationError(
+        'Please complete all required information for each day (including activities, title, distance, and meals) before creating PDF'
+      );
       return;
     }
 
@@ -198,7 +212,7 @@ export default function PublishTab() {
       setPdfUrl(url);
     } catch (error) {
       console.error('PDF generation error:', error);
-      alert(`Failed to generate PDF: ${error.message}`);
+      setValidationError(`Failed to generate PDF: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -224,13 +238,13 @@ export default function PublishTab() {
   }, [pdfUrl, headerImagePreview]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
         <h3 className="font-semibold mb-3">Export Format</h3>
         <div className="flex gap-4">
           <button
             onClick={() => setSelectedFormat('pdf')}
-            className={`p-4 border rounded-lg flex-1 ${
+            className={`p-2 border rounded-lg flex-1 ${
               selectedFormat === 'pdf' ? 'border-primary bg-primary/5' : ''
             }`}
           >
@@ -238,7 +252,7 @@ export default function PublishTab() {
           </button>
           <button
             onClick={() => setSelectedFormat('doc')}
-            className={`p-4 border rounded-lg flex-1 ${
+            className={`p-2 border rounded-lg flex-1 ${
               selectedFormat === 'doc' ? 'border-primary bg-primary/5' : ''
             }`}
           >
@@ -256,7 +270,7 @@ export default function PublishTab() {
                 <button
                   key={brand.id}
                   onClick={() => setSelectedBrand(brand)}
-                  className={`p-4 border rounded-lg flex flex-col items-center ${
+                  className={`p-2 border rounded-lg flex flex-col items-center ${
                     selectedBrand?.id === brand.id ? 'border-primary bg-primary/5' : ''
                   }`}
                 >
@@ -280,7 +294,7 @@ export default function PublishTab() {
           <div className="space-y-3">
             <h3 className="font-semibold">Design Options</h3>
             <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 space-y-2">
+              <div className="col-span-2 flex flex-row gap-2">
                 <ColorPicker
                   label="Trip Title Colors"
                   textColor={tripTitleColors.text}
@@ -355,7 +369,7 @@ export default function PublishTab() {
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex items-start gap-3">
             <button
               onClick={handleCreatePDF}
               disabled={!selectedBrand || isLoading}
@@ -364,17 +378,24 @@ export default function PublishTab() {
               {isLoading ? 'Generating...' : 'Create PDF'}
             </button>
 
+            {validationError && (
+              <div className="flex-1 p-2 border border-red-200 bg-red-50 rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="text-red-700 text-sm">{validationError}</div>
+              </div>
+            )}
+
             {pdfBlob && (
               <>
                 <button
                   onClick={() => window.open(pdfUrl, '_blank')}
-                  className="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90"
+                  className="px-2 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90"
                 >
                   View PDF
                 </button>
                 <button
                   onClick={handleDownloadPDF}
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                  className="px-2 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
                 >
                   Download PDF
                 </button>
@@ -383,7 +404,7 @@ export default function PublishTab() {
           </div>
 
           {pdfUrl && (
-            <div className="border rounded-lg p-4">
+            <div className="border rounded-lg p-2">
               <h3 className="font-semibold mb-3">PDF Preview</h3>
               <iframe
                 src={pdfUrl}
@@ -397,7 +418,7 @@ export default function PublishTab() {
 
       <div>
         <h3 className="font-semibold mb-3">Web Publishing</h3>
-        <div className="p-4 border rounded-lg">
+        <div className="p-2 border rounded-lg">
           <label className="flex items-center gap-2">
             <input type="checkbox" className="rounded" />
             Publish to website

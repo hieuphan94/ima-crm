@@ -5,7 +5,6 @@ import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useDragDrop } from '../../states/useDragDrop';
-import DayNameModal from './DayNameModal';
 import DayViewModal from './DayViewModal';
 import DeleteDayModal from './DeleteDayModal';
 
@@ -113,7 +112,6 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
           className={`font-medium text-xs cursor-move hover:text-blue-600 ${
             titleOfDay ? 'text-green-600' : 'text-yellow-600'
           }`}
-          onClick={() => setIsNameModalOpen(true)}
         >
           Day {order}
         </h3>
@@ -143,18 +141,6 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
           titleOfDay={daySchedule?.titleOfDay || ''}
           {...prepareModalData()}
           distance={0} // Bạn có thể thêm logic tính khoảng cách ở đây
-        />
-      )}
-
-      {/* Add DayNameModal */}
-      {isNameModalOpen && (
-        <DayNameModal
-          isOpen={isNameModalOpen}
-          onClose={() => setIsNameModalOpen(false)}
-          order={order}
-          dayId={dayId}
-          initialName={titleOfDay}
-          onSave={handleSaveDayName}
         />
       )}
 

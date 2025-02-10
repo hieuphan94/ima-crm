@@ -141,7 +141,19 @@ export default function PreviewTab() {
         const hasDayTitle = !!dayData.titleOfDay;
         const hasValidDistance = dayData.distance && parseFloat(dayData.distance) > 0;
 
-        const isValid = hasServices && hasDayTitle && hasValidDistance;
+        // Add meal validation
+        const hasMeals =
+          dayData.meals &&
+          Object.entries(dayData.meals).some(
+            ([, mealDetails]) => mealDetails.included && mealDetails.type
+          );
+        const hasAllMeals =
+          dayData.meals &&
+          ['breakfast', 'lunch', 'dinner'].every(
+            (meal) => dayData.meals[meal]?.included && dayData.meals[meal]?.type
+          );
+
+        const isValid = hasServices && hasDayTitle && hasValidDistance && hasMeals;
 
         return (
           <div key={dayId} className="p-3 border rounded-lg bg-white">
@@ -164,6 +176,8 @@ export default function PreviewTab() {
                 {!hasServices && <div>• No activities</div>}
                 {!hasDayTitle && <div>• No title</div>}
                 {!hasValidDistance && <div>• Distance = 0</div>}
+                {!hasMeals && <div>• No meals specified</div>}
+                {hasMeals && !hasAllMeals && <div>• Missing some meals</div>}
               </div>
             )}
           </div>
@@ -266,3 +280,21 @@ export default function PreviewTab() {
     </div>
   );
 }
+
+// Add a new export for validation status
+export const isScheduleValid = (scheduleItems) => {
+  return Object.values(scheduleItems).every((dayData) => {
+    const hasServices = Object.entries(dayData).some(
+      ([key, value]) => Array.isArray(value) && value.length > 0
+    );
+    const hasDayTitle = !!dayData.titleOfDay;
+    const hasValidDistance = dayData.distance && parseFloat(dayData.distance) > 0;
+    const hasMeals =
+      dayData.meals &&
+      Object.entries(dayData.meals).some(
+        ([, mealDetails]) => mealDetails.included && mealDetails.type
+      );
+
+    return hasServices && hasDayTitle && hasValidDistance && hasMeals;
+  });
+};
