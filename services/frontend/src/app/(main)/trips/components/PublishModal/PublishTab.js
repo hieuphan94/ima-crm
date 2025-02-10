@@ -7,6 +7,40 @@ import { useSelector } from 'react-redux';
 import { TripPDFDocument } from '../PDFExport';
 import { isScheduleValid } from './PreviewTab';
 
+// First, add the brand colors configuration at the top
+const BRAND_COLORS = {
+  aucoeurvietnam: {
+    tripTitleColors: {
+      text: '#FFFFFF',
+      background: '#5B7A67',
+    },
+    dayTitleColors: {
+      text: '#000000',
+      background: '#8bbf9f',
+    },
+  },
+  mekongvillages: {
+    tripTitleColors: {
+      text: '#FFFFFF',
+      background: '#ed7600',
+    },
+    dayTitleColors: {
+      text: '#000000',
+      background: '#8bbf9f',
+    },
+  },
+  imagetravel: {
+    tripTitleColors: {
+      text: '#FFFFFF',
+      background: '#ed7600',
+    },
+    dayTitleColors: {
+      text: '#000000',
+      background: '#f7be85',
+    },
+  },
+};
+
 // Cấu hình brand options với local URLs
 const brandOptions = [
   {
@@ -147,6 +181,17 @@ export default function PublishTab() {
     }
   };
 
+  const handleBrandSelection = (brand) => {
+    setSelectedBrand(brand);
+
+    // Set default colors based on brand
+    const brandColors = BRAND_COLORS[brand.id];
+    if (brandColors) {
+      setTripTitleColors(brandColors.tripTitleColors);
+      setDayTitleColors(brandColors.dayTitleColors);
+    }
+  };
+
   const handleCreatePDF = async () => {
     // Reset validation error
     setValidationError(null);
@@ -270,7 +315,7 @@ export default function PublishTab() {
               {brandOptions.map((brand) => (
                 <button
                   key={brand.id}
-                  onClick={() => setSelectedBrand(brand)}
+                  onClick={() => handleBrandSelection(brand)}
                   className={`p-2 border rounded-lg flex flex-col items-center ${
                     selectedBrand?.id === brand.id ? 'border-primary bg-primary/5' : ''
                   }`}
