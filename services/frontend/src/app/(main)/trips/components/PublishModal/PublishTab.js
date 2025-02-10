@@ -4,6 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { generateAndDownloadDOCX } from '../DOCExport';
 import { TripPDFDocument } from '../PDFExport';
 import { isScheduleValid } from './PreviewTab';
 
@@ -121,6 +122,7 @@ export default function PublishTab() {
   const [headerImage, setHeaderImage] = useState(null);
   const [headerImagePreview, setHeaderImagePreview] = useState(null);
   const [validationError, setValidationError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -270,6 +272,45 @@ export default function PublishTab() {
     const fileName = `trip-${selectedBrand.id}-${Date.now()}.pdf`;
     FileSaver.saveAs(pdfBlob, fileName);
     console.log('PDF downloaded successfully:', fileName);
+  };
+
+  const handleCreateDOCX = async () => {
+    try {
+      console.log('Starting DOCX generation...');
+      setIsLoading(true);
+      setValidationError(null);
+
+      // Log data before validation
+      console.log('Current data:', {
+        scheduleData,
+        formattedScheduleItems,
+        scheduleInfo,
+        settings,
+      });
+
+      // Validate required data
+      if (!formattedScheduleItems.length) {
+        console.log('No schedule items found');
+        setValidationError('Không có dữ liệu lịch trình để xuất');
+        return;
+      }
+
+      // Generate and download DOCX with minimal required data
+      await generateAndDownloadDOCX({
+        scheduleItems: formattedScheduleItems,
+        scheduleInfo: scheduleInfo,
+        settings: settings,
+      });
+
+      console.log('DOCX generation completed');
+      setSuccessMessage('File DOCX đã được tạo thành công');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error('DOCX generation error:', error);
+      setValidationError(`Lỗi khi tạo file DOCX: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Cleanup URL when component unmounts
@@ -461,6 +502,16 @@ export default function PublishTab() {
             </div>
           )}
         </>
+      )}
+
+      {selectedFormat === 'doc' && (
+        <button
+          onClick={handleCreateDOCX}
+          disabled={isLoading}
+          className="px-4 py-2 bg-primary text-white rounded"
+        >
+          {isLoading ? 'Generating...' : 'Generate DOCX'}
+        </button>
       )}
 
       <div>
