@@ -21,6 +21,52 @@ export const generateDescription = (daySchedule) => {
     };
   }
 
+  // Hàm để bôi đậm các từ viết hoa trong text
+  const boldProperNouns = (text) => {
+    if (!text) return text;
+
+    const words = text.split(' ');
+    let insideQuotes = false;
+
+    const processedWords = words.map((word, index) => {
+      // Check for opening/closing quotes
+      if (word.includes('"')) {
+        insideQuotes = !insideQuotes;
+        return word;
+      }
+
+      // Skip bolding if inside quotes
+      if (insideQuotes) return word;
+
+      // Skip bolding in these cases:
+      if (index === 0) return word;
+      if (index > 0 && words[index - 1].endsWith('.')) return word;
+      if (index > 0 && words[index - 1].endsWith(';')) return word;
+      if (index > 0 && words[index - 1].endsWith(':')) return word;
+
+      // Handle words with l', d' prefixes (both straight and curly apostrophes)
+      const prefixMatch = word.match(/^([ldLD]['’'])/);
+      if (prefixMatch) {
+        const prefix = prefixMatch[0];
+        const restOfWord = word.slice(prefix.length);
+        // Check if the rest of the word starts with capital letter
+        if (/^[A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝĂĐĨŨƠƯẾỀỂỄỆỐ]/.test(restOfWord)) {
+          return `<strong>${word}</strong>`;
+        }
+        return word;
+      }
+
+      // Regular cases for bolding - words starting with capital letter
+      if (/^[A-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝĂĐĨŨƠƯẾỀỂỄỆỐ]/.test(word)) {
+        return `<strong>${word}</strong>`;
+      }
+
+      return word;
+    });
+
+    return processedWords.join(' ');
+  };
+
   let description = '';
   availableConnectors = ['Ensuite, ', 'Puis, ', 'Après, '];
 
@@ -70,7 +116,9 @@ export const generateDescription = (daySchedule) => {
     // First morning service
     const firstService = periods.morning[0];
     if (firstService?.sentence) {
-      description += firstService.sentence.charAt(0).toLowerCase() + firstService.sentence.slice(1);
+      description += boldProperNouns(
+        firstService.sentence.charAt(0).toLowerCase() + firstService.sentence.slice(1)
+      );
     }
     // Remaining morning services with connectors
     for (let i = 1; i < periods.morning.length; i++) {
@@ -79,8 +127,7 @@ export const generateDescription = (daySchedule) => {
         description +=
           ' ' +
           getNextConnector() +
-          service.sentence.charAt(0).toLowerCase() +
-          service.sentence.slice(1);
+          boldProperNouns(service.sentence.charAt(0).toLowerCase() + service.sentence.slice(1));
       }
     }
     description += '</p>';
@@ -97,7 +144,9 @@ export const generateDescription = (daySchedule) => {
     // First afternoon service
     const firstService = periods.afternoon[0];
     if (firstService?.sentence) {
-      description += firstService.sentence.charAt(0).toLowerCase() + firstService.sentence.slice(1);
+      description += boldProperNouns(
+        firstService.sentence.charAt(0).toLowerCase() + firstService.sentence.slice(1)
+      );
     }
     // Remaining afternoon services with connectors
     for (let i = 1; i < periods.afternoon.length; i++) {
@@ -106,8 +155,7 @@ export const generateDescription = (daySchedule) => {
         description +=
           ' ' +
           getNextConnector() +
-          service.sentence.charAt(0).toLowerCase() +
-          service.sentence.slice(1);
+          boldProperNouns(service.sentence.charAt(0).toLowerCase() + service.sentence.slice(1));
       }
     }
     description += '</p>';
@@ -119,7 +167,7 @@ export const generateDescription = (daySchedule) => {
     // First evening service
     const firstService = periods.evening[0];
     if (firstService?.sentence) {
-      description += firstService.sentence;
+      description += boldProperNouns(firstService.sentence);
     }
     // Remaining evening services with connectors
     for (let i = 1; i < periods.evening.length; i++) {
@@ -128,8 +176,7 @@ export const generateDescription = (daySchedule) => {
         description +=
           ' ' +
           getNextConnector() +
-          service.sentence.charAt(0).toLowerCase() +
-          service.sentence.slice(1);
+          boldProperNouns(service.sentence.charAt(0).toLowerCase() + service.sentence.slice(1));
       }
     }
     description += '</p>';
