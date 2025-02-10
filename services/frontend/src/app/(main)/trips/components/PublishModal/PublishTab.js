@@ -1,10 +1,11 @@
 import { pdf } from '@react-pdf/renderer';
 import FileSaver from 'file-saver';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { generateAndDownloadDOCX } from '../DOCExport';
+import { generateAndDownloadExcel } from '../ExcelExport';
 import { TripPDFDocument } from '../PDFExport';
 import { isScheduleValid } from './PreviewTab';
 
@@ -123,6 +124,8 @@ export default function PublishTab() {
   const [headerImagePreview, setHeaderImagePreview] = useState(null);
   const [validationError, setValidationError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [docExportType, setDocExportType] = useState('local');
+  const [excelExportType, setExcelExportType] = useState('local');
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -313,6 +316,45 @@ export default function PublishTab() {
     }
   };
 
+  const handleCreateExcel = async () => {
+    try {
+      console.log('Starting Excel generation...');
+      setIsLoading(true);
+      setValidationError(null);
+
+      // Log data before validation
+      console.log('Current data:', {
+        scheduleData,
+        formattedScheduleItems,
+        scheduleInfo,
+        settings,
+      });
+
+      // Validate required data
+      if (!formattedScheduleItems.length) {
+        console.log('No schedule items found');
+        setValidationError('Không có dữ liệu lịch trình để xuất');
+        return;
+      }
+
+      // Generate and download Excel
+      await generateAndDownloadExcel({
+        scheduleItems: formattedScheduleItems,
+        scheduleInfo: scheduleInfo,
+        settings: settings,
+      });
+
+      console.log('Excel generation completed');
+      setSuccessMessage('File Excel đã được tạo thành công');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error('Excel generation error:', error);
+      setValidationError(`Lỗi khi tạo file Excel: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Cleanup URL when component unmounts
   useEffect(() => {
     return () => {
@@ -345,6 +387,14 @@ export default function PublishTab() {
             }`}
           >
             DOC Format
+          </button>
+          <button
+            onClick={() => setSelectedFormat('excel')}
+            className={`p-2 border rounded-lg flex-1 ${
+              selectedFormat === 'excel' ? 'border-primary bg-primary/5' : ''
+            }`}
+          >
+            Excel Format
           </button>
         </div>
       </div>
@@ -505,13 +555,81 @@ export default function PublishTab() {
       )}
 
       {selectedFormat === 'doc' && (
-        <button
-          onClick={handleCreateDOCX}
-          disabled={isLoading}
-          className="px-4 py-2 bg-primary text-white rounded"
-        >
-          {isLoading ? 'Generating...' : 'Generate DOCX'}
-        </button>
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium mb-3">Document Export Options</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setDocExportType('local')}
+                className={`p-3 border rounded-lg flex items-center justify-center gap-2 ${
+                  docExportType === 'local' ? 'border-primary bg-primary/5' : ''
+                }`}
+              >
+                <FileText className="w-5 h-5" />
+                <span>Local DOCX</span>
+              </button>
+              <button
+                onClick={() => setDocExportType('google')}
+                className={`p-3 border rounded-lg flex items-center justify-center gap-2 ${
+                  docExportType === 'google' ? 'border-primary bg-primary/5' : ''
+                } opacity-50 cursor-not-allowed`}
+                disabled
+                title="Coming soon"
+              >
+                <FileText className="w-5 h-5" />
+                <span>Google Doc</span>
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={handleCreateDOCX}
+            disabled={isLoading}
+            className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {isLoading ? 'Generating...' : 'Generate Document'}
+          </button>
+        </div>
+      )}
+
+      {selectedFormat === 'excel' && (
+        <div className="space-y-4">
+          <div className="border rounded-lg p-4">
+            <h4 className="font-medium mb-3">Excel Export Options</h4>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setExcelExportType('local')}
+                className={`p-3 border rounded-lg flex items-center justify-center gap-2 ${
+                  excelExportType === 'local' ? 'border-primary bg-primary/5' : ''
+                }`}
+              >
+                <FileSpreadsheet className="w-5 h-5" />
+                <span>Local Excel</span>
+              </button>
+              <button
+                onClick={() => setExcelExportType('google')}
+                className={`p-3 border rounded-lg flex items-center justify-center gap-2 ${
+                  excelExportType === 'google' ? 'border-primary bg-primary/5' : ''
+                } opacity-50 cursor-not-allowed`}
+                disabled
+                title="Coming soon"
+              >
+                <FileSpreadsheet className="w-5 h-5" />
+                <span>Google Sheet</span>
+              </button>
+            </div>
+          </div>
+
+          <button
+            onClick={handleCreateExcel}
+            disabled={isLoading}
+            className="px-4 py-2 bg-primary text-white rounded-lg flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {isLoading ? 'Generating...' : 'Generate Excel'}
+          </button>
+        </div>
       )}
 
       <div>
@@ -523,6 +641,13 @@ export default function PublishTab() {
           </label>
         </div>
       </div>
+
+      {successMessage && (
+        <div className="p-2 border border-green-200 bg-green-50 rounded-lg flex items-start gap-2">
+          <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+          <div className="text-green-700 text-sm">{successMessage}</div>
+        </div>
+      )}
     </div>
   );
 }
