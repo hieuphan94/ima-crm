@@ -204,15 +204,6 @@ export default function DraftTab({ onClose }) {
 
   const handleManualSave = () => {
     try {
-      // Log state trước khi save
-      console.log('Save state:', {
-        currentSchedule,
-        globalPax,
-        numberOfDays,
-        tripTitle,
-        starRating,
-      });
-
       if (!currentSchedule || Object.keys(currentSchedule).length === 0) {
         throw new Error('Schedule data is empty');
       }
@@ -232,8 +223,6 @@ export default function DraftTab({ onClose }) {
           starRating: starRating,
         },
       };
-
-      console.log('New version:', newVersion);
 
       const isValid = validateVersion(newVersion);
       if (!isValid) {

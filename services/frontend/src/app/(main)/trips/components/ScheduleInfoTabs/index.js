@@ -1,16 +1,13 @@
 'use client';
 
 import {
-  addGroupGuest,
   addScheduleImage,
-  removeGroupGuest,
   removeScheduleImage,
   updateCustomerInfo,
-  updateGroupGuest,
 } from '@/store/slices/useDailyScheduleSlice';
 import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import DailySchedule from '../../components/DailySchedule';
+import DailySchedule from '../DailySchedule';
 
 const tabs = [
   { id: 'basic', label: 'Trip Info' },
@@ -31,24 +28,6 @@ export default function ScheduleInfoTabs() {
   const handleCustomerInfoChange = useCallback(
     (field, value) => {
       dispatch(updateCustomerInfo({ field, value }));
-    },
-    [dispatch]
-  );
-
-  const handleGuestChange = useCallback(
-    (index, field, value) => {
-      dispatch(updateGroupGuest({ index, field, value }));
-    },
-    [dispatch]
-  );
-
-  const handleAddGuest = useCallback(() => {
-    dispatch(addGroupGuest());
-  }, [dispatch]);
-
-  const handleRemoveGuest = useCallback(
-    (index) => {
-      dispatch(removeGroupGuest(index));
     },
     [dispatch]
   );
@@ -83,155 +62,181 @@ export default function ScheduleInfoTabs() {
 
   return (
     <div className="w-full">
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-4">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`px-4 py-2 font-medium text-sm transition-colors duration-200
-                ${
-                  activeTab === tab.id
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      {/* Tabs */}
+      <div className="flex gap-4 mb-4 border-b border-gray-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => handleTabChange(tab.id)}
+            className={`pb-2 px-1 ${
+              activeTab === tab.id
+                ? 'border-b-2 border-primary text-primary font-medium'
+                : 'text-gray-500'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Tab Content */}
-      <div className="py-4">
-        {activeTab === 'basic' ? (
-          <div className="space-y-6">
-            {/* Customer Info Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Thông tin khách hàng</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tên khách/đoàn
-                  </label>
-                  <input
-                    type="text"
-                    value={customerInfo.name || ''}
-                    onChange={(e) => handleCustomerInfoChange('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="Nhập tên khách/đoàn..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Quốc tịch</label>
-                  <input
-                    type="text"
-                    value={customerInfo.nationality || ''}
-                    onChange={(e) => handleCustomerInfoChange('nationality', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="Nhập quốc tịch..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ngôn ngữ</label>
-                  <input
-                    type="text"
-                    value={customerInfo.language || ''}
-                    onChange={(e) => handleCustomerInfoChange('language', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    placeholder="Nhập ngôn ngữ sử dụng..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Yêu cầu đặc biệt
-                  </label>
-                  <textarea
-                    value={customerInfo.specialRequests || ''}
-                    onChange={(e) => handleCustomerInfoChange('specialRequests', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    rows={2}
-                    placeholder="Nhập yêu cầu đặc biệt..."
-                  />
-                </div>
+      {activeTab === 'basic' ? (
+        // Trip Info Content
+        <>
+          {/* Header with collapse button */}
+          <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-medium ml-1">Traveller request</h2>
+            </div>
+          </div>
+
+          {/* Request Information */}
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-sm text-gray-600">Request ID</label>
+              <div className="font-medium">{customerInfo.requestId || '1529636'}</div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-8">
+              <div>
+                <label className="block text-sm text-gray-600">Traveller first name</label>
+                <input
+                  type="text"
+                  value={customerInfo.name || ''}
+                  onChange={(e) => handleCustomerInfoChange('name', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Traveller surname</label>
+                <input
+                  type="text"
+                  value={customerInfo.surname || ''}
+                  onChange={(e) => handleCustomerInfoChange('surname', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
             </div>
 
-            {/* Group Info Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Thông tin đoàn</h3>
-              <div className="border border-gray-200 rounded-lg p-4">
-                {groupInfo.guests.map((guest, index) => (
-                  <div key={guest.id || index} className="grid grid-cols-3 gap-4 mb-4">
-                    <input
-                      type="text"
-                      value={guest.name || ''}
-                      onChange={(e) => handleGuestChange(index, 'name', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      placeholder="Tên khách..."
-                    />
-                    <input
-                      type="text"
-                      value={guest.nationality || ''}
-                      onChange={(e) => handleGuestChange(index, 'nationality', e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      placeholder="Quốc tịch..."
-                    />
-                    <button
-                      onClick={() => handleRemoveGuest(index)}
-                      className="text-red-500 hover:text-red-600"
-                    >
-                      Xóa
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={handleAddGuest}
-                  className="px-4 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-                >
-                  Thêm khách
-                </button>
+            <div>
+              <label className="block text-sm text-gray-600">Destination</label>
+              <input
+                type="text"
+                value={customerInfo.destination || ''}
+                onChange={(e) => handleCustomerInfoChange('destination', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-8">
+              <div>
+                <label className="block text-sm text-gray-600">Arrival date</label>
+                <input
+                  type="date"
+                  value={customerInfo.arrivalDate || ''}
+                  onChange={(e) => handleCustomerInfoChange('arrivalDate', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Departure date</label>
+                <input
+                  type="date"
+                  value={customerInfo.departureDate || ''}
+                  onChange={(e) => handleCustomerInfoChange('departureDate', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
               </div>
             </div>
 
-            {/* Schedule Images Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Hình ảnh lịch trình</h3>
-              <div className="grid grid-cols-5 gap-4">
-                {scheduleImages.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={image}
-                      alt={`Schedule ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                    <button
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                {scheduleImages.length < 5 && (
-                  <button
-                    onClick={handleAddImage}
-                    className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-primary/50"
-                  >
-                    + Thêm ảnh
+            <div className="relative">
+              <label className="block text-sm text-gray-600">Number of travellers</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={customerInfo.numberOfTravellers || ''}
+                  onChange={(e) => handleCustomerInfoChange('numberOfTravellers', e.target.value)}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <div className="relative group">
+                  <button className="w-5 h-5 rounded-full border border-blue-500 text-blue-500 flex items-center justify-center">
+                    i
                   </button>
-                )}
+                  <div className="hidden group-hover:block absolute bottom-full left-0 w-64 p-4 bg-white border rounded-lg shadow-lg mb-2">
+                    <h4 className="font-medium mb-2">Important</h4>
+                    <p className="text-sm text-gray-600">
+                      If you need to adjust the number of pax please go to Request Manager. Please
+                      refresh this page when you've done the modifications in Request Manager.
+                    </p>
+                    <button className="mt-2 text-green-700 font-medium">
+                      GOT TO REQUEST MANAGER
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-gray-500">Tối đa 5 hình ảnh</p>
             </div>
           </div>
-        ) : (
-          <div className="h-[calc(100vh-200px)] overflow-y-auto">
-            <DailySchedule />
+
+          {/* Personalize Section */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center border-b border-gray-200 pb-2 mb-4">
+              <h2 className="text-lg font-medium">Personalize</h2>
+              <button className="p-2">
+                <span className="transform rotate-180">^</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-600">Quote title</label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="Au coeur de l'Indochine"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600">Language of quote</label>
+                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20">
+                  <option value="fr">Français</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-600">Cover photo</label>
+                <div className="grid grid-cols-3 gap-4">
+                  {scheduleImages.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={image}
+                        alt={`Cover ${index + 1}`}
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <button
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-2 right-2 p-1 bg-white text-gray-600 rounded-full hover:bg-gray-100"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {scheduleImages.length < 3 && (
+                    <button
+                      onClick={handleAddImage}
+                      className="w-full h-40 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-primary/50"
+                    >
+                      <span className="text-md text-gray-400">📷 Max 3 images</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        </>
+      ) : (
+        // Trip Schedule Content
+        <DailySchedule />
+      )}
     </div>
   );
 }
