@@ -1,6 +1,5 @@
 'use client';
 
-import { VisitService } from '@/data/models';
 import { useUI } from '@/hooks/useUI';
 import {
   resetDays,
@@ -13,9 +12,9 @@ import { ChevronLeft, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import DailySchedule from '../components/DailySchedule';
 import ResetDaysModal from '../components/DailySchedule/components/ResetDaysModal';
 import PublishModal from '../components/PublishModal';
+import ScheduleInfoTabs from '../components/ScheduleInfoTabs';
 import TemplateModal from '../components/TemplateModal';
 
 export default function NewTripPage() {
@@ -30,8 +29,6 @@ export default function NewTripPage() {
   const { notifyError } = useUI();
 
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [sheetData, setSheetData] = useState(null);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
@@ -139,41 +136,6 @@ export default function NewTripPage() {
     setIsResetModalOpen(false);
   };
 
-  const fetchLocationServices = async (locationName) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
-      const data = await response.json();
-
-      // Hàm tạo giá random từ 100,000 đến 500,000
-      const getRandomPrice = () => {
-        return Math.floor(Math.random() * (500000 - 100000 + 1) + 100000);
-      };
-
-      // Chuyển đổi dữ liệu thành VisitService instances với giá random
-      const services = data.map((serviceData) => {
-        const randomPrice = getRandomPrice();
-        return new VisitService({
-          ...serviceData,
-          price: randomPrice,
-          quotedPrice: randomPrice * 1.2,
-          actualPrice: randomPrice * 0.9,
-          duration: serviceData.duration || 0,
-          ticketInfo: serviceData.ticketInfo || {},
-          openingHours: serviceData.openingHours || {},
-          highlights: serviceData.highlights || [],
-        });
-      });
-
-      setSheetData(services);
-    } catch (error) {
-      console.error('Error fetching location services:', error);
-      notifyError('Không thể lấy dữ liệu dịch vụ cho địa điểm này');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleStarChange = (e) => {
     dispatch(setStarRating(parseInt(e.target.value, 10)));
   };
@@ -185,10 +147,10 @@ export default function NewTripPage() {
   return (
     <>
       <div className="h-full flex flex-col overflow-hidden">
-        <div className="flex-none p-6">
-          <div className="flex justify-between items-center">
+        <div className="flex-none p-2">
+          <div className="flex justify-start items-center">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-sm text-gray-500 mr-4 bg-gray-200 p-1 border-gray-200 rounded-lg">
               <button
                 onClick={() => router.back()}
                 className="hover:text-primary flex items-center gap-1"
@@ -203,16 +165,14 @@ export default function NewTripPage() {
             </div>
 
             {/* Quick Create Form */}
-            <form className="flex gap-6 items-end">
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsTemplateModalOpen(true)}
-                  className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  Load Template
-                </button>
-              </div>
+            <form className="flex gap-6 items-center">
+              <button
+                type="button"
+                onClick={() => setIsTemplateModalOpen(true)}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Load Template
+              </button>
               <div>
                 <input
                   type="text"
@@ -273,13 +233,9 @@ export default function NewTripPage() {
           </div>
         </div>
 
+        {/* Main Content */}
         <div className="flex-1 overflow-hidden">
-          <div className="flex h-full">
-            <DailySchedule
-              sheetServices={sheetData || []}
-              onFetchLocationServices={fetchLocationServices}
-            />
-          </div>
+          <ScheduleInfoTabs />
         </div>
       </div>
 

@@ -457,6 +457,55 @@ const useDailyScheduleSlice = createSlice({
     setScheduleTitle: (state, action) => {
       state.scheduleInfo.title = action.payload;
     },
+
+    // Customer Info
+    updateCustomerInfo: (state, action) => {
+      const { field, value } = action.payload;
+      state.scheduleInfo.customerInfo[field] = value;
+    },
+
+    // Group Info
+    updateGroupGuests: (state, action) => {
+      state.scheduleInfo.groupInfo.guests = action.payload;
+    },
+
+    addGroupGuest: (state) => {
+      state.scheduleInfo.groupInfo.guests.push({
+        id: Date.now().toString(),
+        name: '',
+        nationality: '',
+      });
+    },
+
+    removeGroupGuest: (state, action) => {
+      const index = action.payload;
+      state.scheduleInfo.groupInfo.guests = state.scheduleInfo.groupInfo.guests.filter(
+        (_, i) => i !== index
+      );
+    },
+
+    updateGroupGuest: (state, action) => {
+      const { index, field, value } = action.payload;
+      state.scheduleInfo.groupInfo.guests[index][field] = value;
+    },
+
+    // Schedule Images
+    updateScheduleImages: (state, action) => {
+      state.scheduleInfo.scheduleImages = action.payload;
+    },
+
+    addScheduleImage: (state, action) => {
+      if (state.scheduleInfo.scheduleImages.length < 5) {
+        state.scheduleInfo.scheduleImages.push(action.payload);
+      }
+    },
+
+    removeScheduleImage: (state, action) => {
+      const index = action.payload;
+      state.scheduleInfo.scheduleImages = state.scheduleInfo.scheduleImages.filter(
+        (_, i) => i !== index
+      );
+    },
   },
 });
 
@@ -481,6 +530,14 @@ export const {
   updateDayParagraph,
   loadScheduleItems,
   setScheduleTitle,
+  updateCustomerInfo,
+  updateGroupGuests,
+  addGroupGuest,
+  removeGroupGuest,
+  updateGroupGuest,
+  updateScheduleImages,
+  addScheduleImage,
+  removeScheduleImage,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;
