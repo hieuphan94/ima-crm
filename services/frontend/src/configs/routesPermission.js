@@ -24,6 +24,12 @@ export const ROUTES = {
   tours: '/tours',
   trips: '/trips',
   tripsDetail: '/trips/:id',
+
+  // Office routes
+  office: '/office',
+  officeInbox: '/office?tab=inbox',
+  officePipeline: '/office?tab=pipeline',
+  officeTodo: '/office?tab=todo',
 };
 
 // 3. Ba loại role có thể có
@@ -51,6 +57,11 @@ export const DEPARTMENT_PERMISSIONS = {
     ROUTES.libraryDayTemplates,
     ROUTES.libraryServicesRepository,
     ROUTES.settings,
+    // Thêm quyền truy cập Office cho Sales
+    ROUTES.office,
+    ROUTES.officeInbox,
+    ROUTES.officePipeline,
+    ROUTES.officeTodo,
   ],
 };
 
