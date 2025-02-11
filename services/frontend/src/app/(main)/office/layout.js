@@ -1,7 +1,7 @@
 export default function OfficeLayout({ children }) {
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</div>
+      <div className="w-full mx-auto px-1 py-1">{children}</div>
     </div>
   );
 }
