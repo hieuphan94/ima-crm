@@ -1,20 +1,21 @@
 'use client';
 
+import { ImageOptimized } from '@/components/common/ImageOptimized';
+import HeaderMenu from '@/components/layouts/HeaderMenu';
+import { useAuth } from '@/hooks/useAuth';
 import {
+  Avatar,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
   Navbar,
   NavbarContent,
   NavbarItem,
-  Button,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Avatar,
 } from '@nextui-org/react';
-import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-import { FiUser, FiLogOut } from 'react-icons/fi';
-import { ImageOptimized } from '@/components/common/ImageOptimized';
+import { FiLogOut, FiUser } from 'react-icons/fi';
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -45,6 +46,12 @@ export default function Header() {
             priority
           />
         </div>
+      </NavbarContent>
+
+      <NavbarContent justify="center">
+        <NavbarItem>
+          <HeaderMenu />
+        </NavbarItem>
       </NavbarContent>
 
       <NavbarContent justify="end">

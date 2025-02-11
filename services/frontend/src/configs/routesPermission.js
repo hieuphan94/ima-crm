@@ -30,6 +30,14 @@ export const ROUTES = {
   officeInbox: '/office?tab=inbox',
   officePipeline: '/office?tab=pipeline',
   officeTodo: '/office?tab=todo',
+
+  // Room routes
+  room: '/room',
+  roomDetails: '/room/details',
+  roomSettings: '/room/settings',
+
+  // Personal route
+  personal: '/personal',
 };
 
 // 3. Ba loại role có thể có
@@ -153,4 +161,17 @@ export const getDefaultRoute = (role, department) => {
   }
 
   return ROUTES.dashboard;
+};
+
+export const ROUTE_PERMISSIONS = {
+  [ROUTES.room]: ['admin', 'user', 'manager'],
+  [ROUTES.roomDetails]: ['admin', 'user', 'manager'],
+  [ROUTES.roomSettings]: ['admin', 'manager'],
+};
+
+export const ROUTES_PERMISSIONS = {
+  [ROUTES.personal]: {
+    roles: ['admin', 'user'],
+    redirectTo: '/auth/login',
+  },
 };
