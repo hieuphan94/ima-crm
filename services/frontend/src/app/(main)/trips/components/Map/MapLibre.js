@@ -1,6 +1,7 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import Map, { Marker } from 'react-map-gl/maplibre';
+import Map, { Layer, Marker, Source } from 'react-map-gl/maplibre';
+import vietnamGeoJson from './vietnam-geo.json'; // Import file GeoJSON
 
 export default function MapLibre({
   position = { lng: 105.8542, lat: 14.4974 },
@@ -88,6 +89,43 @@ export default function MapLibre({
         ],
       }}
     >
+      {/* Add Vietnam provinces overlay */}
+      <Source id="vietnam-provinces" type="geojson" data={vietnamGeoJson}>
+        <Layer
+          id="province-fills"
+          type="fill"
+          paint={{
+            'fill-color': '#166534',
+            'fill-opacity': 0.9,
+          }}
+        />
+        <Layer
+          id="province-borders"
+          type="line"
+          paint={{
+            'line-color': '#14532d',
+            'line-width': 1,
+            'line-opacity': 0.9,
+          }}
+        />
+        <Layer
+          id="province-labels"
+          type="symbol"
+          layout={{
+            'text-field': ['get', 'name'],
+            'text-size': 12,
+            'text-allow-overlap': false,
+            'text-ignore-placement': false,
+            'text-anchor': 'center',
+          }}
+          paint={{
+            'text-color': '#000000',
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1,
+          }}
+        />
+      </Source>
+
       {matchedLocations.map((location, index) => (
         <Marker key={index} longitude={location.lng} latitude={location.lat} anchor="bottom">
           <div className="relative group cursor-pointer">
@@ -98,7 +136,7 @@ export default function MapLibre({
               </div>
             </div>
 
-            {/* Tooltip cải tiến */}
+            {/* Tooltip khi hover (có thể giữ lại hoặc bỏ đi) */}
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block">
               <div className="bg-white px-3 py-1 rounded-lg shadow-lg text-sm font-medium text-gray-900 whitespace-nowrap">
                 {location.name}
