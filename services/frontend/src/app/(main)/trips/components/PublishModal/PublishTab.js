@@ -1,6 +1,6 @@
 import { pdf } from '@react-pdf/renderer';
 import FileSaver from 'file-saver';
-import { AlertCircle, CheckCircle, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, Download, FileSpreadsheet, FileText, Globe } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -126,6 +126,9 @@ export default function PublishTab() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [docExportType, setDocExportType] = useState('local');
   const [excelExportType, setExcelExportType] = useState('local');
+  const [enableWebPublish, setEnableWebPublish] = useState(false);
+  const [publishedTripId, setPublishedTripId] = useState(null);
+  const [publishSuccess, setPublishSuccess] = useState(false);
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -352,6 +355,104 @@ export default function PublishTab() {
       setValidationError(`Lỗi khi tạo file Excel: ${error.message}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Thêm hàm validateVersion từ DraftTab
+  const validateVersion = (version) => {
+    if (!version) {
+      console.log('Version is null or undefined');
+      return false;
+    }
+
+    // Log chi tiết từng field để debug
+    console.log('Validating version:', {
+      hasScheduleData: !!version.scheduleData,
+      scheduleDataEmpty: Object.keys(version.scheduleData || {}).length === 0,
+      hasTripInfo: !!version.tripInfo,
+      pax: version.tripInfo?.pax,
+      numberOfDays: version.tripInfo?.numberOfDays,
+      title: version.tripInfo?.title,
+      starRating: version.tripInfo?.starRating,
+    });
+
+    // Kiểm tra scheduleData không rỗng
+    if (!version.scheduleData || Object.keys(version.scheduleData).length === 0) {
+      console.log('Schedule data is empty');
+      return false;
+    }
+
+    // Kiểm tra các trường bắt buộc
+    const requiredFields = [
+      'scheduleData',
+      'tripInfo',
+      'tripInfo.pax',
+      'tripInfo.numberOfDays',
+      'tripInfo.title',
+      'tripInfo.starRating',
+    ];
+
+    const validationResults = requiredFields.map((field) => {
+      const fields = field.split('.');
+      let value = version;
+      for (const f of fields) {
+        value = value?.[f];
+      }
+      const isValid = value !== undefined && value !== null;
+      console.log(`Validating ${field}:`, { value, isValid });
+      return isValid;
+    });
+
+    return validationResults.every((result) => result === true);
+  };
+
+  const handlePublishToWeb = () => {
+    try {
+      // Generate unique trip ID
+      const tripId = `trip-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Tạo version mới với cấu trúc giống DraftTab
+      const newVersion = {
+        id: tripId,
+        date: new Date().toISOString().replace('T', ' ').substr(0, 19),
+        type: 'publish',
+        changes: 'Published to web',
+        scheduleData: scheduleData.scheduleItems, // Lấy trực tiếp scheduleItems
+        tripInfo: {
+          pax: settings?.globalPax,
+          numberOfDays: settings?.numberOfDays,
+          title: scheduleInfo?.title,
+          starRating: settings?.starRating || 4,
+        },
+      };
+
+      // Validate version trước khi lưu
+      if (!validateVersion(newVersion)) {
+        throw new Error('Invalid version data structure');
+      }
+
+      // Save to localStorage
+      localStorage.setItem(tripId, JSON.stringify(newVersion));
+
+      // Update state
+      setPublishedTripId(tripId);
+      setPublishSuccess(true);
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setPublishSuccess(false), 3000);
+
+      console.log('Published trip data:', newVersion);
+    } catch (error) {
+      console.error('Publish error:', {
+        message: error.message,
+        currentState: {
+          hasSchedule: !!scheduleData,
+          scheduleKeys: Object.keys(scheduleData?.scheduleItems || {}),
+          settings,
+          scheduleInfo,
+        },
+      });
+      setValidationError(`Failed to publish: ${error.message}`);
     }
   };
 
@@ -634,18 +735,55 @@ export default function PublishTab() {
 
       <div>
         <h3 className="font-semibold mb-3">Web Publishing</h3>
-        <div className="p-2 border rounded-lg">
+        <div className="p-2 border rounded-lg space-y-4">
           <label className="flex items-center gap-2">
-            <input type="checkbox" className="rounded" />
+            <input
+              type="checkbox"
+              className="rounded"
+              checked={enableWebPublish}
+              onChange={(e) => setEnableWebPublish(e.target.checked)}
+            />
             Publish to website
           </label>
+
+          {enableWebPublish && (
+            <div className="space-y-4">
+              <button
+                onClick={handlePublishToWeb}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 flex items-center gap-2"
+              >
+                <Globe className="w-4 h-4" />
+                Publish Trip
+              </button>
+
+              {publishedTripId && (
+                <div className="p-3 bg-gray-50 border rounded-lg space-y-2">
+                  <div className="text-sm font-medium">Preview Link:</div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={`${window.location.origin}/preview/${publishedTripId}`}
+                      readOnly
+                      className="flex-1 px-3 py-1 bg-white border rounded text-sm"
+                    />
+                    <button
+                      onClick={() => window.open(`/preview/${publishedTripId}`, '_blank')}
+                      className="px-3 py-1 bg-secondary text-white rounded hover:bg-secondary/90 text-sm"
+                    >
+                      Open
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {successMessage && (
+      {publishSuccess && (
         <div className="p-2 border border-green-200 bg-green-50 rounded-lg flex items-start gap-2">
           <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-          <div className="text-green-700 text-sm">{successMessage}</div>
+          <div className="text-green-700 text-sm">Trip published successfully!</div>
         </div>
       )}
     </div>
