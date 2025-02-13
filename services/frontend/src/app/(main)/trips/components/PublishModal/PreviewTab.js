@@ -1,6 +1,9 @@
 import { AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
+
 import { useSelector } from 'react-redux';
 
 const previewTabs = [
@@ -13,6 +16,10 @@ export default function PreviewTab() {
   const scheduleInfo = useSelector((state) => state.dailySchedule.scheduleInfo);
   const [expandedDays, setExpandedDays] = useState({});
   const [activePreviewTab, setActivePreviewTab] = useState('validation');
+
+  const Map = dynamic(() => import('@/app/(main)/trips/components/Map/MapLibre'), {
+    ssr: false,
+  });
 
   const toggleDay = (dayId) => {
     setExpandedDays((prev) => {
@@ -132,6 +139,36 @@ export default function PreviewTab() {
   };
 
   const sortedDays = Object.entries(scheduleItems).sort(([, a], [, b]) => a.order - b.order);
+
+  const getLocationsFromSchedule = () => {
+    const locations = sortedDays
+      .map(([, dayData]) => {
+        const dayLocations = [];
+        // Collect all locations from all services in the day
+        for (const [, services] of Object.entries(dayData)) {
+          if (Array.isArray(services)) {
+            services.forEach((service) => {
+              if (service.locations?.length > 0) {
+                service.locations.forEach((location) => {
+                  // Normalize location string
+                  const normalizedLocation = location
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ')
+                    .replace(/'/g, '');
+                  dayLocations.push(normalizedLocation);
+                });
+              }
+            });
+          }
+        }
+        return dayLocations;
+      })
+      .flat(); // Flatten the array of arrays
+
+    // Remove duplicates using Set
+    return [...new Set(locations)];
+  };
 
   const renderValidationStatus = () => (
     <div className="space-y-3">
@@ -280,6 +317,7 @@ export default function PreviewTab() {
           )}
         </div>
       ))}
+      <Map locations={getLocationsFromSchedule()} />
     </div>
   );
 
@@ -302,7 +340,6 @@ export default function PreviewTab() {
           );
         })}
       </div>
-
       <div className="mt-4">
         {activePreviewTab === 'validation' ? renderValidationStatus() : renderTripDetails()}
       </div>
