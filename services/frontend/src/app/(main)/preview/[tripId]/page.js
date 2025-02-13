@@ -5,7 +5,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
+import { useSelector } from 'react-redux';
 // Import Map component dynamically to avoid SSR issues
 const Map = dynamic(() => import('@/app/(main)/trips/components/Map/MapLibre'), {
   ssr: false,
@@ -23,6 +23,7 @@ export default function TripPreview() {
   const params = useParams();
   const [tripData, setTripData] = useState(null);
   const [error, setError] = useState(null);
+  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
 
   useEffect(() => {
     try {
@@ -41,29 +42,33 @@ export default function TripPreview() {
     }
   }, [params.tripId]);
 
-  const getLocationsFromSchedule = (scheduleData) => {
-    const locations = Object.entries(scheduleData)
+  const sortedDays = Object.entries(scheduleItems).sort(([, a], [, b]) => a.order - b.order);
+
+  const getLocationsFromSchedule = () => {
+    const locations = sortedDays
       .map(([, dayData]) => {
         const dayLocations = [];
-        // Collect all locations from all time slots
-        Object.entries(dayData).forEach(([time, activities]) => {
-          if (Array.isArray(activities)) {
-            activities.forEach((activity) => {
-              if (activity.location) {
-                // Normalize location string
-                const normalizedLocation = activity.location
-                  .split(' ')
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                  .join(' ')
-                  .replace(/'/g, '');
-                dayLocations.push(normalizedLocation);
+        // Collect all locations from all services in the day
+        for (const [, services] of Object.entries(dayData)) {
+          if (Array.isArray(services)) {
+            services.forEach((service) => {
+              if (service.locations?.length > 0) {
+                service.locations.forEach((location) => {
+                  // Normalize location string
+                  const normalizedLocation = location
+                    .split(' ')
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ')
+                    .replace(/'/g, '');
+                  dayLocations.push(normalizedLocation);
+                });
               }
             });
           }
-        });
+        }
         return dayLocations;
       })
-      .flat();
+      .flat(); // Flatten the array of arrays
 
     // Remove duplicates using Set
     return [...new Set(locations)];

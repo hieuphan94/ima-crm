@@ -67,7 +67,7 @@ export default function MapLibre({
         zoom: zoom,
         bounds: getBounds(),
       }}
-      style={{ width: '100%', height: 400, borderRadius: '0.5rem' }}
+      style={{ width: 400, height: 400, borderRadius: '0.5rem' }}
       mapStyle={{
         version: 8,
         sources: {
