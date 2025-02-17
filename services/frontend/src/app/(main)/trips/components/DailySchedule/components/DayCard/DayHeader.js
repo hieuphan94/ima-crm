@@ -1,6 +1,6 @@
 'use client';
 
-import { removeDay, updateDayTitle } from '@/store/slices/useDailyScheduleSlice';
+import { removeDay } from '@/store/slices/useDailyScheduleSlice';
 import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
@@ -10,7 +10,6 @@ import DeleteDayModal from './DeleteDayModal';
 
 const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const dispatch = useDispatch();
 
@@ -65,14 +64,6 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
 
     return modalData;
   }, [daySchedule, dayId, handleGetDistancePrice]);
-
-  const handleSaveDayName = useCallback(
-    (name) => {
-      dispatch(updateDayTitle({ day: dayId, title: name }));
-      setIsNameModalOpen(false);
-    },
-    [dayId, dispatch]
-  );
 
   const handleGetDistancePrice = useCallback(() => {
     const dayContainer = document.getElementById(`day-${dayId}`);

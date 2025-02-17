@@ -29,7 +29,7 @@ export default function GuideSection({
       id: 1,
       name: 'Nguyễn Văn A',
       icon: '👨‍🦱',
-      price: '1,500,000đ/ngày',
+      price: '1500000',
       languages: ['en', 'cn'],
       region: 'north',
     },
@@ -37,7 +37,7 @@ export default function GuideSection({
       id: 2,
       name: 'Trần Thị B',
       icon: '👩‍🦰',
-      price: '1,200,000đ/ngày',
+      price: '1200000',
       languages: ['en', 'jp'],
       region: 'central',
     },
@@ -45,7 +45,7 @@ export default function GuideSection({
       id: 3,
       name: 'Lê Văn C',
       icon: '👨‍🦳',
-      price: '2,000,000đ/ngày',
+      price: '2000000',
       languages: ['en', 'kr'],
       region: 'south',
     },
@@ -59,6 +59,17 @@ export default function GuideSection({
       const matchesRegion = selectedRegion === 'all' || guide.region === selectedRegion;
       return matchesSearch && matchesLanguage && matchesRegion;
     });
+  };
+
+  const formatPrice = (price) => {
+    if (!price) return '0';
+
+    const formattedPrice = price.toLocaleString('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    });
+
+    return formattedPrice + 'đ/ngày';
   };
 
   return (
@@ -136,7 +147,7 @@ export default function GuideSection({
                   <span className="text-[11px]">{guide.icon}</span>
                   <span className="text-[9px]">{guide.name}</span>
                 </div>
-                <span className="text-[9px] text-gray-500">{guide.price}</span>
+                <span className="text-[9px] text-gray-500">{formatPrice(guide.price)}</span>
               </div>
             ))}
           </div>

@@ -13,8 +13,12 @@ import { createPortal } from 'react-dom';
 import { FiCheck, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
-import { EXCHANGE_RATE } from '../../utils/constants';
-import { convertVNDtoUSD, formatCurrency } from '../../utils/formatters';
+import {
+  aggregatedLocation,
+  convertVNDtoUSD,
+  formatCurrency,
+  normalizedServices,
+} from '../../utils/formatters';
 import DeleteDayModal from './DeleteDayModal';
 
 const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
@@ -71,7 +75,6 @@ const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
 
 function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }) {
   const dispatch = useDispatch();
-  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState(titleOfDay || '');
@@ -84,8 +87,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   if (!isOpen || typeof window === 'undefined') return null;
 
-  const distance = useSelector((state) => state.dailySchedule.scheduleItems[dayId]?.distance || 0);
-  const { starRating } = useSelector((state) => state.dailySchedule.settings);
+  const settings = useSelector((state) => state.dailySchedule.settings);
   const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
 
   if (!daySchedule) {
@@ -93,8 +95,9 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return null;
   }
 
-  const { globalPax } = useSelector((state) => state.dailySchedule.settings);
-  const paxChangeOfDay = daySchedule.paxChangeOfDay || '';
+  const { globalPax } = settings;
+  const { distance, paxChangeOfDay } = daySchedule;
+
   const paxCalculate = paxChangeOfDay || globalPax;
 
   const handleDistancePrice = (distance) => {
@@ -104,140 +107,29 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return 0;
   };
 
-  // Helper function để convert time string sang minutes
-  const convertTimeToMinutes = (timeString) => {
-    const [hours, minutes] = timeString.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
+  const services = normalizedServices(daySchedule);
 
-  // Memoize normalized services
-  const normalizedServices = useMemo(() => {
-    if (!daySchedule) return [];
-
-    // Helper function để tính price dựa vào star rating
-    const calculatePriceByStarRating = (type, mealType) => {
-      // Nếu là food và là bữa sáng thì return 0 ngay từ đầu
-      if (type === 'food' && mealType === 'breakfast') {
-        return 0;
-      } else if (type === 'food') {
-        const pax = paxChangeOfDay || globalPax;
-        switch (starRating) {
-          case 3:
-            return EXCHANGE_RATE.VND_TO_USD * 2 * pax;
-          case 4:
-            return EXCHANGE_RATE.VND_TO_USD * 5 * pax;
-          case 5:
-            return EXCHANGE_RATE.VND_TO_USD * 10 * pax;
-          default:
-            return EXCHANGE_RATE.VND_TO_USD * pax;
-        }
-      }
-    };
-
-    const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
-
-    return timeKeys
-      .flatMap((timeKey) => {
-        const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-
-        return timeSlotServices.map((service) => {
-          let price = 0;
-          let name = '';
-
-          if (service.type === 'food') {
-            price = calculatePriceByStarRating('food', service.meal.mealType);
-            name = service.name.split(' - ').slice(1).join(' - ');
-          } else {
-            price = service.price;
-            name = service.name;
-          }
-          return {
-            time: timeKey,
-            timeInMinutes: convertTimeToMinutes(timeKey),
-            name,
-            price,
-            priceUSD: convertVNDtoUSD(price),
-            type: service.type,
-          };
-        });
-      })
-      .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
-  }, [daySchedule, globalPax, paxChangeOfDay, starRating]);
-
-  // Memoize totals calculation
+  // Totals calculation
   const { totalUSD } = useMemo(() => {
-    const servicesTotal = normalizedServices.reduce((sum, service) => sum + service.price, 0);
-    const distancePrice = handleDistancePrice(distance) || 0;
-    const total = servicesTotal + distancePrice;
-    const totalUSD = convertVNDtoUSD(total);
+    const servicesTotal = services.reduce((sum, service) => sum + service.priceUSD, 0);
+    const distancePrice = convertVNDtoUSD(handleDistancePrice(distance) || 0);
+    const totalUSD = servicesTotal + distancePrice;
 
-    return { servicesTotal, distancePrice, total, totalUSD };
-  }, [normalizedServices, distance]);
+    return { servicesTotal, distancePrice, totalUSD };
+  }, [services, distance]);
 
-  // Add this memoized location aggregation
-  const aggregatedLocation = useMemo(() => {
-    if (!daySchedule) return '';
+  // LOCATION
+  const locations = aggregatedLocation(daySchedule);
 
-    const timeKeys = Object.keys(daySchedule)
-      .filter((key) => /^\d/.test(key))
-      .sort(); // Sort time keys to ensure chronological order
+  const [firstLocation, ...otherLocations] = locations ? locations.split(' - ') : [];
 
-    const locations = new Set();
-    let firstServiceLocations = []; // Store first service's locations separately
-
-    // Find first service with locations
-    for (const timeKey of timeKeys) {
-      const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-      for (const service of timeSlotServices) {
-        if (Array.isArray(service.locations) && service.locations.length > 0) {
-          firstServiceLocations = service.locations.map((loc) => loc.trim());
-          break;
-        }
-      }
-      if (firstServiceLocations.length > 0) break;
-    }
-
-    // Collect all other locations
-    timeKeys.forEach((timeKey) => {
-      const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-      timeSlotServices.forEach((service) => {
-        if (Array.isArray(service.locations)) {
-          service.locations.forEach((loc) => {
-            if (loc) locations.add(loc.trim());
-          });
-        }
-      });
-    });
-
-    // Combine locations with first service's locations taking priority
-    const result = [
-      ...firstServiceLocations,
-      ...Array.from(locations).filter((loc) => !firstServiceLocations.includes(loc)),
-    ]
-      .filter(Boolean)
-      .join(' - ');
-
-    return result;
-  }, [daySchedule]);
-
-  // Split location string into first location and remaining locations
-  const [firstLocation, ...otherLocations] = aggregatedLocation
-    ? aggregatedLocation.split(' - ')
-    : [];
-
-  // Replace the existing location selector with our aggregated location
-  const location = aggregatedLocation;
-
-  const handleSaveDayName = (name) => {
-    dispatch(updateDayTitle({ day: dayId, title: name }));
-    setIsNameModalOpen(false);
-  };
-
+  // DELETE Button
   const handleDeleteDay = useCallback(() => {
     dispatch(removeDay({ dayId }));
     onClose(); // Close the modal after deletion
   }, [dayId, dispatch, onClose]);
 
+  // TITLE
   const handleSaveTitle = () => {
     dispatch(updateDayTitle({ day: dayId, title: editedTitle }));
     setIsEditingTitle(false);
@@ -256,6 +148,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     }
   };
 
+  // IMAGE
   const handleImageUpload = useCallback(
     (e) => {
       const files = Array.from(e.target.files);
@@ -272,6 +165,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     setImages((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
+  // TEMPLATE
   const dayTemplates = useMemo(
     () => [
       { id: 1, name: 'City Tour Hà Nội' },
@@ -288,6 +182,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     []
   );
 
+  // PARAGRAPH
   const handleSaveParagraph = () => {
     dispatch(
       updateDayParagraph({
@@ -465,7 +360,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
               </div>
 
               <div className="divide-y divide-gray-200">
-                {normalizedServices
+                {services
                   .filter((service) => service.type !== 'food')
                   .map((service, index) => (
                     <div key={index} className="grid grid-cols-12 gap-4 p-1.5 text-sm">
