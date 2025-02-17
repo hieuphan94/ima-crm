@@ -30,6 +30,8 @@ export default function TripPreview() {
       const tripId = params.tripId;
       const savedTrip = localStorage.getItem(tripId);
 
+      console.log('savedTrip', savedTrip);
+
       if (!savedTrip) {
         throw new Error('Trip not found');
       }
@@ -114,7 +116,7 @@ export default function TripPreview() {
       <div className="mb-8 rounded-lg overflow-hidden border">
         <div className="h-[400px]">
           <Map
-            locations={getLocationsFromSchedule(tripData.scheduleData)}
+            locations={getLocationsFromSchedule()}
             initialBounds={VIETNAM_BOUNDS}
             padding={50} // Thêm padding để không bị sát viền
           />

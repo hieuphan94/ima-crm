@@ -10,57 +10,123 @@ import {
 import debounce from 'lodash/debounce';
 import { ChevronLeft, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ResetDaysModal from '../components/DailySchedule/components/ResetDaysModal';
-import PublishModal from '../components/PublishModal';
+import LoadingModal from '../../components/LoadingModal';
 import ScheduleInfoTabs from '../components/ScheduleInfoTabs';
-import TemplateModal from '../components/TemplateModal';
 
 export default function NewTripPage() {
   const dispatch = useDispatch();
-  const { numberOfDays, globalPax, starRating } = useSelector(
-    (state) => state.dailySchedule.settings
-  );
-  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
-  const { title } = useSelector((state) => state.dailySchedule.scheduleInfo);
-
   const router = useRouter();
   const { notifyError } = useUI();
 
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
-  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  // State management
+  const [isReady, setIsReady] = useState(false);
+  const [ResetDaysModal, setResetDaysModal] = useState(null);
+  const [TemplateModal, setTemplateModal] = useState(null);
+  const [PublishModal, setPublishModal] = useState(null);
+  const [modalStates, setModalStates] = useState({
+    isResetModalOpen: false,
+    isTemplateModalOpen: false,
+    isPublishModalOpen: false,
+  });
 
+  // Redux selectors
+  const settings = useSelector((state) => state.dailySchedule.settings);
+  const { numberOfDays, globalPax, starRating } = settings;
+  const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
+  const { title } = useSelector((state) => state.dailySchedule.scheduleInfo);
+
+  // Modal loading functions
+  const loadResetModal = async () => {
+    try {
+      const { default: ResetModalComponent } = await import(
+        '../components/DailySchedule/components/ResetDaysModal'
+      );
+      setResetDaysModal(() => ResetModalComponent);
+    } catch (error) {
+      console.error('Failed to load ResetDaysModal:', error);
+      notifyError('Không thể tải modal');
+    }
+  };
+
+  const loadTemplateModal = async () => {
+    try {
+      const { default: TemplateModalComponent } = await import('../components/TemplateModal');
+      setTemplateModal(() => TemplateModalComponent);
+    } catch (error) {
+      console.error('Failed to load TemplateModal:', error);
+      notifyError('Không thể tải modal');
+    }
+  };
+
+  const loadPublishModal = async () => {
+    try {
+      const { default: PublishModalComponent } = await import('../components/PublishModal');
+      setPublishModal(() => PublishModalComponent);
+    } catch (error) {
+      console.error('Failed to load PublishModal:', error);
+      notifyError('Không thể tải modal');
+    }
+  };
+
+  // Modal toggle handler
+  const toggleModal = useCallback((modalName, value) => {
+    setModalStates((prev) => ({
+      ...prev,
+      [modalName]: value,
+    }));
+  }, []);
+
+  // Debounced handlers
   const debouncedValidation = useCallback(
-    debounce((value) => {
-      const existingDaysCount = Object.keys(scheduleItems).length;
+    debounce((value, existingDaysCount) => {
       if (value < existingDaysCount) {
         notifyError(`Số ngày không thể nhỏ hơn số ngày hiện tại (${existingDaysCount} ngày)`);
         return false;
       }
       return true;
     }, 1000),
-    [scheduleItems]
+    [notifyError]
   );
 
   const debouncedUpdateSettings = useCallback(
-    debounce((field, value) => {
+    debounce((field, value, currentSettings) => {
       dispatch(
         setSettingsSchedule({
           ...(field === 'numberOfDays'
-            ? { numberOfDays: value, globalPax }
-            : { globalPax: value, numberOfDays }),
+            ? { numberOfDays: value, globalPax: currentSettings.globalPax }
+            : { globalPax: value, numberOfDays: currentSettings.numberOfDays }),
         })
       );
     }, 200),
-    [dispatch, numberOfDays, globalPax]
+    [dispatch]
   );
 
+  // Load initial resources
+  useEffect(() => {
+    const prepareResources = async () => {
+      try {
+        await Promise.all([
+          import('../components/PublishModal'),
+          import('../components/TemplateModal'),
+          import('../components/DailySchedule/components/ResetDaysModal'),
+        ]);
+        setIsReady(true);
+      } catch (error) {
+        console.error('Failed to load resources:', error);
+        notifyError('Có lỗi xảy ra khi tải trang');
+      }
+    };
+
+    prepareResources();
+  }, [notifyError]);
+
+  // Event handlers
   const handleDaysChange = (e) => {
     const value = e.target.value;
     if (!value) {
-      debouncedUpdateSettings('numberOfDays', null);
+      debouncedUpdateSettings('numberOfDays', null, settings);
       return;
     }
 
@@ -80,60 +146,41 @@ export default function NewTripPage() {
       return;
     }
 
-    // Cập nhật state ngay lập tức để UI responsive
-    debouncedUpdateSettings('numberOfDays', numValue);
-    // Validate sau 500ms để đợi người dùng nhập xong
-    debouncedValidation(numValue);
-  };
-
-  const handleDaysBlur = (e) => {
-    const value = e.target.value;
-    if (!value) return;
-
-    const numValue = parseInt(value, 10);
-    if (numValue < 1) {
-      notifyError('Số ngày phải lớn hơn 0');
-      return;
-    }
-
-    // Kiểm tra số ngày mới không được nhỏ hơn số ngày hiện có
-    const existingDaysCount = Object.keys(scheduleItems).length;
-    if (numValue < existingDaysCount) {
-      notifyError(`Số ngày không thể nhỏ hơn số ngày hiện tại (${existingDaysCount} ngày)`);
-      debouncedUpdateSettings('numberOfDays', existingDaysCount);
-      return;
-    }
+    debouncedUpdateSettings('numberOfDays', numValue, settings);
+    debouncedValidation(numValue, Object.keys(scheduleItems).length);
   };
 
   const handleGuestsChange = (e) => {
     const value = e.target.value;
     if (!value) {
-      debouncedUpdateSettings('globalPax', null);
+      debouncedUpdateSettings('globalPax', null, settings);
       return;
     }
+
     if (!/^\d+$/.test(value)) {
       notifyError('Vui lòng chỉ nhập số khách');
       return;
     }
+
     const numValue = parseInt(value, 10);
     if (numValue < 1) {
       notifyError('Số khách phải lớn hơn 0');
       return;
     }
-    if (numValue > 500) {
-      notifyError('Số khách không lớn hơn 500');
+
+    if (numValue > 100) {
+      notifyError('Số khách không lớn hơn 100');
       return;
     }
-    debouncedUpdateSettings('globalPax', numValue);
+
+    debouncedUpdateSettings('globalPax', numValue, settings);
   };
 
-  const handleReset = () => {
-    setIsResetModalOpen(true);
-  };
-
-  const handleConfirmReset = () => {
-    dispatch(resetDays());
-    setIsResetModalOpen(false);
+  const handleReset = async () => {
+    if (!ResetDaysModal) {
+      await loadResetModal();
+    }
+    toggleModal('isResetModalOpen', true);
   };
 
   const handleStarChange = (e) => {
@@ -144,8 +191,27 @@ export default function NewTripPage() {
     dispatch(setScheduleTitle(e.target.value));
   };
 
+  // Update modal handlers
+  const handleTemplateModal = async () => {
+    if (!TemplateModal) {
+      await loadTemplateModal();
+    }
+    toggleModal('isTemplateModalOpen', true);
+  };
+
+  const handlePublishModal = async () => {
+    if (!PublishModal) {
+      await loadPublishModal();
+    }
+    toggleModal('isPublishModalOpen', true);
+  };
+
+  if (!isReady) {
+    return <LoadingModal isOpen={true} />;
+  }
+
   return (
-    <>
+    <Suspense fallback={<LoadingModal isOpen={true} />}>
       <div className="h-full flex flex-col overflow-hidden">
         <div className="flex-none p-2">
           <div className="flex justify-start items-center">
@@ -168,7 +234,7 @@ export default function NewTripPage() {
             <form className="flex gap-6 items-center">
               <button
                 type="button"
-                onClick={() => setIsTemplateModalOpen(true)}
+                onClick={handleTemplateModal}
                 className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
               >
                 Load Template
@@ -200,7 +266,6 @@ export default function NewTripPage() {
                   placeholder="Days"
                   value={numberOfDays || ''}
                   onChange={handleDaysChange}
-                  onBlur={handleDaysBlur}
                 />
                 {numberOfDays > 1 && (
                   <button
@@ -224,7 +289,7 @@ export default function NewTripPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setIsPublishModalOpen(true)}
+                onClick={handlePublishModal}
                 className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90"
               >
                 Publish
@@ -235,19 +300,37 @@ export default function NewTripPage() {
 
         {/* Main Content */}
         <div className="flex-1 overflow-hidden">
-          <ScheduleInfoTabs />
+          <Suspense fallback={<LoadingModal isOpen={true} />}>
+            <ScheduleInfoTabs />
+          </Suspense>
         </div>
+
+        {/* Modals */}
+        {modalStates.isResetModalOpen && ResetDaysModal && (
+          <ResetDaysModal
+            isOpen={modalStates.isResetModalOpen}
+            onClose={() => toggleModal('isResetModalOpen', false)}
+            onConfirm={() => {
+              dispatch(resetDays());
+              toggleModal('isResetModalOpen', false);
+            }}
+          />
+        )}
+
+        {modalStates.isTemplateModalOpen && TemplateModal && (
+          <TemplateModal
+            isOpen={modalStates.isTemplateModalOpen}
+            onClose={() => toggleModal('isTemplateModalOpen', false)}
+          />
+        )}
+
+        {modalStates.isPublishModalOpen && PublishModal && (
+          <PublishModal
+            isOpen={modalStates.isPublishModalOpen}
+            onClose={() => toggleModal('isPublishModalOpen', false)}
+          />
+        )}
       </div>
-
-      <ResetDaysModal
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-        onConfirm={handleConfirmReset}
-      />
-
-      <TemplateModal isOpen={isTemplateModalOpen} onClose={() => setIsTemplateModalOpen(false)} />
-
-      <PublishModal isOpen={isPublishModalOpen} onClose={() => setIsPublishModalOpen(false)} />
-    </>
+    </Suspense>
   );
 }
