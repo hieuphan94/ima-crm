@@ -96,13 +96,11 @@ export const aggregatedLocation = (daySchedule) => {
   return result;
 };
 
-export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax, starRating) => {
+export const normalizedServices = (daySchedule, paxCalculate, starRating) => {
   if (!daySchedule || !daySchedule.services) return [];
-
-  const paxToUse = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
 
   return daySchedule.services.map((service) => ({
     ...service,
-    priceUSD: calculatePriceByStarRating(service.type, service.mealType, starRating, paxToUse),
+    priceUSD: calculatePriceByStarRating(service.type, service.mealType, starRating, paxCalculate),
   }));
 };

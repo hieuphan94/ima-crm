@@ -47,7 +47,8 @@ export async function GET(request) {
     }
 
     // Lấy toàn bộ dữ liệu từ sheet
-    const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:D323');
+    const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:F254');
+    console.log('data', data);
 
     // Validate sheet data
     if (!Array.isArray(data) || data.length < 2) {
@@ -63,15 +64,16 @@ export async function GET(request) {
     }
 
     const headers = data[0];
-    const visitCityIndex = headers.findIndex((header) => header === 'Visit City');
+    const locationIndex = headers.findIndex((header) => header === 'LOCATION');
+    console.log('locationIndex', locationIndex);
 
     // Validate required columns
-    if (visitCityIndex === -1) {
+    if (locationIndex === -1) {
       return Response.json(
         {
           success: false,
           status: 500,
-          message: 'Required column "Visit City" not found in sheet',
+          message: 'Required column "LOCATION" not found in sheet',
           data: null,
         },
         { status: 500 }
@@ -80,9 +82,11 @@ export async function GET(request) {
 
     // Process services
     const filteredServices = data.slice(1).filter((row) => {
-      const visitCity = normalizeText(row[visitCityIndex]);
-      return visitCity && visitCity === normalizedLocation;
+      const location = normalizeText(row[locationIndex]);
+      return location && location === normalizedLocation;
     });
+
+    console.log('filteredServices', filteredServices);
 
     // Check if any services were found
     if (filteredServices.length === 0) {
@@ -107,28 +111,17 @@ export async function GET(request) {
           }
         });
 
-        // Xử lý locations
-        const locationNames = new Set();
-        if (rawData['Visit City']) locationNames.add(rawData['Visit City']);
-        if (rawData['Visit Location'] && rawData['Visit Location'] !== rawData['Visit City']) {
-          locationNames.add(rawData['Visit Location']);
-        }
-
-        // Generate random prices
-        const basePrice = Math.floor(Math.random() * (500000 - 100000 + 1) + 100000);
-
         return new VisitService({
           id: `service-${Math.random().toString(36).substr(2, 9)}`,
-          name: rawData['Visit Title'] || '',
+          name: rawData['NAME'] || '',
           type: ServiceType.VISIT,
           serviceLevel: ServiceLevel.TEMPLATE,
-          locations: Array.from(locationNames),
-          sentence: rawData['PROGRAMME'] || '',
+          locations: rawData['LOCATION'] || '',
+          sentence: rawData['PARAGRAPH'] || '',
           serviceStatus: ServiceStatus.ACTIVE,
-          price: basePrice,
-          quotedPrice: basePrice * 1.2,
-          actualPrice: basePrice * 0.9,
-          duration: 0,
+          mealOption: rawData['MEAL'] || '',
+          priceUsd: rawData['PRICE-USD'] || 0,
+          priceGroupUsd: rawData['GROUP-USD'] || 0,
           ticketInfo: {},
           openingHours: {},
           highlights: [],
