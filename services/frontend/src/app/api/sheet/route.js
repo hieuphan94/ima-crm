@@ -2,6 +2,16 @@ import { GoogleSheetService } from '@/api/credentials/googleSheet';
 import { ServiceLevel, ServiceStatus, ServiceType } from '@/data/models/enums';
 import { VisitService } from '@/data/models/Service';
 
+// Thay thế hàm normalizeText cũ bằng hàm mới
+const normalizeLocationName = (name) => {
+  return (name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove vietnamese tones
+    .toLowerCase()
+    .replace(/\s+/g, '') // remove spaces
+    .replace(/[^a-z0-9]/g, ''); // remove special characters
+};
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -20,17 +30,7 @@ export async function GET(request) {
       );
     }
 
-    // Format location thành dạng viết hoa, không dấu và bỏ khoảng trắng
-    const normalizeText = (text) => {
-      return (text || '')
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .replace(/\s+/g, '')
-        .replace(/-/g, '');
-    };
-
-    const normalizedLocation = normalizeText(location);
+    const normalizedLocation = normalizeLocationName(location);
     const sheetService = new GoogleSheetService(process.env.GOOGLE_SHEETS_ID);
 
     // Validate Google Sheet ID
@@ -46,7 +46,7 @@ export async function GET(request) {
       );
     }
 
-    // Lấy toàn bộ dữ liệu từ sheet
+    // Cập nhật range để phù hợp với sheet mới
     const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:F254');
     console.log('data', data);
 
@@ -63,27 +63,20 @@ export async function GET(request) {
       );
     }
 
-    const headers = data[0];
-    const locationIndex = headers.findIndex((header) => header === 'LOCATION');
-    console.log('locationIndex', locationIndex);
+    // Định nghĩa các cột theo sheet mới
+    const columnIndexes = {
+      LOCATION: 0, // Cột A
+      NAME: 1, // Cột B
+      PARAGRAPH: 2, // Cột C
+      MEAL: 3, // Cột D
+      PRICE: 4, // Cột E
+      GROUP: 5, // Cột F
+    };
 
-    // Validate required columns
-    if (locationIndex === -1) {
-      return Response.json(
-        {
-          success: false,
-          status: 500,
-          message: 'Required column "LOCATION" not found in sheet',
-          data: null,
-        },
-        { status: 500 }
-      );
-    }
-
-    // Process services
+    // Lọc services theo location
     const filteredServices = data.slice(1).filter((row) => {
-      const location = normalizeText(row[locationIndex]);
-      return location && location === normalizedLocation;
+      const rowLocation = normalizeLocationName(row[columnIndexes.LOCATION]);
+      return rowLocation && rowLocation === normalizedLocation;
     });
 
     console.log('filteredServices', filteredServices);
@@ -101,27 +94,20 @@ export async function GET(request) {
       );
     }
 
-    // Transform data to services
+    // Chuyển đổi dữ liệu theo cấu trúc mới
     const services = filteredServices
       .map((row) => {
-        const rawData = {};
-        headers.forEach((header, index) => {
-          if (header && row[index]) {
-            rawData[header] = row[index];
-          }
-        });
-
         return new VisitService({
           id: `service-${Math.random().toString(36).substr(2, 9)}`,
-          name: rawData['NAME'] || '',
+          name: row[columnIndexes.NAME] || '',
           type: ServiceType.VISIT,
           serviceLevel: ServiceLevel.TEMPLATE,
-          locations: rawData['LOCATION'] || '',
-          sentence: rawData['PARAGRAPH'] || '',
+          locations: row[columnIndexes.LOCATION] || '',
+          sentence: row[columnIndexes.PARAGRAPH] || '',
           serviceStatus: ServiceStatus.ACTIVE,
-          mealOption: rawData['MEAL'] || '',
-          priceUsd: rawData['PRICE-USD'] || 0,
-          priceGroupUsd: rawData['GROUP-USD'] || 0,
+          mealOption: row[columnIndexes.MEAL] || '',
+          priceUsd: parseFloat(row[columnIndexes.PRICE]) || 0,
+          priceGroupUsd: parseFloat(row[columnIndexes.GROUP]) || 0,
           ticketInfo: {},
           openingHours: {},
           highlights: [],

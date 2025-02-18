@@ -105,6 +105,13 @@ export default function VisitSection({
     handleLocationClick('Hà Nội');
   }, []);
 
+  const normalizeLocationName = (name) => {
+    return removeVietnameseTones(name)
+      .toLowerCase()
+      .replace(/\s+/g, '') // remove spaces
+      .replace(/[^a-z0-9]/g, ''); // remove special characters
+  };
+
   const handleLocationClick = async (locationName) => {
     if (selectedLocation === locationName) {
       onLocationSelect(null);
@@ -122,8 +129,9 @@ export default function VisitSection({
         return;
       }
 
-      // Fetch from API
-      const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
+      const normalizedLocation = normalizeLocationName(locationName);
+      // Fetch from API with normalized location name
+      const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
 
       const result = await response.json();
       console.log('result', result);
