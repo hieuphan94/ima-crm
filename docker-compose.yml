@@ -43,7 +43,7 @@ services:
       - redisdata:/data
 
   frontend:
-    image: node:16
+    image: node:18-alpine
     working_dir: /app
     volumes:
       - ./services/frontend:/app:delegated
