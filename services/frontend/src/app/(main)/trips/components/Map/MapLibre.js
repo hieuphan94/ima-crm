@@ -1,7 +1,7 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import Map, { Layer, Marker, Source } from 'react-map-gl/maplibre';
-const vietnamGeoJson = await fetch('/json/vietnam-geo.json').then((res) => res.json());
+// const vietnamGeoJson = await fetch('/json/vietnam-geo.json').then((res) => res.json());
 
 export default function MapLibre({
   position = { lng: 105.8542, lat: 14.4974 },
@@ -90,7 +90,7 @@ export default function MapLibre({
       }}
     >
       {/* Add Vietnam provinces overlay */}
-      <Source id="vietnam-provinces" type="geojson" data={vietnamGeoJson}>
+      <Source id="vietnam-provinces" type="geojson">
         <Layer
           id="province-fills"
           type="fill"
