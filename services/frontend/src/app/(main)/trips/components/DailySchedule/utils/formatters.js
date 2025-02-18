@@ -23,7 +23,7 @@ export const formatCurrency = (amount, currency = 'VND') => {
 };
 
 export const calculatePriceByStarRating = (type, mealType, starRating, pax) => {
-  if (!pax) return 0;
+  if (!type || !pax) return 0;
 
   if (type === 'food' && mealType === 'breakfast') {
     return 0;
@@ -107,20 +107,21 @@ export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax, starR
         let price = 0;
         let name = '';
 
-        if (service.type === 'food') {
+        if (service.type === 'food' && service.meal) {
           price = calculatePriceByStarRating(service.type, service.meal.mealType, starRating, pax);
           name = service.name.split(' - ').slice(1).join(' - ');
         } else {
-          price = service.price;
-          name = service.name;
+          price = service.price || 0;
+          name = service.name || '';
         }
+
         return {
           time: timeKey,
           timeInMinutes: convertTimeToMinutes(timeKey),
           name,
           price,
           priceUSD: convertVNDtoUSD(price),
-          type: service.type,
+          type: service.type || 'unknown',
         };
       });
     })
