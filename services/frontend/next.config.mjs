@@ -9,7 +9,8 @@ const nextConfig = {
   webpack: (config) => {
     config.module.rules.push({
       test: /\.json$/,
-      type: 'json',
+      use: 'json-loader',
+      type: 'javascript/auto',
     });
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
