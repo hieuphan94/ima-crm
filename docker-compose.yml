@@ -20,7 +20,7 @@ services:
       - DB_PORT=5432
       - REDIS_URL=redis://redis:6379
       - JWT_SECRET=ima_crm_sk_2024
-    mem_limit: 512m
+    mem_limit: 1024m
     depends_on:
       - postgres
       - redis
@@ -35,7 +35,7 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    mem_limit: 256m
+    mem_limit: 512m
 
   redis:
     image: redis:alpine
@@ -43,7 +43,7 @@ services:
       - "6379:6379"
     volumes:
       - redisdata:/data
-    mem_limit: 128m
+    mem_limit: 256m
 
   frontend:
     image: node:18-alpine
@@ -53,15 +53,15 @@ services:
       - /app/node_modules
     ports:
       - "3002:3002"
-    command: sh -c "export NODE_OPTIONS='--max-old-space-size=512' && npm install && npm run dev"
+    command: sh -c "export NODE_OPTIONS='--max-old-space-size=1536' && npm install && npm run dev"
     environment:
       - NODE_ENV=development
       - PORT=3002
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
       - NODE_NO_WARNINGS=1
-      - NODE_OPTIONS=--max-old-space-size=512
-    mem_limit: 768m
+      - NODE_OPTIONS=--max-old-space-size=1536
+    mem_limit: 1536m
     depends_on:
       - backend
 
@@ -71,7 +71,7 @@ services:
       - "80:80"
     volumes:
       - ./services/nginx/conf.d:/etc/nginx/conf.d
-    mem_limit: 128m
+    mem_limit: 256m
     depends_on:
       - backend
       - frontend
