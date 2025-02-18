@@ -100,14 +100,14 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   const paxCalculate = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
 
+  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax, starRating);
+
   const handleDistancePrice = (distance) => {
     if (typeof paxCalculate === 'number' && paxCalculate > 0) {
       return calculatePrice(distance, paxCalculate);
     }
     return 0;
   };
-
-  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax, starRating);
 
   // Totals calculation
   const { totalUSD } = useMemo(() => {
