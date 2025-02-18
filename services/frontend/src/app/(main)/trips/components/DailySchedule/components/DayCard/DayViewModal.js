@@ -107,7 +107,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return 0;
   };
 
-  const services = normalizedServices(daySchedule);
+  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax);
 
   // Totals calculation
   const { totalUSD } = useMemo(() => {
