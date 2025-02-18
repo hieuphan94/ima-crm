@@ -22,7 +22,13 @@ export const formatCurrency = (amount, currency = 'VND') => {
   return `${amount.toLocaleString('vi-VN')}đ`;
 };
 
-export const calculatePriceByStarRating = (type, mealType, paxChangeOfDay, globalPax) => {
+export const calculatePriceByStarRating = (
+  type,
+  mealType,
+  starRating,
+  paxChangeOfDay,
+  globalPax
+) => {
   const pax = paxChangeOfDay ?? globalPax;
 
   if (type === 'food' && mealType === 'breakfast') {
@@ -92,7 +98,7 @@ export const aggregatedLocation = (daySchedule) => {
   return result;
 };
 
-export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax) => {
+export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax, starRating) => {
   if (!daySchedule) return [];
 
   const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
@@ -109,6 +115,7 @@ export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax) => {
           price = calculatePriceByStarRating(
             'food',
             service.meal.mealType,
+            starRating,
             paxChangeOfDay,
             globalPax
           );

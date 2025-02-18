@@ -95,7 +95,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return null;
   }
 
-  const { globalPax } = settings;
+  const { globalPax, starRating } = settings;
   const { distance, paxChangeOfDay = null } = daySchedule;
 
   const paxCalculate = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
@@ -107,7 +107,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return 0;
   };
 
-  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax);
+  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax, starRating);
 
   // Totals calculation
   const { totalUSD } = useMemo(() => {
