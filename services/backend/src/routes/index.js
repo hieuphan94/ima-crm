@@ -1,6 +1,6 @@
 const express = require('express');
 const userRoutes = require('./userRoutes');
-// const tourRoutes = require('./tourRoutes');
+// const tourRoutes = require('./tourRoutes');`
 const serviceCategoryRoutes = require('./serviceCategoryRoutes');
 const dayTemplateRoutes = require('./dayTemplateRoutes');
 
