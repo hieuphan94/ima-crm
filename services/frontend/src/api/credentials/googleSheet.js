@@ -7,8 +7,7 @@ class GoogleSheetService {
     try {
       // Đọc credentials từ file JSON
       const credentialsPath = path.join(
-        process.cwd(),
-        'credentials',
+        __dirname, // Trỏ thẳng đến thư mục hiện tại (src/api/credentials)
         'my-sheet-ima-crm-import-084d657ff146.json'
       );
       const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
