@@ -23,10 +23,8 @@ export const formatCurrency = (amount, currency = 'VND') => {
 };
 
 export const calculatePriceByStarRating = (type, mealType, paxChangeOfDay, globalPax) => {
-  let pax = globalPax;
-  if (paxChangeOfDay) {
-    pax = paxChangeOfDay;
-  }
+  const pax = paxChangeOfDay ?? globalPax;
+
   if (type === 'food' && mealType === 'breakfast') {
     return 0;
   } else if (type === 'food') {
@@ -41,6 +39,7 @@ export const calculatePriceByStarRating = (type, mealType, paxChangeOfDay, globa
         return EXCHANGE_RATE.VND_TO_USD * pax;
     }
   }
+  return 0;
 };
 
 export const convertTimeToMinutes = (timeString) => {

@@ -96,12 +96,12 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   }
 
   const { globalPax } = settings;
-  const { distance, paxChangeOfDay } = daySchedule;
+  const { distance, paxChangeOfDay = null } = daySchedule;
 
-  const paxCalculate = paxChangeOfDay || globalPax;
+  const paxCalculate = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
 
   const handleDistancePrice = (distance) => {
-    if (paxCalculate) {
+    if (typeof paxCalculate === 'number' && paxCalculate > 0) {
       return calculatePrice(distance, paxCalculate);
     }
     return 0;
