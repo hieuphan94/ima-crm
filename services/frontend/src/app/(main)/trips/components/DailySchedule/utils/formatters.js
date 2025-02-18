@@ -113,7 +113,7 @@ export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax, starR
 
         if (service.type === 'food') {
           price = calculatePriceByStarRating(
-            'food',
+            service.type,
             service.meal.mealType,
             starRating,
             paxChangeOfDay,
