@@ -89,6 +89,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   const settings = useSelector((state) => state.dailySchedule.settings);
   const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
+  const paxChangeOfDay = useSelector((state) => state.dailySchedule.paxChangeOfDay);
 
   if (!daySchedule) {
     console.warn('Day not found:', dayId);
@@ -96,11 +97,11 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   }
 
   const { globalPax, starRating } = settings;
-  const { distance, paxChangeOfDay = null } = daySchedule;
+  const { distance } = daySchedule;
 
   const paxCalculate = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
 
-  const services = normalizedServices(daySchedule, paxChangeOfDay, globalPax, starRating);
+  const services = normalizedServices(daySchedule, paxCalculate, globalPax, starRating);
 
   const handleDistancePrice = (distance) => {
     if (typeof paxCalculate === 'number' && paxCalculate > 0) {
