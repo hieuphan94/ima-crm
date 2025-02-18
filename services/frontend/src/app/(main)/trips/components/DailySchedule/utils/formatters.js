@@ -23,7 +23,10 @@ export const formatCurrency = (amount, currency = 'VND') => {
 };
 
 export const calculatePriceByStarRating = (type, mealType, paxChangeOfDay, globalPax) => {
-  const pax = paxChangeOfDay || globalPax;
+  let pax = globalPax;
+  if (paxChangeOfDay) {
+    pax = paxChangeOfDay;
+  }
   if (type === 'food' && mealType === 'breakfast') {
     return 0;
   } else if (type === 'food') {
