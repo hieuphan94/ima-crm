@@ -54,8 +54,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3002
-      - NEXT_PUBLIC_API_URL=http://188.166.212.41/api
-      - GOOGLE_SHEETS_ID=1elGPvAvZi3xa1n2av4VA4LHjc8ZiT4Np-OIR7nMv6Rc
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_NO_WARNINGS=1
     depends_on:
       - backend
 
