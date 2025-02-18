@@ -1,7 +1,7 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import Map, { Layer, Marker, Source } from 'react-map-gl/maplibre';
-import vietnamGeoJson from './vietnam-geo.json'; // Import file GeoJSON
+const vietnamGeoJson = await import('./vietnam-geo.json').then((m) => m.default); // Import file GeoJSON
 
 export default function MapLibre({
   position = { lng: 105.8542, lat: 14.4974 },
