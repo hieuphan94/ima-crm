@@ -7,6 +7,10 @@ const nextConfig = {
   // Cấu hình cho @react-pdf/renderer
   transpilePackages: ['@react-pdf/renderer'],
   webpack: (config) => {
+    config.module.rules.push({
+      test: /\.json$/,
+      type: 'json',
+    });
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
     return config;
