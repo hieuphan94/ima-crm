@@ -124,7 +124,9 @@ export default function VisitSection({
 
       // Fetch from API
       const response = await fetch(`/api/sheet?location=${encodeURIComponent(locationName)}`);
+
       const result = await response.json();
+      console.log('result', result);
 
       if (result.success) {
         setSheetServices(result.data);
