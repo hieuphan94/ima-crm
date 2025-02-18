@@ -30,15 +30,17 @@ export const calculatePriceByStarRating = (type, mealType, starRating, pax) => {
       return 0;
     }
 
+    const validPax = parseInt(pax) || 1;
+
     switch (starRating) {
       case 3:
-        return EXCHANGE_RATE.VND_TO_USD * 2 * pax;
+        return EXCHANGE_RATE.VND_TO_USD * 2 * validPax;
       case 4:
-        return EXCHANGE_RATE.VND_TO_USD * 5 * pax;
+        return EXCHANGE_RATE.VND_TO_USD * 5 * validPax;
       case 5:
-        return EXCHANGE_RATE.VND_TO_USD * 10 * pax;
+        return EXCHANGE_RATE.VND_TO_USD * 10 * validPax;
       default:
-        return EXCHANGE_RATE.VND_TO_USD * pax;
+        return EXCHANGE_RATE.VND_TO_USD * validPax;
     }
   }
   return 0;
@@ -95,37 +97,12 @@ export const aggregatedLocation = (daySchedule) => {
 };
 
 export const normalizedServices = (daySchedule, paxChangeOfDay, globalPax, starRating) => {
-  if (!daySchedule) return [];
+  if (!daySchedule || !daySchedule.services) return [];
 
-  const pax = paxChangeOfDay ?? globalPax;
+  const paxToUse = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
 
-  const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
-
-  return timeKeys
-    .flatMap((timeKey) => {
-      const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-
-      return timeSlotServices.map((service) => {
-        let price = 0;
-        let name = '';
-
-        if (service.type === 'food' && service.meal) {
-          price = calculatePriceByStarRating(service.type, service.meal.mealType, starRating, pax);
-          name = service.name.split(' - ').slice(1).join(' - ');
-        } else {
-          price = service.price || 0;
-          name = service.name || '';
-        }
-
-        return {
-          time: timeKey,
-          timeInMinutes: convertTimeToMinutes(timeKey),
-          name,
-          price,
-          priceUSD: convertVNDtoUSD(price),
-          type: service.type || 'unknown',
-        };
-      });
-    })
-    .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
+  return daySchedule.services.map((service) => ({
+    ...service,
+    priceUSD: calculatePriceByStarRating(service.type, service.mealType, starRating, paxToUse),
+  }));
 };
