@@ -72,6 +72,7 @@ export function middleware(request) {
 
   const token = request.cookies.get('token')?.value;
   const isApiRoute = path.startsWith('/api/');
+  const isApiRouteSheet = path.startsWith('/api/sheet');
 
   // 2. Parse và validate token
   let userData = null;
@@ -92,7 +93,11 @@ export function middleware(request) {
     }
   }
 
-  // 3. API routes luôn cần authentication
+  // 3. API routes sheet pass -THÊM VÀO SAU
+  if (isApiRouteSheet) {
+    return NextResponse.next();
+  }
+
   if (isApiRoute && !userData) {
     console.warn('Unauthorized API access:', { path });
     return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {

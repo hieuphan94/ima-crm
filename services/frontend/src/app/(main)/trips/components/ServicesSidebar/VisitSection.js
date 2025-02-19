@@ -130,11 +130,11 @@ export default function VisitSection({
       }
 
       const normalizedLocation = normalizeLocationName(locationName);
+      console.log('normalizedLocation', normalizedLocation);
       // Fetch from API with normalized location name
       const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
 
       const result = await response.json();
-      console.log('result', result);
 
       if (result.success) {
         setSheetServices(result.data);

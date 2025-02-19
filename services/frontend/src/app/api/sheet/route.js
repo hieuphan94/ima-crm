@@ -15,7 +15,9 @@ const normalizeLocationName = (name) => {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    console.log('searchParams', searchParams);
     const location = searchParams.get('location');
+    console.log('location form url', location);
 
     // Validate location parameter
     if (!location?.trim()) {
@@ -48,7 +50,7 @@ export async function GET(request) {
 
     // Cập nhật range để phù hợp với sheet mới
     const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:F254');
-    console.log('data', data);
+    console.log('data X', data);
 
     // Validate sheet data
     if (!Array.isArray(data) || data.length < 2) {
@@ -95,6 +97,7 @@ export async function GET(request) {
     }
 
     // Chuyển đổi dữ liệu theo cấu trúc mới
+    console.log('before convert');
     const services = filteredServices
       .map((row) => {
         return new VisitService({
@@ -102,18 +105,22 @@ export async function GET(request) {
           name: row[columnIndexes.NAME] || '',
           type: ServiceType.VISIT,
           serviceLevel: ServiceLevel.TEMPLATE,
-          locations: row[columnIndexes.LOCATION] || '',
+          locations: [row[columnIndexes.LOCATION] || ''],
           sentence: row[columnIndexes.PARAGRAPH] || '',
           serviceStatus: ServiceStatus.ACTIVE,
           mealOption: row[columnIndexes.MEAL] || '',
-          priceUsd: parseFloat(row[columnIndexes.PRICE]) || 0,
-          priceGroupUsd: parseFloat(row[columnIndexes.GROUP]) || 0,
+          price: parseFloat(row[columnIndexes.PRICE]) || 0,
+          priceGroup: {
+            priceDefault2to3Pax: parseFloat(row[columnIndexes.GROUP]) || 0,
+          },
           ticketInfo: {},
           openingHours: {},
           highlights: [],
         });
       })
       .filter((service) => service.name);
+
+    console.log('Visit services', services);
 
     // Return success response with processed services
     return Response.json(

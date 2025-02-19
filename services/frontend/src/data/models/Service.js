@@ -111,6 +111,8 @@ export class Service {
 export class VisitService extends Service {
   constructor({
     id = `visit-${uuidv4()}`,
+    mealOption = '',
+    priceGroup = {},
     duration = 0,
     ticketInfo = {},
     openingHours = {},
@@ -118,6 +120,8 @@ export class VisitService extends Service {
     ...data
   }) {
     super({ ...data, type: ServiceType.VISIT });
+    this.mealOption = mealOption;
+    this.priceGroup = priceGroup;
     this.duration = duration;
     this.ticketInfo = ticketInfo;
     this.openingHours = openingHours;

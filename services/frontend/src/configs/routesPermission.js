@@ -1,5 +1,5 @@
 // 1. Routes công khai
-export const PUBLIC_ROUTES = ['/login', '/forgot-password'];
+export const PUBLIC_ROUTES = ['/login', '/forgot-password', '/trips/new', '/api/sheet']; // THÊM VÀO SAU
 
 // 2. Tất cả routes trong hệ thống
 export const ROUTES = {
