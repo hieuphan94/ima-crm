@@ -16,10 +16,10 @@ export const formatCurrency = (amount, currency = 'VND') => {
   if (!amount) return '0';
 
   if (currency === 'USD') {
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `$${Number(amount).toLocaleString()}`;
   }
 
-  return `${amount.toLocaleString('vi-VN')}đ`;
+  return `${Number(amount).toLocaleString()}đ`;
 };
 
 export const starRatingFormula = (star) => {
