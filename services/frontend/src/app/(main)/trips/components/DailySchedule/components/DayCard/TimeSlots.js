@@ -84,7 +84,7 @@ const TimeSlots = memo(function TimeSlots({
                               e.stopPropagation();
                               onRemoveService(day, time, 0);
                             }}
-                            className="text-[9px] text-red-500 hover:text-red-700 ml-1"
+                            className="text-[15px] text-red-500 hover:text-red-700 ml-1"
                           >
                             ×
                           </button>
@@ -150,7 +150,7 @@ const TimeSlots = memo(function TimeSlots({
                                   e.stopPropagation();
                                   onRemoveService(day, halfHourTime, 0);
                                 }}
-                                className="text-[9px] text-red-500 hover:text-red-700 ml-1"
+                                className="text-[15px] text-red-500 hover:text-red-700 ml-1"
                               >
                                 ×
                               </button>

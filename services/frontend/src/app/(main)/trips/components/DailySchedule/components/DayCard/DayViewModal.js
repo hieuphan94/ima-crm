@@ -1,26 +1,20 @@
 'use client';
 
 import TiptapEditor from '@/components/TiptapEditor';
-import {
-  removeDay,
-  updateDayParagraph,
-  updateDayTitle,
-} from '@/store/slices/useDailyScheduleSlice';
+import { updateDayParagraph, updateDayTitle } from '@/store/slices/useDailyScheduleSlice';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FiCheck, FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { FiCheck, FiEdit2, FiX } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
 import {
   aggregatedLocation,
   convertVNDtoUSD,
-  formatCurrency,
   formulaFoodPriceByStarRating,
   normalizedServices,
 } from '../../utils/formatters';
-import DeleteDayModal from './DeleteDayModal';
 
 const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,11 +68,11 @@ const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
   );
 };
 
-function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }) {
+function DayViewModal({ isOpen, onClose, order, dayId }) {
   const dispatch = useDispatch();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(titleOfDay || '');
+  const [editedTitle, setEditedTitle] = useState('');
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
@@ -88,8 +82,10 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   if (!isOpen || typeof window === 'undefined') return null;
 
-  const settings = useSelector((state) => state.dailySchedule.settings);
   const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
+  const settings = useSelector((state) => state.dailySchedule.settings);
+  const paxChangeOfDay = useSelector((state) => state.dailySchedule.paxChangeOfDay);
+  const guides = daySchedule?.guides || [];
 
   if (!daySchedule) {
     console.warn('Day not found:', dayId);
@@ -97,11 +93,15 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   }
 
   const { globalPax, starRating } = settings;
-  const { distance, paxChangeOfDay } = daySchedule;
+  const { distance, titleOfDay } = daySchedule;
 
+  // Services contain visit, food, hotel
   const services = normalizedServices(daySchedule);
-  console.log('services', services);
 
+  // Location show in the day
+  const locations = aggregatedLocation(services);
+
+  // Pax calculate
   const paxCalculate = paxChangeOfDay !== undefined ? paxChangeOfDay : globalPax;
 
   const handleDistancePrice = (distance) => {
@@ -124,17 +124,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
     return { servicesTotal, distancePrice, totalUSD };
   }, [services, distance]);
 
-  // LOCATION
-  const locations = aggregatedLocation(daySchedule);
-
-  const [firstLocation, ...otherLocations] = locations ? locations.split(' - ') : [];
-
-  // DELETE Button
-  const handleDeleteDay = useCallback(() => {
-    dispatch(removeDay({ dayId }));
-    onClose(); // Close the modal after deletion
-  }, [dayId, dispatch, onClose]);
-
   // TITLE
   const handleSaveTitle = () => {
     dispatch(updateDayTitle({ day: dayId, title: editedTitle }));
@@ -142,7 +131,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
   };
 
   const handleCancelEditTitle = () => {
-    setEditedTitle(titleOfDay || '');
     setIsEditingTitle(false);
   };
 
@@ -225,11 +213,11 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
           {titleOfDay && <span className="text-sm font-sm text-gray-700">{titleOfDay}</span>}
           {location && (
             <span className="text-sm font-sm text-gray-700 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">
-              <span className="font-medium text-blue-600">📍 {firstLocation}</span>
-              {otherLocations.length > 0 && (
+              <span className="font-medium text-blue-600">📍 {locations.firstLocation}</span>
+              {locations.otherLocations.length > 0 && (
                 <>
                   <span className="text-gray-400 mx-1">-</span>
-                  <span className="text-gray-600">{otherLocations.join(' - ')}</span>
+                  <span className="text-gray-600">{locations.otherLocations.join(' - ')}</span>
                 </>
               )}
             </span>
@@ -286,18 +274,9 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
                       className="w-full px-4 py-2 text-[9px] text-left text-blue-600 bg-blue-50 rounded hover:bg-blue-100 flex items-center gap-2"
                     >
                       <FiEdit2 size={14} />
-                      {titleOfDay || 'Day Title...'}
+                      {'Day Title...'}
                     </button>
                   )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsDeleteModalOpen(true)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded"
-                    title="Xóa ngày"
-                  >
-                    <FiTrash2 size={16} />
-                  </button>
                 </div>
               </div>
 
@@ -371,9 +350,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
                     <div className="col-span-1 text-gray-500">{index + 1}</div>
                     <div className="col-span-2 text-gray-600">{service.timeKey}</div>
                     <div className="col-span-6">{service.name}</div>
-                    <div className="col-span-3 text-right">
-                      {formatCurrency(convertVNDtoUSD(service.price), 'USD')}
-                    </div>
+                    <div className="col-span-3 text-right">{convertVNDtoUSD(service.price)}</div>
                   </div>
                 ))}
               </div>
@@ -383,7 +360,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
             <div className="grid grid-cols-12 gap-4 p-1.5 text-sm border-t border-gray-200">
               <div className="col-span-9">Distance ({distance}km)</div>
               <div className="col-span-3 text-right">
-                {formatCurrency(convertVNDtoUSD(handleDistancePrice(distance)), 'USD')}
+                {convertVNDtoUSD(handleDistancePrice(distance))}
               </div>
             </div>
 
@@ -406,7 +383,7 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
             {/* Total */}
             <div className="grid grid-cols-12 gap-4 p-1.5 text-sm font-medium bg-gray-100 rounded-lg">
               <div className="col-span-9">Total</div>
-              <div className="col-span-3 text-right">{formatCurrency(totalUSD, 'USD')}</div>
+              <div className="col-span-3 text-right">{totalUSD}</div>
             </div>
           </div>
         </div>
@@ -453,13 +430,6 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
           )}
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      <DeleteDayModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteDay}
-      />
     </div>,
     document.body
   );

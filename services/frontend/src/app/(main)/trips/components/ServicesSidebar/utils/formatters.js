@@ -3,7 +3,7 @@ import { MealType } from '@/data/models/enums';
 export const formatPrice = (price) => {
   if (!price) return '';
   const numericPrice = price.toString().replace(/[^\d]/g, '');
-  return numericPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' đ';
+  return numericPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 
 export const getMealTypeName = (mealType) => {

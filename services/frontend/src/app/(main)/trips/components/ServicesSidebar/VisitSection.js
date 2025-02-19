@@ -1,16 +1,9 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { useEffect, useState } from 'react';
-import {
-  IoIosArrowDown,
-  IoIosArrowForward,
-  IoIosRefresh,
-  IoIosSearch,
-  IoIosWarning,
-} from 'react-icons/io';
+import { IoIosArrowDown, IoIosArrowForward, IoIosSearch } from 'react-icons/io';
 import LocationButton from './components/LocationButton';
 import SearchInput from './components/SearchInput';
 import ServiceTooltip from './components/ServiceTooltip';
-import UpdateModal from './components/UpdateModal';
 import { sectionColors, serviceItemStyles } from './constants/styles';
 import { formatPrice, removeVietnameseTones } from './utils/formatters';
 import { LocationCache } from './utils/locationCache';
@@ -22,13 +15,6 @@ export default function VisitSection({
   onLocationSelect,
   sheetServices,
   setSheetServices,
-  mockChanges,
-  hasChanges,
-  setHasChanges,
-  showModal,
-  setShowModal,
-  isRefreshed,
-  setIsRefreshed,
 }) {
   const [serviceSearchTerm, setServiceSearchTerm] = useState('');
   const [currentServicePage, setCurrentServicePage] = useState(0);
@@ -49,13 +35,7 @@ export default function VisitSection({
         name: location.name,
         region: location.region,
         coordinates: location.coordinates,
-        services: sheetServices.filter((service) =>
-          service.locations.some(
-            (loc) =>
-              removeVietnameseTones(loc.toLowerCase()) ===
-              removeVietnameseTones(location.name.toLowerCase())
-          )
-        ),
+        services: sheetServices,
       })),
     },
   ];
@@ -86,17 +66,6 @@ export default function VisitSection({
         filteredLocations(countries[0].locations).length / locationsPerPage
       );
       setCurrentPage(Math.min(maxPages - 1, currentPage + 1));
-    }
-  };
-
-  const handleRefreshServices = () => {
-    if (selectedLocation) {
-      onLocationSelect(selectedLocation);
-      setHasChanges(false);
-      setIsRefreshed(true);
-      setTimeout(() => {
-        setIsRefreshed(false);
-      }, 2000);
     }
   };
 
@@ -285,26 +254,6 @@ export default function VisitSection({
                       placeholder="Tìm kiếm visit..."
                       className="bg-white"
                     />
-                    {hasChanges && (
-                      <button
-                        onClick={() => setShowModal(true)}
-                        className="p-1 rounded bg-amber-50 hover:bg-amber-100 border border-amber-200"
-                      >
-                        <IoIosWarning className="w-3 h-3 text-amber-500" />
-                      </button>
-                    )}
-                    <button
-                      onClick={handleRefreshServices}
-                      className={`p-1 rounded border transition-colors duration-200 ${
-                        isRefreshed
-                          ? 'bg-green-50 hover:bg-green-100 border-green-200'
-                          : 'bg-white hover:bg-gray-50 border-gray-200'
-                      }`}
-                    >
-                      <IoIosRefresh
-                        className={`w-3 h-3 ${isRefreshed ? 'text-green-500' : 'text-gray-500'}`}
-                      />
-                    </button>
                   </div>
 
                   <div className="mt-1 space-y-0.5">
@@ -370,13 +319,6 @@ export default function VisitSection({
         service={tooltipService}
         visible={tooltipVisible}
         position={tooltipPosition}
-      />
-
-      <UpdateModal
-        showModal={showModal}
-        setShowModal={setShowModal}
-        mockChanges={mockChanges}
-        handleRefreshServices={handleRefreshServices}
       />
     </div>
   );

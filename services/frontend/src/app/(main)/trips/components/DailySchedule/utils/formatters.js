@@ -12,16 +12,6 @@ export const convertVNDtoUSD = (amount) => {
   return Number((amountNum / EXCHANGE_RATE.VND_TO_USD).toFixed(2));
 };
 
-export const formatCurrency = (amount, currency = 'VND') => {
-  if (!amount) return '0';
-
-  if (currency === 'USD') {
-    return `$${Number(amount).toLocaleString()}`;
-  }
-
-  return `${Number(amount).toLocaleString()}đ`;
-};
-
 export const starRatingFormula = (star) => {
   switch (star) {
     case 3:
@@ -55,54 +45,29 @@ export const timeKeysOnDaySchedule = (daySchedule) => {
     .sort();
 };
 
-export const aggregatedLocation = (daySchedule) => {
-  if (!daySchedule) return '';
-
-  const timeKeys = Object.keys(daySchedule)
-    .filter((key) => /^\d/.test(key))
-    .sort(); // Sort time keys to ensure chronological order
-
+export const aggregatedLocation = (normalizedServices) => {
+  const { visit } = normalizedServices;
   const locations = new Set();
-  let firstServiceLocations = []; // Store first service's locations separately
-
-  // Find first service with locations
-  for (const timeKey of timeKeys) {
-    const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-    for (const service of timeSlotServices) {
-      if (Array.isArray(service.locations) && service.locations.length > 0) {
-        firstServiceLocations = service.locations.map((loc) => loc.trim());
-        break;
-      }
+  visit.forEach((service) => {
+    if (service.location) {
+      locations.add(service.location);
     }
-    if (firstServiceLocations.length > 0) break;
-  }
-
-  // Collect all other locations
-  timeKeys.forEach((timeKey) => {
-    const timeSlotServices = Array.isArray(daySchedule[timeKey]) ? daySchedule[timeKey] : [];
-    timeSlotServices.forEach((service) => {
-      if (Array.isArray(service.locations)) {
-        service.locations.forEach((loc) => {
-          if (loc) locations.add(loc.trim());
-        });
-      }
-    });
   });
 
-  // Combine locations with first service's locations taking priority
-  const result = [
-    ...firstServiceLocations,
-    ...Array.from(locations).filter((loc) => !firstServiceLocations.includes(loc)),
-  ]
-    .filter(Boolean)
-    .join(' - ');
-
-  return result;
+  return {
+    firstLocation: Array.from(locations)[0],
+    otherLocations: Array.from(locations).slice(1),
+  };
 };
 
 export const foodServices = (services) => {
   if (!services) return [];
   return services.filter((service) => service.type === 'food');
+};
+
+export const guideServices = (services) => {
+  if (!services) return [];
+  return services.filter((service) => service.type === 'guide');
 };
 
 export const visitServices = (services) => {
@@ -135,8 +100,8 @@ export const normalizedServices = (daySchedule) => {
     food: foodServices(allServices),
     visit: visitServices(allServices),
     hotel: hotelServices(allServices),
+    guide: guideServices(allServices),
   };
 
-  console.log('servicesDivided', servicesDivided);
   return servicesDivided;
 };

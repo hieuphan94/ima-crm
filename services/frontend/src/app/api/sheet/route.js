@@ -15,9 +15,7 @@ const normalizeLocationName = (name) => {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    console.log('searchParams', searchParams);
     const location = searchParams.get('location');
-    console.log('location form url', location);
 
     // Validate location parameter
     if (!location?.trim()) {
@@ -50,7 +48,6 @@ export async function GET(request) {
 
     // Cập nhật range để phù hợp với sheet mới
     const data = await sheetService.getSheetData('TÁCH ĐỊA ĐIỂM!A1:F254');
-    console.log('data X', data);
 
     // Validate sheet data
     if (!Array.isArray(data) || data.length < 2) {
@@ -105,7 +102,7 @@ export async function GET(request) {
           name: row[columnIndexes.NAME] || '',
           type: ServiceType.VISIT,
           serviceLevel: ServiceLevel.TEMPLATE,
-          locations: [row[columnIndexes.LOCATION] || ''],
+          location: row[columnIndexes.LOCATION] || '',
           sentence: row[columnIndexes.PARAGRAPH] || '',
           serviceStatus: ServiceStatus.ACTIVE,
           mealOption: row[columnIndexes.MEAL] || '',

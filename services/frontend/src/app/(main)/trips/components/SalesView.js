@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  formatCurrency,
-  getStatusBadgeClasses,
-  getStatusLabel,
-  TRIP_STATUS,
-} from '@/data/mocks/tripsData';
+import { getStatusBadgeClasses, getStatusLabel, TRIP_STATUS } from '@/data/mocks/tripsData';
 import { Calendar, DollarSign, MapPin } from 'lucide-react';
 
 export default function SalesView({ trips }) {
@@ -78,7 +73,7 @@ function TripCard({ trip }) {
         {trip.estimatedCost && (
           <div className="flex items-center gap-2 text-sm font-medium text-primary">
             <DollarSign className="w-4 h-4" />
-            <span>Báo giá: {formatCurrency(trip.estimatedCost)}</span>
+            <span>Báo giá: {trip.estimatedCost}</span>
           </div>
         )}
       </div>

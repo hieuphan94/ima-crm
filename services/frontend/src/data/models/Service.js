@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Location } from './Location';
 import { ServiceLevel, ServiceStatus, ServiceType } from './enums';
 
 // Base Service Model
@@ -15,7 +14,7 @@ export class Service {
     type = ServiceType.FOOD,
     serviceLevel = ServiceLevel.TEMPLATE, // Mặc định là TEMPLATE
     templateId = null, // ID của template service (chỉ có ở ACTUAL)
-    locations = [],
+    location = '',
     address,
     sentence,
     images = [],
@@ -33,49 +32,13 @@ export class Service {
     this.type = type;
     this.serviceLevel = serviceLevel;
     this.templateId = templateId;
-    this.locations = this._processLocations(locations);
+    this.location = location;
     this.address = address;
     this.sentence = sentence;
     this.images = images;
     this.description = description;
     this.tags = tags;
     this.serviceStatus = serviceStatus;
-  }
-
-  _processLocations(locations) {
-    return locations.map((location) => {
-      if (location instanceof Location) {
-        return location;
-      }
-      // Nếu location là ID, có thể tạo mới Location object hoặc giữ nguyên ID
-      return location;
-    });
-  }
-
-  addLocation(location) {
-    if (!this.locations.includes(location)) {
-      this.locations.push(location);
-    }
-  }
-
-  removeLocation(locationId) {
-    this.locations = this.locations.filter((loc) =>
-      loc instanceof Location ? loc.id !== locationId : loc !== locationId
-    );
-  }
-
-  hasLocation(locationId) {
-    return this.locations.some((loc) =>
-      loc instanceof Location ? loc.id === locationId : loc === locationId
-    );
-  }
-
-  isInVietnam() {
-    return this.locations.some((loc) => loc instanceof Location && loc.isInVietnam());
-  }
-
-  isInNorth() {
-    return this.locations.some((loc) => loc instanceof Location && loc.isNorthern());
   }
 
   isTemplate() {

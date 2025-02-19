@@ -5,6 +5,7 @@ import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useDragDrop } from '../../states/useDragDrop';
+import { aggregatedLocation, normalizedServices } from '../../utils/formatters';
 import DayViewModal from './DayViewModal';
 import DeleteDayModal from './DeleteDayModal';
 
@@ -24,61 +25,7 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
 
   // Lấy titleOfDay từ daySchedule nếu có
   const titleOfDay = daySchedule?.titleOfDay || '';
-
-  // Chuẩn bị data cho modal
-  const prepareModalData = useCallback(() => {
-    const services = [];
-    const guides = [];
-    const { distance, price } = handleGetDistancePrice();
-
-    const priceOfDistance = {
-      dayId: dayId + 1,
-      distance,
-      priceDt: price,
-    };
-
-    if (daySchedule) {
-      Object.entries(daySchedule).forEach(([time, timeServices]) => {
-        if (time === 'titleOfDay') return;
-
-        if (Array.isArray(timeServices)) {
-          timeServices.forEach((service) => {
-            if (service.type === 'guide') {
-              guides.push(service.name);
-            }
-            services.push({
-              name: `${time} - ${service.name}`,
-              price: service.price || 0,
-            });
-          });
-        }
-      });
-    }
-
-    const modalData = {
-      services,
-      guides,
-      priceOfDistance,
-      titleOfDay: daySchedule?.titleOfDay || '',
-    };
-
-    return modalData;
-  }, [daySchedule, dayId, handleGetDistancePrice]);
-
-  const handleGetDistancePrice = useCallback(() => {
-    const dayContainer = document.getElementById(`day-${dayId}`);
-    if (!dayContainer) return { distance: 0, price: 0 };
-
-    const elements = {
-      distance: dayContainer.querySelector('.distance-input'),
-      price: dayContainer.querySelector('.price-value'),
-    };
-
-    const distance = elements.distance ? parseFloat(elements.distance.value) || 0 : 0;
-    const price = elements.price ? parseFloat(elements.price.textContent) || 0 : 0;
-
-    return { distance, price };
-  }, [dayId]);
+  const locations = aggregatedLocation(normalizedServices(daySchedule));
 
   const handleDeleteDay = useCallback(() => {
     dispatch(removeDay({ dayId }));
@@ -100,11 +47,18 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
         onDrop={(e) => handleDayHeaderDrop(e, dayId, order)}
       >
         <h3
-          className={`font-medium text-xs cursor-move hover:text-blue-600 ${
+          className={`font-medium text-[12px] cursor-move hover:text-blue-600 ${
             titleOfDay ? 'text-green-600' : 'text-yellow-600'
           }`}
         >
-          Day {order}
+          {order}
+          {locations.firstLocation ? (
+            <span className="text-white text-[8px] lowercase rounded-full bg-black py-1 px-2 ml-1.5">
+              {locations.firstLocation}
+            </span>
+          ) : (
+            ''
+          )}
         </h3>
         <div className="flex gap-1">
           <button
@@ -129,9 +83,6 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
           onClose={() => setIsModalOpen(false)}
           order={order}
           dayId={dayId}
-          titleOfDay={daySchedule?.titleOfDay || ''}
-          {...prepareModalData()}
-          distance={0} // Bạn có thể thêm logic tính khoảng cách ở đây
         />
       )}
 

@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  formatCurrency,
-  getStatusBadgeClasses,
-  getStatusLabel,
-  TRIP_STATUS,
-} from '@/data/mocks/tripsData';
+import { getStatusBadgeClasses, getStatusLabel, TRIP_STATUS } from '@/data/mocks/tripsData';
 import { DollarSign } from 'lucide-react';
 
 export default function AccountantView({ trips }) {
@@ -65,12 +60,12 @@ function TripCard({ trip }) {
       <div className="space-y-2 mb-4">
         <div className="flex items-center gap-2 text-sm">
           <DollarSign className="w-4 h-4" />
-          <span>Dự toán: {formatCurrency(trip.estimatedCost)}</span>
+          <span>Dự toán: {trip.estimatedCost}</span>
         </div>
         {trip.finalCost && (
           <div className="flex items-center gap-2 text-sm font-medium text-green-600">
             <DollarSign className="w-4 h-4" />
-            <span>Quyết toán: {formatCurrency(trip.finalCost)}</span>
+            <span>Quyết toán: {trip.finalCost}</span>
           </div>
         )}
         <div className="text-sm text-gray-500">Hóa đơn: 5/10 (50%)</div>

@@ -3,7 +3,7 @@ import { ServiceType } from '@/data/models/enums';
 import { IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
 import { mealTypeColors } from './constants/styles';
 
-export default function FoodSection({ openFood, setOpenFood, foodSearchTerm, setFoodSearchTerm }) {
+export default function FoodSection({ openFood, setOpenFood }) {
   return (
     <div>
       <button
@@ -22,10 +22,7 @@ export default function FoodSection({ openFood, setOpenFood, foodSearchTerm, set
         <div className="mt-1 space-y-2">
           {Object.entries(salesFoodServices).map(([mealType, services]) => (
             <div key={mealType}>
-              {/* <div className={`p-1 rounded ${mealTypeColors[mealType].header}`}>
-                <span className="text-[9px] font-medium">{getMealTypeName(mealType)}</span>
-              </div> */}
-              <div className="mt-1 grid grid-cols-5 gap-0.5">
+              <div className="mt-1 flex flex-wrap gap-0.5">
                 {services.map((service) => (
                   <div
                     key={service.id}
@@ -46,10 +43,9 @@ export default function FoodSection({ openFood, setOpenFood, foodSearchTerm, set
                     onDragEnd={(e) => {
                       e.target.classList.remove('opacity-50');
                     }}
-                    className={`flex flex-col items-center p-1 rounded cursor-move border ${mealTypeColors[mealType].item}`}
+                    className={`flex flex-col items-center p-0.5 rounded cursor-move border ${mealTypeColors[mealType].item}`}
                   >
-                    {/* <span className="text-[11px]">{service.icon}</span> */}
-                    <span className="text-[8px] text-center truncate w-full">
+                    <span className="text-[10px] text-center truncate w-full">
                       {service.name.split(' - ')[1]}
                     </span>
                   </div>
