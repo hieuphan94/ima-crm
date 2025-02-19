@@ -49,7 +49,8 @@ export default function VisitSection({
   const getPaginatedServices = (services) => {
     if (!services) return [];
     const startIndex = currentServicePage * servicesPerPage;
-    return services.slice(startIndex, startIndex + servicesPerPage);
+    const filteredServices = services.filter((service) => service.location === selectedLocation);
+    return filteredServices.slice(startIndex, startIndex + servicesPerPage);
   };
 
   const handleScroll = (direction) => {
@@ -132,13 +133,11 @@ export default function VisitSection({
   };
 
   const totalPages = Math.ceil(
-    (countries[0]?.locations
-      .find((loc) => loc.name === selectedLocation)
-      ?.servicesFromSheet?.filter(
-        (
-          service // Thêm optional chaining cho services
-        ) => service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
-      )?.length || 0) / servicesPerPage
+    (sheetServices?.filter(
+      (service) =>
+        service.location === selectedLocation &&
+        service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
+    )?.length || 0) / servicesPerPage
   );
 
   const handleServicePageChange = (pageNumber) => {
@@ -261,11 +260,11 @@ export default function VisitSection({
 
                   <div className="mt-1 space-y-0.5">
                     {getPaginatedServices(
-                      countries[0].locations
-                        .find((loc) => loc.name === selectedLocation)
-                        ?.servicesFromSheet.filter((service) =>
+                      sheetServices?.filter(
+                        (service) =>
+                          service.location === selectedLocation &&
                           service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
-                        ) || []
+                      ) || []
                     ).map((service) => (
                       <div
                         key={service.id}
