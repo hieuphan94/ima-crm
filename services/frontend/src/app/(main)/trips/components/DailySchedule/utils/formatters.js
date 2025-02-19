@@ -22,33 +22,37 @@ export const formatCurrency = (amount, currency = 'VND') => {
   return `${amount.toLocaleString('vi-VN')}đ`;
 };
 
-export const calculatePriceByStarRating = (type, mealType, starRating, pax) => {
-  if (!type || !pax) return 0;
-
-  if (type === 'food') {
-    if (mealType === 'breakfast') {
-      return 0;
-    }
-
-    const validPax = parseInt(pax) || 1;
-
-    switch (starRating) {
-      case 3:
-        return EXCHANGE_RATE.VND_TO_USD * 2 * validPax;
-      case 4:
-        return EXCHANGE_RATE.VND_TO_USD * 5 * validPax;
-      case 5:
-        return EXCHANGE_RATE.VND_TO_USD * 10 * validPax;
-      default:
-        return EXCHANGE_RATE.VND_TO_USD * validPax;
-    }
+export const starRatingFormula = (star) => {
+  switch (star) {
+    case 3:
+      return 2 * EXCHANGE_RATE.VND_TO_USD;
+    case 4:
+      return 5 * EXCHANGE_RATE.VND_TO_USD;
+    case 5:
+      return 10 * EXCHANGE_RATE.VND_TO_USD;
+    default:
+      return 1 * EXCHANGE_RATE.VND_TO_USD;
   }
-  return 0;
+};
+
+export const formulaFoodPriceByStarRating = (services, starRating, pax) => {
+  return services.reduce((total, service) => {
+    if (service.meal.mealType === 'breakfast') {
+      return total;
+    }
+    return total + service.meal.price * starRatingFormula(starRating) * pax;
+  }, 0);
 };
 
 export const convertTimeToMinutes = (timeString) => {
   const [hours, minutes] = timeString.split(':').map(Number);
   return hours * 60 + minutes;
+};
+
+export const timeKeysOnDaySchedule = (daySchedule) => {
+  return Object.keys(daySchedule)
+    .filter((key) => /^\d/.test(key))
+    .sort();
 };
 
 export const aggregatedLocation = (daySchedule) => {
@@ -96,11 +100,43 @@ export const aggregatedLocation = (daySchedule) => {
   return result;
 };
 
-export const normalizedServices = (daySchedule, paxCalculate, starRating) => {
-  if (!daySchedule || !daySchedule.services) return [];
+export const foodServices = (services) => {
+  if (!services) return [];
+  return services.filter((service) => service.type === 'food');
+};
 
-  return daySchedule.services.map((service) => ({
-    ...service,
-    priceUSD: calculatePriceByStarRating(service.type, service.mealType, starRating, paxCalculate),
-  }));
+export const visitServices = (services) => {
+  if (!services) return [];
+  return services.filter((service) => service.type === 'visit');
+};
+
+export const hotelServices = (services) => {
+  if (!services) return [];
+  return services.filter((service) => service.type === 'hotel');
+};
+
+export const normalizedServices = (daySchedule) => {
+  const timeKeys = timeKeysOnDaySchedule(daySchedule);
+
+  // Tạo mảng chứa tất cả services từ daySchedule
+  const allServices = [];
+  timeKeys.forEach((timeKey) => {
+    const timeSlotServices = daySchedule[timeKey] || [];
+    timeSlotServices.forEach((service) => {
+      allServices.push({
+        ...service,
+        timeKey,
+      });
+    });
+  });
+
+  // Phân loại services theo type
+  const servicesDivided = {
+    food: foodServices(allServices),
+    visit: visitServices(allServices),
+    hotel: hotelServices(allServices),
+  };
+
+  console.log('servicesDivided', servicesDivided);
+  return servicesDivided;
 };

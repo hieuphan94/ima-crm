@@ -17,6 +17,7 @@ import {
   aggregatedLocation,
   convertVNDtoUSD,
   formatCurrency,
+  formulaFoodPriceByStarRating,
   normalizedServices,
 } from '../../utils/formatters';
 import DeleteDayModal from './DeleteDayModal';
@@ -97,11 +98,11 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   const { globalPax, starRating } = settings;
   const { distance, paxChangeOfDay } = daySchedule;
-  console.log('paxChangeOfDay', paxChangeOfDay);
 
-  const paxCalculate = paxChangeOfDay !== null ? paxChangeOfDay : globalPax;
+  const services = normalizedServices(daySchedule);
+  console.log('services', services);
 
-  const services = normalizedServices(daySchedule, paxCalculate, globalPax, starRating);
+  const paxCalculate = paxChangeOfDay !== undefined ? paxChangeOfDay : globalPax;
 
   const handleDistancePrice = (distance) => {
     if (typeof paxCalculate === 'number' && paxCalculate > 0) {
@@ -112,9 +113,13 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
 
   // Totals calculation
   const { totalUSD } = useMemo(() => {
-    const servicesTotal = services.reduce((sum, service) => sum + service.priceUSD, 0);
+    let servicesTotal = 0;
+    servicesTotal += services.visit.reduce((sum, service) => sum + (service.price || 0), 0);
+    servicesTotal += formulaFoodPriceByStarRating(services.food, starRating, paxCalculate);
+    servicesTotal += services.hotel.reduce((sum, service) => sum + (service.price || 0), 0);
+
     const distancePrice = convertVNDtoUSD(handleDistancePrice(distance) || 0);
-    const totalUSD = servicesTotal + distancePrice;
+    const totalUSD = convertVNDtoUSD(servicesTotal) + distancePrice;
 
     return { servicesTotal, distancePrice, totalUSD };
   }, [services, distance]);
@@ -361,18 +366,16 @@ function DayViewModal({ isOpen, onClose, order, dayId, titleOfDay, guides = [] }
               </div>
 
               <div className="divide-y divide-gray-200">
-                {services
-                  .filter((service) => service.type !== 'food')
-                  .map((service, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-4 p-1.5 text-sm">
-                      <div className="col-span-1 text-gray-500">{index + 1}</div>
-                      <div className="col-span-2 text-gray-600">{service.time}</div>
-                      <div className="col-span-6">{service.name}</div>
-                      <div className="col-span-3 text-right">
-                        {formatCurrency(service.priceUSD, 'USD')}
-                      </div>
+                {services.visit.map((service, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-4 p-1.5 text-sm">
+                    <div className="col-span-1 text-gray-500">{index + 1}</div>
+                    <div className="col-span-2 text-gray-600">{service.timeKey}</div>
+                    <div className="col-span-6">{service.name}</div>
+                    <div className="col-span-3 text-right">
+                      {formatCurrency(convertVNDtoUSD(service.price), 'USD')}
                     </div>
-                  ))}
+                  </div>
+                ))}
               </div>
             </div>
 
