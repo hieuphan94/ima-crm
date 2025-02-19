@@ -35,25 +35,19 @@ export default function VisitSection({
         name: location.name,
         region: location.region,
         coordinates: location.coordinates,
-        services: sheetServices || [],
+        servicesFromSheet: sheetServices || [],
       })),
     },
   ];
 
-  const filteredLocations = (locations) => {
-    return locations.filter((location) =>
-      removeVietnameseTones(location.name.toLowerCase()).includes(
-        removeVietnameseTones(locationSearchTerm.toLowerCase())
-      )
-    );
-  };
-
-  const getPaginatedLocations = (locations) => {
+  const getPaginatedLocations = (locationsFromCountry) => {
+    if (!locationsFromCountry) return [];
     const startIndex = currentPage * locationsPerPage;
-    return locations.slice(startIndex, startIndex + locationsPerPage);
+    return locationsFromCountry.slice(startIndex, startIndex + locationsPerPage);
   };
 
   const getPaginatedServices = (services) => {
+    if (!services) return [];
     const startIndex = currentServicePage * servicesPerPage;
     return services.slice(startIndex, startIndex + servicesPerPage);
   };
@@ -62,9 +56,7 @@ export default function VisitSection({
     if (direction === 'left') {
       setCurrentPage(Math.max(0, currentPage - 1));
     } else {
-      const maxPages = Math.ceil(
-        filteredLocations(countries[0].locations).length / locationsPerPage
-      );
+      const maxPages = Math.ceil(countries[0].locations.length / locationsPerPage);
       setCurrentPage(Math.min(maxPages - 1, currentPage + 1));
     }
   };
@@ -142,8 +134,10 @@ export default function VisitSection({
   const totalPages = Math.ceil(
     (countries[0]?.locations
       .find((loc) => loc.name === selectedLocation)
-      ?.services.filter((service) =>
-        service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
+      ?.servicesFromSheet?.filter(
+        (
+          service // Thêm optional chaining cho services
+        ) => service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
       )?.length || 0) / servicesPerPage
   );
 
@@ -163,6 +157,15 @@ export default function VisitSection({
       })
     );
     e.target.classList.add('opacity-50');
+  };
+
+  const filteredLocations = (locations) => {
+    if (!locations) return [];
+    return locations.filter((location) =>
+      removeVietnameseTones(location.name.toLowerCase()).includes(
+        removeVietnameseTones(locationSearchTerm.toLowerCase())
+      )
+    );
   };
 
   return (
@@ -260,7 +263,7 @@ export default function VisitSection({
                     {getPaginatedServices(
                       countries[0].locations
                         .find((loc) => loc.name === selectedLocation)
-                        ?.services.filter((service) =>
+                        ?.servicesFromSheet.filter((service) =>
                           service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
                         ) || []
                     ).map((service) => (
