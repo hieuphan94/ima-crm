@@ -35,7 +35,7 @@ export default function VisitSection({
         name: location.name,
         region: location.region,
         coordinates: location.coordinates,
-        services: sheetServices,
+        services: sheetServices || [],
       })),
     },
   ];
