@@ -82,9 +82,8 @@ export default function VisitSection({
     try {
       setLoadingLocation(locationName);
 
-      // Check cache
+      // Check cache first
       const cachedServices = LocationCache.get(locationName);
-
       if (cachedServices?.length > 0) {
         setSheetServices(cachedServices);
         onLocationSelect(locationName);
@@ -92,23 +91,32 @@ export default function VisitSection({
       }
 
       const normalizedLocation = normalizeLocationName(locationName);
-
       const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
       const result = await response.json();
 
+      // Xử lý kết quả API tốt hơn
       if (result.success) {
-        setSheetServices(result.data);
-
         if (result.data?.length > 0) {
+          setSheetServices(result.data);
           LocationCache.set(locationName, result.data);
+          onLocationSelect(locationName);
+        } else {
+          // Không có data nhưng vẫn success
+          console.log(`No services found for ${locationName}`);
+          // Giữ nguyên state cũ thay vì set empty
+          onLocationSelect(locationName);
         }
-
-        onLocationSelect(locationName);
       } else {
-        setSheetServices([]);
+        // API trả về lỗi
+        console.error('API Error:', result.message);
+        // Không set empty array, giữ nguyên state cũ
+        onLocationSelect(locationName);
       }
     } catch (error) {
-      setSheetServices([]);
+      // Network/parsing error
+      console.error('Request failed:', error);
+      // Không set empty array, giữ nguyên state cũ
+      onLocationSelect(locationName);
     } finally {
       setLoadingLocation(null);
     }
