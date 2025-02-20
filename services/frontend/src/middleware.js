@@ -60,6 +60,13 @@ const isValidToken = (userData) => {
 export function middleware(request) {
   const path = request.nextUrl.pathname;
 
+  // 1. Block sensitive files/paths FIRST
+  const blockedPaths = ['/.env', '/node_modules', '/.git'];
+  if (blockedPaths.some((blocked) => path.startsWith(blocked))) {
+    console.warn('Blocked sensitive path access:', { path });
+    return new NextResponse(null, { status: 404 });
+  }
+
   // 1. Skip static files và public assets
   if (
     path === '/favicon.ico' ||
@@ -78,7 +85,7 @@ export function middleware(request) {
   if (token) {
     userData = parseJwt(token);
     if (!userData || !isValidToken(userData)) {
-      console.warn('Invalid or expired token:', { path, userData });
+      console.log('Invalid or expired token:', { path, userData });
 
       if (isApiRoute) {
         return new NextResponse(JSON.stringify({ message: 'Token invalid or expired' }), {
@@ -90,20 +97,10 @@ export function middleware(request) {
       response.cookies.delete('token');
       return response;
     }
+    return NextResponse.next();
   }
 
-  // 3. API routes sheet pass -THÊM VÀO SAU
-  // if (isApiRouteSheet) {
-  //   return NextResponse.next();
-  // }
-
-  if (isApiRoute && !userData) {
-    console.warn('Unauthorized API access:', { path });
-    return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), {
-      status: 401,
-      headers: { 'content-type': 'application/json' },
-    });
-  }
+  console.log(userData);
 
   // 4. Xử lý public routes
   if (isPublicRoute(path)) {
