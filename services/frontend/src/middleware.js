@@ -100,8 +100,6 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  console.log(userData);
-
   // 4. Xử lý public routes
   if (isPublicRoute(path)) {
     if (userData) {
