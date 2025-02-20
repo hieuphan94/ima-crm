@@ -19,8 +19,6 @@ const DaysContainer = memo(function DaysContainer({
   const { numberOfDays } = useSelector((state) => state.dailySchedule.settings);
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
 
-  console.log('scheduleItems', scheduleItems);
-
   // Khởi tạo days khi numberOfDays thay đổi
   useEffect(() => {
     const existingDays = Object.entries(scheduleItems);
@@ -47,8 +45,6 @@ const DaysContainer = memo(function DaysContainer({
       dispatch(initializeDays([...existingDaysData, ...newDays]));
     }
   }, [numberOfDays, dispatch]);
-
-  console.log('scheduleItems', scheduleItems);
 
   // Sắp xếp days theo order
   const dataDays = Object.entries(scheduleItems).sort(([, a], [, b]) => a.order - b.order);
