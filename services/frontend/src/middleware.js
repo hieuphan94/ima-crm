@@ -72,7 +72,6 @@ export function middleware(request) {
 
   const token = request.cookies.get('token')?.value;
   const isApiRoute = path.startsWith('/api/');
-  const isApiRouteSheet = path.startsWith('/api/sheet');
 
   // 2. Parse và validate token
   let userData = null;
@@ -109,6 +108,10 @@ export function middleware(request) {
   // 4. Xử lý public routes
   if (isPublicRoute(path)) {
     if (userData) {
+      // Đã login -> nếu là API route thì cho phép đi tiếp
+      if (isApiRoute) {
+        return NextResponse.next();
+      }
       // Đã login -> chuyển đến trang mặc định theo role/department
       const defaultRoute = getDefaultRoute(userData.role, userData.department);
       console.log('Redirecting logged user from public route:', {
