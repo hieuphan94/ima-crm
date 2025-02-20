@@ -1,5 +1,5 @@
 // 1. Routes công khai
-export const PUBLIC_ROUTES = ['/login', '/forgot-password'];
+export const PUBLIC_ROUTES = ['/login', '/forgot-password', '/api/sheet'];
 // export const PUBLIC_ROUTES = ['/login', '/forgot-password', '/trips/new', '/api/sheet']; // THÊM VÀO SAU
 
 // 2. Tất cả routes trong hệ thống
@@ -7,6 +7,7 @@ export const ROUTES = {
   // Public routes
   login: '/login',
   forgotPassword: '/forgot-password',
+  sheetApi: '/api/sheet',
 
   // Common routes
   dashboard: '/dashboard',
@@ -24,6 +25,7 @@ export const ROUTES = {
   sales: '/sales',
   tours: '/tours',
   trips: '/trips',
+  tripsNew: '/trips/new',
   tripsDetail: '/trips/:id',
 
   // Office routes
@@ -60,6 +62,7 @@ export const DEPARTMENT_PERMISSIONS = {
     ROUTES.sales,
     ROUTES.tours,
     ROUTES.trips,
+    ROUTES.sheetApi,
     ROUTES.profile,
     ROUTES.library,
     ROUTES.libraryTemplates,
