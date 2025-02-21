@@ -3,7 +3,8 @@ import {
   setLoading,
   showNotification,
   clearNotification,
-  toggleTheme,toggleSidebar,
+  toggleTheme,
+  toggleSidebar,
   openModal,
   closeModal,
 } from '@/store/slices/uiSlice';
@@ -14,7 +15,8 @@ export const useUI = () => {
 
   if (!ui) {
     return {
-      isLoading: false,notification: null,
+      isLoading: false,
+      notification: null,
       theme: 'light',
       sidebarOpen: true,
       modal: { isOpen: false, type: null, data: null },

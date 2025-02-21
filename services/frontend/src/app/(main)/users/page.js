@@ -194,7 +194,7 @@ export default function UsersPage() {
       ) : filteredUsers?.length === 0 ? (
         <div className="text-center py-10 bg-gray-50 rounded-lg">
           <p className="text-gray-600">
-            Không tìm thấy người dùng nào khớp với từ khóa "{searchTerm}"
+            Không tìm thấy người dùng nào khớp với từ khóa &quot;{searchTerm}&quot;
           </p>
           <Button
             color="primary"
