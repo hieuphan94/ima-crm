@@ -42,7 +42,7 @@ services:
       - "3002:3002"
     command: sh -c "npm install && npm run build && npm run start"
     env_file:
-      - ./services/frontend/.env
+      - ./services/frontend/.env.production
     mem_limit: 1536m
     depends_on:
       - backend
