@@ -13,6 +13,9 @@
     # Sao chép toàn bộ mã nguồn vào container
     COPY . .
     
+    # Xóa cache của Next.js trước khi build
+    RUN rm -rf .next/cache
+
     # Chạy build
     RUN npm run build
     
