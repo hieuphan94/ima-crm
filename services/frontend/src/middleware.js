@@ -67,6 +67,10 @@ export function middleware(request) {
     return new NextResponse(null, { status: 404 });
   }
 
+  if (path === '/health' || path === '/api/health') {
+    return NextResponse.next();
+  }
+
   // 1. Skip static files và public assets
   if (
     path === '/favicon.ico' ||
@@ -155,7 +159,7 @@ export function middleware(request) {
 export const config = {
   matcher: [
     // Exclude files
-    '/((?!_next/static|_next/image|favicon.ico|images|public).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images|public|health|api/health).*)',
     // Include API routes
     '/api/:path*',
   ],
