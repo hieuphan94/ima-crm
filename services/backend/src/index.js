@@ -37,6 +37,10 @@ app.get('/api', (req, res) => {
     });
 });
 
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy' });
+});
+
 // Routes
 app.use('/api', routes);
 
