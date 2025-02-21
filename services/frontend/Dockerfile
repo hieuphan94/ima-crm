@@ -8,7 +8,7 @@
     COPY package*.json ./
     
     # Cài đặt chỉ dependencies cho production
-    RUN npm ci --only=production
+    RUN npm ci --legacy-peer-deps
     
     # Sao chép toàn bộ mã nguồn vào container
     COPY . .
