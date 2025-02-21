@@ -78,8 +78,6 @@ export async function GET(request) {
       return rowLocation && rowLocation === normalizedLocation;
     });
 
-    console.log('filteredServices', filteredServices);
-
     // Check if any services were found
     if (filteredServices.length === 0) {
       return Response.json(
@@ -94,7 +92,6 @@ export async function GET(request) {
     }
 
     // Chuyển đổi dữ liệu theo cấu trúc mới
-    console.log('before convert');
     const services = filteredServices
       .map((row) => {
         return new VisitService({
@@ -116,8 +113,6 @@ export async function GET(request) {
         });
       })
       .filter((service) => service.name);
-
-    console.log('Visit services', services);
 
     // Return success response with processed services
     return Response.json(

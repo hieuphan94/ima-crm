@@ -13,7 +13,6 @@ class GoogleSheetService {
         'credentials',
         'my-sheet-ima-crm-import-084d657ff146.json'
       );
-      console.log('Trying to read credentials from:', credentialsPath);
       const credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
 
       this.spreadsheetId = spreadsheetId;

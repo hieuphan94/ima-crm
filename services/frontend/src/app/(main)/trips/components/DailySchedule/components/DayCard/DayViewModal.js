@@ -82,6 +82,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
   const [editedParagraph, setEditedParagraph] = useState(paragraphTotal);
+  const [hasGuide, setHasGuide] = useState(true);
 
   if (!isOpen || typeof window === 'undefined') return null;
 
@@ -330,6 +331,32 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
 
           {/* Right Column - 70% */}
           <div className="w-[70%] space-y-2">
+            {/* Guide */}
+            <div className="grid grid-cols-12 gap-4 p-1.5 text-sm border-t border-gray-200">
+              <div className="col-span-12 flex items-center gap-4">
+                <span className="font-medium">Guide:</span>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="guide"
+                    checked={hasGuide}
+                    onChange={() => setHasGuide(true)}
+                    className="form-radio text-blue-600"
+                  />
+                  <span className="text-gray-700">Có Guide</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="guide"
+                    checked={!hasGuide}
+                    onChange={() => setHasGuide(false)}
+                    className="form-radio text-blue-600"
+                  />
+                  <span className="text-gray-700">Không có Guide</span>
+                </label>
+              </div>
+            </div>
             {/* Services List */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <div className="grid grid-cols-12 gap-4 bg-gray-200 p-1.5 border-b border-gray-200 text-sm font-medium text-gray-600">
@@ -360,23 +387,29 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
             </div>
 
             {/* Meals from daySchedule.meals */}
-            <div className="grid grid-cols-12 gap-4 p-1.5 text-sm border-t border-gray-200">
-              <div className="col-span-9">
-                <span className="font-medium mb-2">Repas en journée: </span>
+            <div className="grid grid-cols-12 p-1.5 text-sm border-t border-gray-200">
+              <div className="col-span-12">
+                <span className="font-medium mb-2">Repas:</span>
                 {daySchedule.meals.breakfast.included && (
-                  <span>Petit déjeuner: {daySchedule.meals.breakfast.type}, </span>
+                  <span className="m-1 p-1 bg-gray-200 rounded">
+                    PD {daySchedule.meals.breakfast.type},{' '}
+                  </span>
                 )}
                 {daySchedule.meals.lunch.included && (
-                  <span>Déjeuner: {daySchedule.meals.lunch.type}, </span>
+                  <span className="m-1 p-1 bg-gray-200 rounded">
+                    DJ: {daySchedule.meals.lunch.type},{' '}
+                  </span>
                 )}
                 {daySchedule.meals.dinner.included && (
-                  <span>Dîner: {daySchedule.meals.dinner.type}</span>
+                  <span className="m-1 p-1 bg-gray-200 rounded">
+                    DI: {daySchedule.meals.dinner.type}
+                  </span>
                 )}
               </div>
             </div>
 
             {/* Total */}
-            <div className="grid grid-cols-12 gap-4 p-1.5 text-sm font-medium bg-gray-100 rounded-lg">
+            <div className="grid grid-cols-12 gap-4 p-1.5 text-sm font-medium bg-yellow-100 rounded-lg">
               <div className="col-span-9">Total</div>
               <div className="col-span-3 text-right">{totalUSD}</div>
             </div>

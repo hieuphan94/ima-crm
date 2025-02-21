@@ -36,11 +36,11 @@ const createBasicFoodService = (mealType, venueType) => ({
 const getMealTypeName = (mealType) => {
   switch (mealType) {
     case MealType.BREAKFAST:
-      return 'Petit-déjeuner';
+      return 'PD';
     case MealType.LUNCH:
-      return 'Déjeuner';
+      return 'DJ';
     case MealType.DINNER:
-      return 'Dîner';
+      return 'DI';
     default:
       return '';
   }

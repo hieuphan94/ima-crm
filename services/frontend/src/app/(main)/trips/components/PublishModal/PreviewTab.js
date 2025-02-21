@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -16,10 +15,6 @@ export default function PreviewTab() {
   const scheduleInfo = useSelector((state) => state.dailySchedule.scheduleInfo);
   const [expandedDays, setExpandedDays] = useState({});
   const [activePreviewTab, setActivePreviewTab] = useState('validation');
-
-  const Map = dynamic(() => import('@/app/(main)/trips/components/Map/MapLibre'), {
-    ssr: false,
-  });
 
   const toggleDay = (dayId) => {
     setExpandedDays((prev) => {
@@ -47,93 +42,6 @@ export default function PreviewTab() {
           unoptimized
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-      </div>
-    );
-  };
-
-  const renderDayServices = (dayData) => {
-    const timeSlots = Object.entries(dayData).filter(
-      ([key]) => !['order', 'distance', 'titleOfDay', 'meals', 'paragraphDay'].includes(key)
-    );
-
-    if (timeSlots.length === 0) {
-      return (
-        <div className="text-sm text-gray-500 italic">No activities scheduled for this day</div>
-      );
-    }
-
-    return (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32"
-              >
-                Time
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Activity
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32"
-              >
-                Duration
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32"
-              >
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {timeSlots.map(
-              ([time, services]) =>
-                Array.isArray(services) &&
-                services.map((service, index) => (
-                  <tr key={`${time}-${index}`}>
-                    {index === 0 && (
-                      <td
-                        className="px-4 py-2 text-sm text-gray-900 align-top"
-                        rowSpan={services.length}
-                      >
-                        {time}
-                      </td>
-                    )}
-                    <td className="px-4 py-2 text-sm text-gray-500">
-                      <div className="font-medium text-gray-900">{service.name}</div>
-                      {service.image && renderImage(service.image)}
-                      {service.description && (
-                        <div className="mt-1 text-sm text-gray-500">{service.description}</div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-sm text-gray-500">{service.duration || '-'}</td>
-                    <td className="px-4 py-2 text-sm">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${
-                        service.status === 'confirmed'
-                          ? 'bg-green-100 text-green-800'
-                          : service.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                      }`}
-                      >
-                        {service.status || 'Not set'}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-            )}
-          </tbody>
-        </table>
       </div>
     );
   };
@@ -274,31 +182,27 @@ export default function PreviewTab() {
           {expandedDays[dayId] && (
             <div className="p-4 space-y-4">
               <div className="space-y-2">
-                <div className="text-sm">
-                  <span className="font-medium">Distance:</span> {dayData.distance} km
-                </div>
-
-                {dayData.meals && (
+                <div className="flex items-center gap-2">
                   <div className="text-sm">
-                    <span className="font-medium">Meals:</span>
-                    <div className="ml-4">
-                      {Object.entries(dayData.meals).map(
-                        ([meal, details]) =>
-                          details.included && (
-                            <div key={meal}>
-                              • {meal.charAt(0).toUpperCase() + meal.slice(1)}:{' '}
-                              {details.type || 'Not specified'}
-                              {details.price > 0 && ` - ${details.price}`}
-                            </div>
-                          )
-                      )}
-                    </div>
+                    <span className="font-medium">Distance:</span> {dayData.distance} km
                   </div>
-                )}
-
-                <div className="mt-4">
-                  <div className="font-medium mb-2">Activities:</div>
-                  {renderDayServices(dayData)}
+                  {dayData.meals && (
+                    <div className="text-sm">
+                      <span className="font-medium ml-2">Meals:</span>
+                      <div className="ml-4">
+                        {Object.entries(dayData.meals).map(
+                          ([meal, details]) =>
+                            details.included && (
+                              <div key={meal}>
+                                • {meal.charAt(0).toUpperCase() + meal.slice(1)}:{' '}
+                                {details.type || 'Not specified'}
+                                {details.price > 0 && ` - ${details.price}`}
+                              </div>
+                            )
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {dayData.paragraphDay.paragraphTotal && (
@@ -317,7 +221,6 @@ export default function PreviewTab() {
           )}
         </div>
       ))}
-      <Map locations={getLocationsFromSchedule()} />
     </div>
   );
 

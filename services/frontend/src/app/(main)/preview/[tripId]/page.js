@@ -112,17 +112,6 @@ export default function TripPreview() {
         </div>
       </div>
 
-      {/* Map Section */}
-      <div className="mb-8 rounded-lg overflow-hidden border">
-        <div className="h-[400px]">
-          <Map
-            locations={getLocationsFromSchedule()}
-            initialBounds={VIETNAM_BOUNDS}
-            padding={50} // Thêm padding để không bị sát viền
-          />
-        </div>
-      </div>
-
       {/* Schedule Content */}
       <div className="space-y-6">
         {Object.entries(tripData.scheduleData).map(([dayId, dayData]) => {
@@ -135,28 +124,12 @@ export default function TripPreview() {
             return null;
           }
 
-          const dayActivities = Object.entries(dayData)
-            .filter(
-              ([time]) =>
-                ![
-                  'distance',
-                  'meals',
-                  'order',
-                  'paragraphDay',
-                  'paxChangeOfDay',
-                  'titleOfDay',
-                ].includes(time)
-            )
-            .sort(([timeA], [timeB]) => timeA.localeCompare(timeB));
-
-          if (dayActivities.length === 0) return null;
-
           return (
-            <div key={dayId} className="border rounded-lg overflow-hidden">
-              <h2 className="text-xl font-semibold p-4 bg-gray-50">
-                Day {dayData.order || parseInt(dayId.split('-')[0]) + 1}
+            <div key={dayId} className="border rounded-lg overflow-hidden p-4">
+              <h2 className="text-xl font-semibold  bg-gray-50">
+                Jour {dayData.order || parseInt(dayId.split('-')[0]) + 1}
               </h2>
-              <div className="overflow-x-auto">
+              {/* <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gray-50 border-y">
@@ -201,25 +174,29 @@ export default function TripPreview() {
                     })}
                   </tbody>
                 </table>
-              </div>
+              </div> */}
+
+              {dayData.paragraphDay.paragraphTotal && (
+                <div
+                  className="text-sm text-gray-600 mt-1 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: dayData.paragraphDay.paragraphTotal.replace(/\n/g, '<br/>'),
+                  }}
+                />
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Additional Info */}
-      <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-semibold mb-2">Trip Details</h3>
-        <div className="text-sm text-gray-600">
-          Published on:{' '}
-          {new Date(tripData.date).toLocaleString('vi-VN', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          })}
+      {/* Map Section */}
+      <div className="mb-8 overflow-hidden mt-4 flex justify-center">
+        <div className="h-[700px]">
+          <Map
+            locations={getLocationsFromSchedule()}
+            initialBounds={VIETNAM_BOUNDS}
+            padding={50} // Thêm padding để không bị sát viền
+          />
         </div>
       </div>
     </div>
