@@ -164,7 +164,7 @@ export default function PreviewTab() {
             className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100"
           >
             <div className="flex items-center gap-4">
-              <span className="font-medium">Day {dayData.order}</span>
+              <span className="font-medium">Jour {dayData.order}</span>
               {dayData.titleOfDay && <span className="text-gray-600">- {dayData.titleOfDay}</span>}
               {dayData.paxChangeOfDay && (
                 <span className="text-gray-600 truncate">
@@ -182,13 +182,17 @@ export default function PreviewTab() {
           {expandedDays[dayId] && (
             <div className="p-4 space-y-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                  <div className="text-sm">
+                    <span className="font-medium">Guide:</span>{' '}
+                    {dayData.guide.included ? 'Có' : 'Không'}
+                  </div>
                   <div className="text-sm">
                     <span className="font-medium">Distance:</span> {dayData.distance} km
                   </div>
                   {dayData.meals && (
                     <div className="text-sm">
-                      <span className="font-medium ml-2">Meals:</span>
+                      <span className="font-medium">Meals:</span>
                       <div className="ml-4">
                         {Object.entries(dayData.meals).map(
                           ([meal, details]) =>

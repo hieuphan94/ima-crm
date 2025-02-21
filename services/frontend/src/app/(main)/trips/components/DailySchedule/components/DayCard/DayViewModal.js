@@ -1,7 +1,11 @@
 'use client';
 
 import TiptapEditor from '@/components/TiptapEditor';
-import { updateDayParagraph, updateDayTitle } from '@/store/slices/useDailyScheduleSlice';
+import {
+  setDayGuide,
+  updateDayParagraph,
+  updateDayTitle,
+} from '@/store/slices/useDailyScheduleSlice';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import { useCallback, useMemo, useState } from 'react';
@@ -75,6 +79,8 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   const paxChangeOfDay = useSelector((state) => state.dailySchedule.paxChangeOfDay);
 
   const paragraphTotal = daySchedule?.paragraphDay?.paragraphTotal || '';
+  // Get guide state from store, default to true if not set
+  const hasGuide = daySchedule?.guide?.included ?? true;
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
@@ -82,7 +88,6 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
   const [editedParagraph, setEditedParagraph] = useState(paragraphTotal);
-  const [hasGuide, setHasGuide] = useState(true);
 
   if (!isOpen || typeof window === 'undefined') return null;
 
@@ -201,6 +206,11 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   const handleCancelEdit = () => {
     setEditedParagraph(paragraphTotal);
     setIsEditingParagraph(false);
+  };
+
+  // Update the guide handler
+  const handleGuideChange = (included) => {
+    dispatch(setDayGuide({ dayId, included }));
   };
 
   return createPortal(
@@ -340,7 +350,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
                     type="radio"
                     name="guide"
                     checked={hasGuide}
-                    onChange={() => setHasGuide(true)}
+                    onChange={() => handleGuideChange(true)}
                     className="form-radio text-blue-600"
                   />
                   <span className="text-gray-700">Có Guide</span>
@@ -350,7 +360,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
                     type="radio"
                     name="guide"
                     checked={!hasGuide}
-                    onChange={() => setHasGuide(false)}
+                    onChange={() => handleGuideChange(false)}
                     className="form-radio text-blue-600"
                   />
                   <span className="text-gray-700">Không có Guide</span>

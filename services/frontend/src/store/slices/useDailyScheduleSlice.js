@@ -143,6 +143,8 @@ const useDailyScheduleSlice = createSlice({
               paragraphFromLocation: '',
               paragraphTotal: '',
             },
+            // Keep existing guide or set default
+            guide: existingItems[id].guide || { included: true },
           };
         } else {
           newScheduleItems[id] = {
@@ -160,6 +162,7 @@ const useDailyScheduleSlice = createSlice({
               paragraphFromLocation: '',
               paragraphTotal: '',
             },
+            guide: { included: true }, // Default guide setting for new days
           };
         }
       }
@@ -506,6 +509,19 @@ const useDailyScheduleSlice = createSlice({
         (_, i) => i !== index
       );
     },
+
+    // Add new reducer for guide
+    setDayGuide: (state, action) => {
+      const { dayId, included } = action.payload;
+
+      if (!state.scheduleItems[dayId]) {
+        state.scheduleItems[dayId] = {};
+      }
+
+      state.scheduleItems[dayId].guide = {
+        included,
+      };
+    },
   },
 });
 
@@ -538,6 +554,7 @@ export const {
   updateScheduleImages,
   addScheduleImage,
   removeScheduleImage,
+  setDayGuide,
 } = useDailyScheduleSlice.actions;
 
 export default useDailyScheduleSlice.reducer;
