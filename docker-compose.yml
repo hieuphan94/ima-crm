@@ -1,25 +1,12 @@
 services:
   backend:
-    image: node:16
-    working_dir: /app
-    volumes:
-      - ./services/backend:/app:delegated
-      - /app/node_modules
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    command: sh -c "npm install && npm run dev"
-    environment:
-      - NODE_ENV=development
-      - PORT=3000
-      - CHOKIDAR_USEPOLLING=true
-      - WATCHPACK_POLLING=true
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password123
-      - POSTGRES_DB=ima_crm
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=ima_crm_sk_2024
+    env_file:
+      - ./services/backend/.env.production
     mem_limit: 1024m
     depends_on:
       - postgres
@@ -54,11 +41,8 @@ services:
     ports:
       - "3002:3002"
     command: sh -c "npm install && npm run build && npm run start"
-    environment:
-      - NODE_ENV=production
-      - PORT=3002
-      - NODE_NO_WARNINGS=1
-      - NODE_OPTIONS=--max-old-space-size=1536
+    env_file:
+      - ./services/frontend/.env
     mem_limit: 1536m
     depends_on:
       - backend
