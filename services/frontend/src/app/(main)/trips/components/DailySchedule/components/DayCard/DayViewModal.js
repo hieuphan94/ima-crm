@@ -70,21 +70,20 @@ const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
 
 function DayViewModal({ isOpen, onClose, order, dayId }) {
   const dispatch = useDispatch();
+  const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
+  const settings = useSelector((state) => state.dailySchedule.settings);
+  const paxChangeOfDay = useSelector((state) => state.dailySchedule.paxChangeOfDay);
+
+  const paragraphTotal = daySchedule?.paragraphDay?.paragraphTotal || '';
+
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
-  const [editedParagraph, setEditedParagraph] = useState(
-    daySchedule.paragraphDay.paragraphTotal || ''
-  );
+  const [editedParagraph, setEditedParagraph] = useState(paragraphTotal);
 
   if (!isOpen || typeof window === 'undefined') return null;
-
-  const daySchedule = useSelector((state) => state.dailySchedule.scheduleItems[dayId]);
-  const settings = useSelector((state) => state.dailySchedule.settings);
-  const paxChangeOfDay = useSelector((state) => state.dailySchedule.paxChangeOfDay);
-  const guides = daySchedule?.guides || [];
 
   if (!daySchedule) {
     console.warn('Day not found:', dayId);
@@ -194,12 +193,12 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   );
 
   const handleStartEditing = () => {
-    setEditedParagraph(daySchedule.paragraphDay.paragraphTotal || '');
+    setEditedParagraph(paragraphTotal);
     setIsEditingParagraph(true);
   };
 
   const handleCancelEdit = () => {
-    setEditedParagraph(daySchedule.paragraphDay.paragraphTotal || '');
+    setEditedParagraph(paragraphTotal);
     setIsEditingParagraph(false);
   };
 
@@ -423,7 +422,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
             <div
               className="text-[11px] text-blue-800 leading-relaxed bg-blue-50 p-3 rounded-lg"
               dangerouslySetInnerHTML={{
-                __html: daySchedule.paragraphDay.paragraphTotal || '',
+                __html: paragraphTotal || '',
               }}
             />
           )}
