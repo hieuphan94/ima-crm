@@ -43,6 +43,8 @@ services:
     mem_limit: 1536m
     depends_on:
       - backend
+    volumes:
+      - ./services/frontend/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json:/app/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json
 
   nginx:
     image: nginx:alpine
