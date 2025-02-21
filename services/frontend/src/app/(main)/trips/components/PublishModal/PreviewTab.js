@@ -301,7 +301,7 @@ export default function PreviewTab() {
                   {renderDayServices(dayData)}
                 </div>
 
-                {dayData.paragraphDay?.paragraphTotal && (
+                {dayData.paragraphDay.paragraphTotal && (
                   <div className="mt-4">
                     <div className="font-medium">Description:</div>
                     <div

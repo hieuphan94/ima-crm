@@ -20,7 +20,7 @@ const createExcel = async ({ scheduleItems = [], scheduleInfo = {}, settings = {
       `Day ${index + 1}`,
       day.titleOfDay || '',
       day.distance || '',
-      day.paragraphDay?.paragraphTotal?.replace(/<[^>]+>/g, '') || '',
+      day.paragraphDay.paragraphTotal.replace(/<[^>]+>/g, '') || '',
     ]);
   });
   const scheduleWS = XLSX.utils.aoa_to_sheet(scheduleData);

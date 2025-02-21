@@ -70,14 +70,13 @@ const DayTemplateList = ({ searchTemplate, onSelect, templates }) => {
 
 function DayViewModal({ isOpen, onClose, order, dayId }) {
   const dispatch = useDispatch();
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [images, setImages] = useState([]);
   const [searchTemplate, setSearchTemplate] = useState('');
   const [isEditingParagraph, setIsEditingParagraph] = useState(false);
   const [editedParagraph, setEditedParagraph] = useState(
-    daySchedule?.paragraphDay?.paragraphTotal || ''
+    daySchedule.paragraphDay.paragraphTotal || ''
   );
 
   if (!isOpen || typeof window === 'undefined') return null;
@@ -195,12 +194,12 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
   );
 
   const handleStartEditing = () => {
-    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
+    setEditedParagraph(daySchedule.paragraphDay.paragraphTotal || '');
     setIsEditingParagraph(true);
   };
 
   const handleCancelEdit = () => {
-    setEditedParagraph(daySchedule?.paragraphDay?.paragraphTotal || '');
+    setEditedParagraph(daySchedule.paragraphDay.paragraphTotal || '');
     setIsEditingParagraph(false);
   };
 
@@ -424,7 +423,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
             <div
               className="text-[11px] text-blue-800 leading-relaxed bg-blue-50 p-3 rounded-lg"
               dangerouslySetInnerHTML={{
-                __html: daySchedule?.paragraphDay?.paragraphTotal || '',
+                __html: daySchedule.paragraphDay.paragraphTotal || '',
               }}
             />
           )}

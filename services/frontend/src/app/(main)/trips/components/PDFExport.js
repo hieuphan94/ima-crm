@@ -314,7 +314,7 @@ const PDFDocument = ({
                   {`Jour ${dayIndex + 1}: ${day.titleOfDay || ''} | Distance: ${day.distance}km`}
                 </Text>
               </View>
-              {day.paragraphDay?.paragraphTotal && (
+              {day.paragraphDay.paragraphTotal && (
                 <View style={styles.paragraph}>
                   <Text style={styles.text}>
                     {formatHTMLToPDF(day.paragraphDay.paragraphTotal).map((part, idx) => (

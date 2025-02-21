@@ -104,7 +104,7 @@ const createDOCX = async ({ scheduleItems = [], scheduleInfo = {}, settings = {}
         spacing: { before: 400, after: 200 },
       }),
       new Paragraph({
-        children: convertHTMLToTextRuns(day.paragraphDay?.paragraphTotal),
+        children: convertHTMLToTextRuns(day.paragraphDay.paragraphTotal),
         spacing: { after: 200 },
       }),
     ])
