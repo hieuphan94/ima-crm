@@ -7,8 +7,8 @@
     # Sao chép package.json và package-lock.json để tối ưu caching
     COPY package*.json ./
     
-    # Cài đặt chỉ dependencies cho production
-    RUN npm ci --legacy-peer-deps
+    # Cài đặt chỉ dependencies cho production (bỏ qua devDependencies)
+    RUN npm ci --omit=dev --legacy-peer-deps
     
     # Sao chép toàn bộ mã nguồn vào container
     COPY . .
@@ -16,11 +16,11 @@
     # Chạy build
     RUN npm run build
     
-    # Loại bỏ các package dev để giảm dung lượng
-    RUN npm prune --omit=dev
+    # Xóa cache npm để giảm dung lượng image
+    RUN rm -rf ~/.npm
     
     
-    # --- Giai đoạn Chạy ứng dụng (Tạo image nhẹ hơn) ---
+    # --- Giai đoạn Chạy ứng dụng ---
     FROM node:18-alpine AS runner
     
     # Thiết lập biến môi trường để tối ưu Node.js
@@ -33,13 +33,14 @@
     COPY --from=builder /app/node_modules ./node_modules
     COPY --from=builder /app/package.json ./package.json
     COPY --from=builder /app/public ./public
-
-    # Đặt người dùng non-root để tăng bảo mật
-    USER node
+    
+    # Đặt quyền non-root để tăng bảo mật
+    RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+    USER appuser
     
     # Mở port 3002
     EXPOSE 3002
     
-    # Chạy ứng dụng
-    CMD ["npm", "run", "start"]
+    # Chạy ứng dụng bằng next start thay vì npm run start
+    CMD ["npx", "next", "start"]
     

@@ -8,9 +8,17 @@ services:
     env_file:
       - ./services/backend/.env.production
     mem_limit: 1024m
+    restart: unless-stopped
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--max-time", "5", "-f", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
   postgres:
     image: postgres:14
@@ -23,6 +31,12 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     mem_limit: 512m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "admin", "-d", "ima_crm"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:alpine
@@ -31,6 +45,11 @@ services:
     volumes:
       - redisdata:/data
     mem_limit: 256m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 3
 
   frontend:
     build:
@@ -41,8 +60,17 @@ services:
     env_file:
       - ./services/frontend/.env.production
     mem_limit: 1536m
+    restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--max-time", "5", "-f", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
     volumes:
       - ./services/frontend/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json:/app/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json
 
@@ -53,9 +81,12 @@ services:
     volumes:
       - ./services/nginx/conf.d:/etc/nginx/conf.d
     mem_limit: 256m
+    restart: unless-stopped
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
 
 volumes:
   pgdata:

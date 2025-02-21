@@ -220,9 +220,6 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
               )}
             </span>
           )}
-          {guides.length > 0 && (
-            <span className="text-sm text-gray-600">Guides: {guides.join(', ')}</span>
-          )}
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-xl transition-colors duration-200"
@@ -439,7 +436,6 @@ DayViewModal.propTypes = {
   order: PropTypes.number.isRequired,
   dayId: PropTypes.string.isRequired,
   titleOfDay: PropTypes.string,
-  guides: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default DayViewModal;
