@@ -76,14 +76,18 @@ services:
 
   nginx:
     build:
-      context: ./services/nginx
-      dockerfile: Dockerfile
+    context: ./services/nginx
+    dockerfile: Dockerfile
     ports:
       - "80:80"
+      - "443:443"  # Mở cổng HTTPS
     environment:
       PORT_BACKEND: ${PORT_BACKEND}
       PORT_FRONTEND: ${PORT_FRONTEND}
       DOMAIN_NAME: ${DOMAIN_NAME}
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro  # Mount SSL vào container
+      - ./services/nginx/conf.d:/etc/nginx/conf.d
     mem_limit: 256m
     restart: unless-stopped
     depends_on:
