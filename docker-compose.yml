@@ -82,9 +82,9 @@ services:
       - "80:80"
       - "443:443"  # Mở cổng HTTPS
     environment:
-      PORT_BACKEND: ${PORT_BACKEND}
-      PORT_FRONTEND: ${PORT_FRONTEND}
-      DOMAIN_NAME: ${DOMAIN_NAME}
+      PORT_BACKEND: 3000
+      PORT_FRONTEND: 3002
+      DOMAIN_NAME: ima-crm.hieuspace.com
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro  # Mount SSL vào container
       - ./services/nginx/conf.d:/etc/nginx/conf.d
