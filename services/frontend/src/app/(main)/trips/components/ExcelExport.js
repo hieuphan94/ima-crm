@@ -17,7 +17,7 @@ const createExcel = async ({ scheduleItems = [], scheduleInfo = {}, settings = {
   const scheduleData = [['Day', 'Title', 'Distance (km)', 'Description']];
   scheduleItems.forEach((day, index) => {
     scheduleData.push([
-      `Day ${index + 1}`,
+      `Jour ${index + 1}`,
       day.titleOfDay || '',
       day.distance || '',
       day.paragraphDay.paragraphTotal.replace(/<[^>]+>/g, '') || '',

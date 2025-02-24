@@ -16,7 +16,7 @@ Font.register({
 // Sử dụng NotoSans SemiCondensed cho italic
 Font.register({
   family: 'NotoSansVietnamese',
-  src: '/fonts/NotoSans_SemiCondensed-ThinItalic.ttf', // Đổi tên file theo đúng font bạn có
+  src: '/fonts/NotoSans_SemiCondensed-ThinItalic.ttf',
   fontStyle: 'italic',
 });
 
@@ -111,18 +111,13 @@ const styles = StyleSheet.create({
   },
   coverTitleContainer: {
     position: 'absolute',
-    top: '50%',
-    left: 40,
-    right: 40,
-    padding: 20,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    transform: 'translateY(-50%)',
+    bottom: 50,
+    right: 50,
   },
   coverTitle: {
-    fontSize: 20,
-    textAlign: 'center',
-    color: 'black',
+    fontSize: 25,
+    textTransform: 'uppercase',
+    color: 'white',
     fontWeight: 'bold',
     fontFamily: 'NotoSansVietnamese',
   },
@@ -148,17 +143,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dayTitleContainer: {
-    marginBottom: 10,
-    padding: 8,
-    borderRadius: 2,
+    padding: 3,
   },
   dayTitle: {
     fontSize: 14,
     fontFamily: 'NotoSansVietnamese',
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   paragraph: {
     marginVertical: 8,
+    padding: 3,
   },
   text: {
     fontSize: 11,
@@ -192,30 +187,46 @@ const styles = StyleSheet.create({
     height: 'auto',
     objectFit: 'contain',
   },
-  tripInfoContainer: {
-    marginBottom: 20,
-  },
+  tripInfoContainer: {},
   tripTitle: {
     textAlign: 'center',
     fontWeight: 'bold',
     fontFamily: 'NotoSansVietnamese',
     fontSize: 16,
-    padding: 10,
-    borderRadius: 2,
-  },
-  tripMetaInfo: {
-    marginTop: 8,
-    padding: 5,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 2,
-  },
-  metaInfoText: {
-    textAlign: 'center',
-    fontSize: 12,
-    fontFamily: 'NotoSansVietnamese',
-    color: '#666666',
+    padding: 3,
+    textTransform: 'uppercase',
   },
 });
+
+const formatMeal = (day) => {
+  let mealString = '';
+  if (day.meals.breakfast.included === true) {
+    mealString += 'Pdj';
+  }
+  if (day.meals.lunch.included === true) {
+    mealString += '- Dej';
+  }
+  if (day.meals.dinner.included === true) {
+    mealString += '- Din |';
+  }
+  return mealString;
+};
+
+const formatGuide = (day) => {
+  let guideString = '';
+  if (day.guides && day.guides.included === true) {
+    guideString += ' Avec Guide | ';
+  }
+  return guideString;
+};
+
+const formatHotel = (day) => {
+  let hotelString = '';
+  if (day.hotels && day.hotels.included === true) {
+    hotelString += ' Avec Hotel |';
+  }
+  return hotelString;
+};
 
 const PDFDocument = ({
   brand,
@@ -282,14 +293,8 @@ const PDFDocument = ({
                 styles.tripTitle,
               ]}
             >
-              {tripTitle}
+              Programme : {tripTitle}
             </Text>
-
-            <View style={styles.tripMetaInfo}>
-              <Text style={styles.metaInfoText}>
-                {`${numberOfDays} days`} • {`${globalPax} paxs`} • {`${starRating} *`}
-              </Text>
-            </View>
           </View>
 
           {/* Các ngày sẽ được render liên tục */}
@@ -299,7 +304,13 @@ const PDFDocument = ({
                 style={[styles.dayTitleContainer, { backgroundColor: dayTitleColors.background }]}
               >
                 <Text style={[styles.dayTitle, { color: dayTitleColors.text }]}>
-                  {`Jour ${dayIndex + 1}: ${day.titleOfDay || ''} | Distance: ${day.distance}km`}
+                  {`Jour ${dayIndex + 1}: ${day.titleOfDay || ''}`}
+                </Text>
+              </View>
+              <View style={{ backgroundColor: '#FFDAB9', fontSize: 11, padding: 3 }}>
+                <Text>
+                  Repas: {`${formatMeal(day)}`} | Guide: {`${formatGuide(day)}`} | Hotel:{' '}
+                  {`${formatHotel(day)}`}
                 </Text>
               </View>
               {day.paragraphDay.paragraphTotal && (

@@ -218,7 +218,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
       <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-y-auto">
         {/* Header & Title, Location and Guides */}
         <div className="p-2 border-b border-gray-200 flex items-center justify-between">
-          <span className="font-medium text-md text-gray-900">Day {order}</span>
+          <span className="font-medium text-md text-gray-900">Jour {order}</span>
           {titleOfDay && <span className="text-sm font-sm text-gray-700">{titleOfDay}</span>}
           {location && (
             <span className="text-sm font-sm text-gray-700 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">

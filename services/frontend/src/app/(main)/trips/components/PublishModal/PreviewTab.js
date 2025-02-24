@@ -123,7 +123,7 @@ export default function PreviewTab() {
                 <span
                   className={`w-2 h-2 rounded-full ${isValid ? 'bg-green-500' : 'bg-red-500'}`}
                 ></span>
-                <span className="font-medium">Day {dayData.order}</span>
+                <span className="font-medium">Jour {dayData.order}</span>
                 {dayData.titleOfDay && (
                   <span className="text-gray-600 truncate">- {dayData.titleOfDay}</span>
                 )}

@@ -14,11 +14,11 @@ const BRAND_COLORS = {
   aucoeurvietnam: {
     tripTitleColors: {
       text: '#FFFFFF',
-      background: '#5B7A67',
+      background: '#A08F3C',
     },
     dayTitleColors: {
       text: '#000000',
-      background: '#8bbf9f',
+      background: '#ffc31f',
     },
   },
   mekongvillages: {
