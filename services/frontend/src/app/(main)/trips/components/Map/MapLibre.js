@@ -8,9 +8,6 @@ export default function MapLibre({
   zoom = 5,
   locations = [],
 }) {
-  // Debug log để kiểm tra input locations
-  console.log('Input locations:', locations);
-
   const getMatchedLocations = () => {
     const matched = locations
       .map((locationName) => {
@@ -24,18 +21,15 @@ export default function MapLibre({
         });
 
         if (matchedLocation) {
-          console.log('Matched location:', matchedLocation);
           return {
             name: matchedLocation.name,
             ...matchedLocation.coordinates,
           };
         }
-        console.log('No match found for:', locationName);
         return null;
       })
       .filter(Boolean);
 
-    console.log('Final matched locations:', matched);
     return matched;
   };
 

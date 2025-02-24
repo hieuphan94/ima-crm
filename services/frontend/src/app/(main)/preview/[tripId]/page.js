@@ -30,8 +30,6 @@ export default function TripPreview() {
       const tripId = params.tripId;
       const savedTrip = localStorage.getItem(tripId);
 
-      console.log('savedTrip', savedTrip);
-
       if (!savedTrip) {
         throw new Error('Trip not found');
       }

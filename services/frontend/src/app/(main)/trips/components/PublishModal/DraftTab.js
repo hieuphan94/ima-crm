@@ -34,24 +34,11 @@ const MOCK_AUTO_HISTORY = [
 // Validation function cải tiến
 const validateVersion = (version) => {
   if (!version) {
-    console.log('Version is null or undefined');
     return false;
   }
 
-  // Log chi tiết từng field để debug
-  console.log('Validating version:', {
-    hasScheduleData: !!version.scheduleData,
-    scheduleDataEmpty: Object.keys(version.scheduleData || {}).length === 0,
-    hasTripInfo: !!version.tripInfo,
-    pax: version.tripInfo?.pax,
-    numberOfDays: version.tripInfo?.numberOfDays,
-    title: version.tripInfo?.title,
-    starRating: version.tripInfo?.starRating,
-  });
-
   // Kiểm tra scheduleData không rỗng
   if (!version.scheduleData || Object.keys(version.scheduleData).length === 0) {
-    console.log('Schedule data is empty');
     return false;
   }
 
@@ -72,7 +59,6 @@ const validateVersion = (version) => {
       value = value?.[f];
     }
     const isValid = value !== undefined && value !== null;
-    console.log(`Validating ${field}:`, { value, isValid });
     return isValid;
   });
 
@@ -300,8 +286,6 @@ export default function DraftTab({ onClose }) {
 
   const handleLoadVersion = (version) => {
     try {
-      console.log('Loading version:', version);
-
       if (!validateVersion(version)) {
         throw new Error('Invalid version data structure');
       }

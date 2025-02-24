@@ -34,7 +34,6 @@ export default function VisitSection({
   };
 
   const getPaginatedServices = (services) => {
-    console.log('Raw services:', services);
     if (!services || !Array.isArray(services)) {
       return [];
     }
@@ -48,11 +47,6 @@ export default function VisitSection({
         const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
         return locationMatch && searchMatch;
       }) || [];
-
-    console.log('Filtered services:', filteredServices);
-    console.log('Current page:', currentServicePage);
-    console.log('Services per page:', servicesPerPage);
-    console.log('Slice from:', startIndex, 'to:', startIndex + servicesPerPage);
 
     return filteredServices.slice(startIndex, startIndex + servicesPerPage);
   };
@@ -107,9 +101,6 @@ export default function VisitSection({
           LocationCache.set(locationName, result.data);
           onLocationSelect(locationName);
         } else {
-          // Không có data nhưng vẫn success
-          console.log(`No services found for ${locationName}`);
-          // Giữ nguyên state cũ thay vì set empty
           onLocationSelect(locationName);
         }
       } else {
@@ -153,8 +144,6 @@ export default function VisitSection({
     }) || [];
 
   const totalPages = Math.ceil(filteredServices.length / servicesPerPage);
-  console.log('Services length:', filteredServices.length);
-  console.log('Total pages should be:', totalPages);
 
   const handleServicePageChange = (pageNumber) => {
     setCurrentServicePage(pageNumber);
@@ -296,14 +285,12 @@ export default function VisitSection({
                 ))}
               </div>
 
-              {console.log('About to render pagination, totalPages:', totalPages)}
               {totalPages >= 1 && (
                 <div className="flex justify-center gap-0.5 mt-2">
                   {Array.from({ length: totalPages }, (_, i) => (
                     <button
                       key={i}
                       onClick={() => {
-                        console.log('Changing to page:', i + 1);
                         handleServicePageChange(i);
                       }}
                       className={`text-[9px] w-5 h-4 rounded flex items-center justify-center transition-colors

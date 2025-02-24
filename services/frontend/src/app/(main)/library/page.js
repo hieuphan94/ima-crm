@@ -109,8 +109,6 @@ export default function LibraryPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log('LibraryPage mounted');
-
   const handleClick = async (route) => {
     try {
       setIsLoading(true);

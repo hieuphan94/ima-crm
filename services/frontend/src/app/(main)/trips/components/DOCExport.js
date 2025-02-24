@@ -50,12 +50,6 @@ const convertHTMLToTextRuns = (htmlContent) => {
 };
 
 const createDOCX = async ({ scheduleItems = [], scheduleInfo = {}, settings = {} }) => {
-  console.log('createDOCX called with:', {
-    scheduleItems: scheduleItems.length,
-    scheduleInfo,
-    settings,
-  });
-
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
   const globalPax = settings?.globalPax || 1;
   const numberOfDays = settings?.numberOfDays || 1;
@@ -145,29 +139,18 @@ const createDOCX = async ({ scheduleItems = [], scheduleInfo = {}, settings = {}
 
 export const generateAndDownloadDOCX = async (data) => {
   try {
-    console.log('generateAndDownloadDOCX called with:', {
-      scheduleInfo: data.scheduleInfo,
-      itemsCount: data.scheduleItems?.length,
-    });
-
     const doc = await createDOCX(data);
-    console.log('Document created, preparing blob...');
-
     const blob = await Packer.toBlob(doc);
-    console.log('Blob created, preparing download...');
 
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `${data.scheduleInfo?.title || 'trip'}-${Date.now()}.docx`;
 
-    console.log('Triggering download...');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-
-    console.log('Download process completed');
   } catch (error) {
     console.error('Error in generateAndDownloadDOCX:', error);
     throw error;

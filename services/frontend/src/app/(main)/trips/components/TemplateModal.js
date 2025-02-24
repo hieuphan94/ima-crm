@@ -90,8 +90,6 @@ export default function TemplateModal({ isOpen, onClose }) {
   );
 
   const handleLoadTemplate = (template) => {
-    // TODO: Implement template loading logic
-    console.log('Loading template:', template);
     onClose();
   };
 

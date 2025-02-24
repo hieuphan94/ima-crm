@@ -129,6 +129,7 @@ export default function PublishTab() {
   const [enableWebPublish, setEnableWebPublish] = useState(false);
   const [publishedTripId, setPublishedTripId] = useState(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
+  const [bypassValidation, setBypassValidation] = useState(false);
 
   // Lấy dữ liệu từ Redux store
   const scheduleData = useSelector((state) => state.dailySchedule || {});
@@ -197,7 +198,6 @@ export default function PublishTab() {
   };
 
   const handleCreatePDF = async () => {
-    // Reset validation error
     setValidationError(null);
 
     if (!selectedBrand) {
@@ -205,17 +205,23 @@ export default function PublishTab() {
       return;
     }
 
-    // Add validation check with full scheduleData
-    const validation = isScheduleValid(scheduleData);
-    if (!validation.isValid) {
-      setValidationError(validation.error);
-      return;
+    // Check validation only if not bypassed
+    if (!bypassValidation) {
+      const validation = isScheduleValid(scheduleData);
+      if (!validation.isValid) {
+        setValidationError(validation.error + "\n\nClick 'Create PDF' again to generate anyway.");
+        setBypassValidation(true);
+        return;
+      }
     }
 
     try {
       setIsLoading(true);
       setPdfBlob(null);
       setPdfUrl(null);
+
+      // Reset bypass flag
+      setBypassValidation(false);
 
       if (formattedScheduleItems.length === 0) {
         throw new Error('No schedule items to export');
@@ -273,7 +279,6 @@ export default function PublishTab() {
     if (!pdfBlob) return;
     const fileName = `trip-${selectedBrand.id}-${Date.now()}.pdf`;
     FileSaver.saveAs(pdfBlob, fileName);
-    console.log('PDF downloaded successfully:', fileName);
   };
 
   const handleCreateDOCX = async () => {
@@ -335,24 +340,11 @@ export default function PublishTab() {
   // Thêm hàm validateVersion từ DraftTab
   const validateVersion = (version) => {
     if (!version) {
-      console.log('Version is null or undefined');
       return false;
     }
 
-    // Log chi tiết từng field để debug
-    console.log('Validating version:', {
-      hasScheduleData: !!version.scheduleData,
-      scheduleDataEmpty: Object.keys(version.scheduleData || {}).length === 0,
-      hasTripInfo: !!version.tripInfo,
-      pax: version.tripInfo?.pax,
-      numberOfDays: version.tripInfo?.numberOfDays,
-      title: version.tripInfo?.title,
-      starRating: version.tripInfo?.starRating,
-    });
-
     // Kiểm tra scheduleData không rỗng
     if (!version.scheduleData || Object.keys(version.scheduleData).length === 0) {
-      console.log('Schedule data is empty');
       return false;
     }
 
@@ -373,7 +365,6 @@ export default function PublishTab() {
         value = value?.[f];
       }
       const isValid = value !== undefined && value !== null;
-      console.log(`Validating ${field}:`, { value, isValid });
       return isValid;
     });
 

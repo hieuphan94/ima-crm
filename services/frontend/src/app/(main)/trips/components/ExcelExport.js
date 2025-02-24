@@ -34,15 +34,11 @@ const createExcel = async ({ scheduleItems = [], scheduleInfo = {}, settings = {
 
 export const generateAndDownloadExcel = async (data) => {
   try {
-    console.log('Generating Excel file...');
     const workbook = await createExcel(data);
-
-    // Generate filename
     const fileName = `${data.scheduleInfo?.title || 'trip'}-${Date.now()}.xlsx`;
 
     // Write and download
     XLSX.writeFile(workbook, fileName);
-    console.log('Excel file generated successfully');
 
     return true;
   } catch (error) {

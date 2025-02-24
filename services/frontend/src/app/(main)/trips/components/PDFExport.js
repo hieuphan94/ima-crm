@@ -21,7 +21,6 @@ Font.register({
 });
 
 const formatHTMLToPDF = (htmlContent) => {
-  console.log('Original HTML:', htmlContent);
   if (!htmlContent) return [];
 
   let currentText = htmlContent;
@@ -40,8 +39,6 @@ const formatHTMLToPDF = (htmlContent) => {
   let match;
 
   while ((match = formatRegex.exec(currentText)) !== null) {
-    console.log('Processing format match:', match[1], match[2]);
-
     // Thêm text thường trước thẻ định dạng
     if (match.index > lastIndex) {
       const normalText = currentText
@@ -239,20 +236,11 @@ const PDFDocument = ({
     ];
   }
 
-  console.log('scheduleInfo', scheduleInfo);
-
   // Lấy thông tin từ scheduleInfo và settings
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
   const globalPax = settings?.globalPax || 1;
   const numberOfDays = settings?.numberOfDays || 1;
   const starRating = settings?.starRating || 4;
-
-  console.log('PDF Export Data:', {
-    tripTitle,
-    globalPax,
-    numberOfDays,
-    starRating,
-  });
 
   return (
     <Document>

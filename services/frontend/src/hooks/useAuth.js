@@ -81,8 +81,6 @@ export const useAuth = () => {
         data: response.data,
       };
     } catch (error) {
-      console.log('Login error:', error);
-
       let errorMessage;
 
       if (error.response) {
