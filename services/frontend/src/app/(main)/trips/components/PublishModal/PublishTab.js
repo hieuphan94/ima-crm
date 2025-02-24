@@ -162,14 +162,10 @@ export default function PublishTab() {
   }, [scheduleData.scheduleItems]);
 
   // Log khi scheduleData thay đổi
-  useEffect(() => {
-    console.log('Schedule Data from Redux:', scheduleData);
-  }, [scheduleData]);
+  useEffect(() => {}, [scheduleData]);
 
   // Log khi formattedScheduleItems thay đổi
-  useEffect(() => {
-    console.log('Formatted Schedule Items:', formattedScheduleItems);
-  }, [formattedScheduleItems]);
+  useEffect(() => {}, [formattedScheduleItems]);
 
   const handleHeaderImageChange = (e) => {
     const file = e.target.files[0];
@@ -282,21 +278,11 @@ export default function PublishTab() {
 
   const handleCreateDOCX = async () => {
     try {
-      console.log('Starting DOCX generation...');
       setIsLoading(true);
       setValidationError(null);
 
-      // Log data before validation
-      console.log('Current data:', {
-        scheduleData,
-        formattedScheduleItems,
-        scheduleInfo,
-        settings,
-      });
-
       // Validate required data
       if (!formattedScheduleItems.length) {
-        console.log('No schedule items found');
         setValidationError('Không có dữ liệu lịch trình để xuất');
         return;
       }
@@ -308,7 +294,6 @@ export default function PublishTab() {
         settings: settings,
       });
 
-      console.log('DOCX generation completed');
       setSuccessMessage('File DOCX đã được tạo thành công');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
@@ -321,21 +306,11 @@ export default function PublishTab() {
 
   const handleCreateExcel = async () => {
     try {
-      console.log('Starting Excel generation...');
       setIsLoading(true);
       setValidationError(null);
 
-      // Log data before validation
-      console.log('Current data:', {
-        scheduleData,
-        formattedScheduleItems,
-        scheduleInfo,
-        settings,
-      });
-
       // Validate required data
       if (!formattedScheduleItems.length) {
-        console.log('No schedule items found');
         setValidationError('Không có dữ liệu lịch trình để xuất');
         return;
       }
@@ -347,7 +322,6 @@ export default function PublishTab() {
         settings: settings,
       });
 
-      console.log('Excel generation completed');
       setSuccessMessage('File Excel đã được tạo thành công');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
@@ -440,8 +414,6 @@ export default function PublishTab() {
 
       // Clear success message after 3 seconds
       setTimeout(() => setPublishSuccess(false), 3000);
-
-      console.log('Published trip data:', newVersion);
     } catch (error) {
       console.error('Publish error:', {
         message: error.message,

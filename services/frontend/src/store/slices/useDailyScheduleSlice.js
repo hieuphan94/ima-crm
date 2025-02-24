@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+import { v4 as uuidv4 } from 'uuid';
 const initialState = {
   settings: {
     globalPax: 1, // Số khách mặc định = guests.length
@@ -389,7 +389,7 @@ const useDailyScheduleSlice = createSlice({
       state.scheduleItems = {};
 
       // Tạo ngày đầu tiên
-      const firstDayId = crypto.randomUUID();
+      const firstDayId = uuidv4();
       state.scheduleItems[firstDayId] = {
         order: 1,
         distance: 0,
