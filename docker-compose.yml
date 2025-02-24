@@ -76,8 +76,8 @@ services:
 
   nginx:
     build:
-    context: ./services/nginx
-    dockerfile: Dockerfile
+      context: ./services/nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
       - "443:443"  # Mở cổng HTTPS
