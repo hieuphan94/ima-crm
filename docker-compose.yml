@@ -75,13 +75,15 @@ services:
       - ./services/frontend/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json:/app/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./services/nginx
+      dockerfile: Dockerfile
     ports:
       - "80:80"
-    env_file:
-      - .env
-    volumes:
-      - ./services/nginx/conf.d:/etc/nginx/conf.d
+    environment:
+      PORT_BACKEND: ${PORT_BACKEND}
+      PORT_FRONTEND: ${PORT_FRONTEND}
+      DOMAIN_NAME: ${DOMAIN_NAME}
     mem_limit: 256m
     restart: unless-stopped
     depends_on:
