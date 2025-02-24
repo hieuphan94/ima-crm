@@ -75,26 +75,20 @@ services:
       - ./services/frontend/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json:/app/src/api/credentials/my-sheet-ima-crm-import-084d657ff146.json
 
   nginx:
-    build:
-      context: ./services/nginx
-      dockerfile: Dockerfile
+    image: nginx:alpine
     ports:
       - "80:80"
-      - "443:443"  # Mở cổng HTTPS
-    environment:
-      PORT_BACKEND: 3000
-      PORT_FRONTEND: 3002
-      DOMAIN_NAME: ima-crm.hieuspace.com
+      - "443:443"
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro  # Mount SSL vào container
-      - ./services/nginx/conf.d:/etc/nginx/conf.d
-    mem_limit: 256m
+      - ./services/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf  # Mount file config vào đúng vị trí
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_healthy
       frontend:
         condition: service_healthy
+
 
 volumes:
   pgdata:
