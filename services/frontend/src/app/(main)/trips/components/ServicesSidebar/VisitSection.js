@@ -34,6 +34,7 @@ export default function VisitSection({
   };
 
   const getPaginatedServices = (services) => {
+    console.log('Raw services:', services);
     if (!services || !Array.isArray(services)) {
       return [];
     }
@@ -41,12 +42,17 @@ export default function VisitSection({
     const startIndex = currentServicePage * servicesPerPage;
     const filteredServices =
       sheetServices?.filter((service) => {
-        // Chuẩn hóa cả hai location để so sánh
         const normalizedServiceLocation = normalizeLocationName(service.location);
         const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
-
-        return normalizedServiceLocation === normalizedSelectedLocation;
+        const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
+        const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
+        return locationMatch && searchMatch;
       }) || [];
+
+    console.log('Filtered services:', filteredServices);
+    console.log('Current page:', currentServicePage);
+    console.log('Services per page:', servicesPerPage);
+    console.log('Slice from:', startIndex, 'to:', startIndex + servicesPerPage);
 
     return filteredServices.slice(startIndex, startIndex + servicesPerPage);
   };
@@ -137,13 +143,18 @@ export default function VisitSection({
     setTooltipService(null);
   };
 
-  const totalPages = Math.ceil(
-    (sheetServices?.filter(
-      (service) =>
-        service.location === selectedLocation &&
-        service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase())
-    )?.length || 0) / servicesPerPage
-  );
+  const filteredServices =
+    sheetServices?.filter((service) => {
+      const normalizedServiceLocation = normalizeLocationName(service.location);
+      const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
+      const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
+      const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
+      return locationMatch && searchMatch;
+    }) || [];
+
+  const totalPages = Math.ceil(filteredServices.length / servicesPerPage);
+  console.log('Services length:', filteredServices.length);
+  console.log('Total pages should be:', totalPages);
 
   const handleServicePageChange = (pageNumber) => {
     setCurrentServicePage(pageNumber);
@@ -285,12 +296,16 @@ export default function VisitSection({
                 ))}
               </div>
 
-              {totalPages > 1 && (
+              {console.log('About to render pagination, totalPages:', totalPages)}
+              {totalPages >= 1 && (
                 <div className="flex justify-center gap-0.5 mt-2">
                   {Array.from({ length: totalPages }, (_, i) => (
                     <button
                       key={i}
-                      onClick={() => handleServicePageChange(i)}
+                      onClick={() => {
+                        console.log('Changing to page:', i + 1);
+                        handleServicePageChange(i);
+                      }}
                       className={`text-[9px] w-5 h-4 rounded flex items-center justify-center transition-colors
                         ${
                           currentServicePage === i
