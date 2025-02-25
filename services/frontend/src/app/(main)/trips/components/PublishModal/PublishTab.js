@@ -191,7 +191,6 @@ export default function PublishTab() {
   };
 
   const handleBrandSelection = (brand) => {
-    console.log('Brand selected:', brand);
     setSelectedBrand(brand);
 
     // Set default colors based on brand
@@ -202,7 +201,6 @@ export default function PublishTab() {
     }
 
     // Set footer image from brand options
-    console.log('Setting footer image:', brand.footerImage);
     setFooterImage(brand.footerImage);
   };
 
@@ -264,28 +262,22 @@ export default function PublishTab() {
 
       // Handle footer image from brand
       if (footerImage) {
-        console.log('Fetching footer image from:', footerImage);
         const footerResponse = await fetch(footerImage);
-        console.log('Footer image response:', footerResponse);
 
         if (!footerResponse.ok) {
           throw new Error(`Failed to fetch footer image: ${footerResponse.status}`);
         }
 
         const footerBlob = await footerResponse.blob();
-        console.log('Footer image blob:', footerBlob);
 
         footerImageBase64 = await new Promise((resolve) => {
           const reader = new FileReader();
           reader.onloadend = () => {
-            console.log('Footer image converted to base64');
             resolve(reader.result);
           };
           reader.readAsDataURL(footerBlob);
         });
       }
-
-      console.log('Final footerImageBase64:', footerImageBase64 ? 'exists' : 'null');
 
       // Tạo PDF với base64 images
       const blob = await pdf(

@@ -33,6 +33,7 @@ const formatHTMLToPDF = (htmlContent) => {
 
   // 3. Tách text thành mảng dựa trên <strong>, <b>, và <em>
   const parts = [];
+  // Regex mới bao gồm cả <em>
   const formatRegex = /<(strong|b|em)>([\s\S]*?)<\/\1>/gi;
   let lastIndex = 0;
   let match;
@@ -49,8 +50,7 @@ const formatHTMLToPDF = (htmlContent) => {
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
 
-      if (normalText) {
-        // Removed trim() to preserve spaces
+      if (normalText.trim()) {
         parts.push({
           type: 'normal',
           content: normalText,
@@ -67,10 +67,9 @@ const formatHTMLToPDF = (htmlContent) => {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'");
 
-    if (formattedText) {
-      // Removed trim() to preserve spaces
+    if (formattedText.trim()) {
       parts.push({
-        type: match[1] === 'em' ? 'italic' : 'bold',
+        type: match[1] === 'em' ? 'italic' : 'bold', // Phân biệt giữa em và strong/b
         content: formattedText,
       });
     }
@@ -89,15 +88,13 @@ const formatHTMLToPDF = (htmlContent) => {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'");
 
-    if (remainingText) {
-      // Removed trim() to preserve spaces
+    if (remainingText.trim()) {
       parts.push({
         type: 'normal',
         content: remainingText,
       });
     }
   }
-
   return parts;
 };
 
