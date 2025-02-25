@@ -100,6 +100,10 @@ const formatHTMLToPDF = (htmlContent) => {
 };
 
 const styles = StyleSheet.create({
+  footerPage: {
+    position: 'relative',
+    padding: 0,
+  },
   coverPage: {
     position: 'relative',
     padding: 0,
@@ -236,9 +240,18 @@ const PDFDocument = ({
   tripTitleColors = { text: '#000000', background: '#FFFFFF' },
   dayTitleColors = { text: '#000000', background: '#FFFFFF' },
   headerImage = null,
+  footerImage = null,
 }) => {
+  console.log('PDFDocument received props:', {
+    brandId: brand?.id,
+    hasHeaderImage: !!headerImage,
+    hasFooterImage: !!footerImage,
+    footerImageType: footerImage ? typeof footerImage : 'null',
+  });
+
   // Validate scheduleItems
   if (!Array.isArray(scheduleItems) || scheduleItems.length === 0) {
+    console.warn('No schedule items provided');
     scheduleItems = [
       {
         title: 'No schedule items',
@@ -247,11 +260,17 @@ const PDFDocument = ({
     ];
   }
 
+  // Ensure footerImage is a valid URL or base64 string
+  const validFooterImage =
+    footerImage && (footerImage.startsWith('data:image') || footerImage.startsWith('http'));
+  console.log('Footer image validation:', {
+    footerImage: footerImage ? 'exists' : 'null',
+    isValid: validFooterImage,
+    startsWith: footerImage ? footerImage.substring(0, 20) + '...' : 'null',
+  });
+
   // Lấy thông tin từ scheduleInfo và settings
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
-  const globalPax = settings?.globalPax || 1;
-  const numberOfDays = settings?.numberOfDays || 1;
-  const starRating = settings?.starRating || 4;
 
   return (
     <Document>
@@ -333,6 +352,21 @@ const PDFDocument = ({
               )}
             </View>
           ))}
+        </View>
+      </Page>
+      <Page size="A4" style={styles.footerPage}>
+        <View style={{ position: 'relative', width: '100%', height: '100%' }}>
+          {validFooterImage ? (
+            <Image
+              style={styles.coverImage}
+              src={footerImage}
+              onError={(error) => console.error('Footer image rendering error:', error)}
+            />
+          ) : (
+            <View style={[styles.coverTitleContainer]}>
+              <Text style={[styles.coverTitle]}>{tripTitle}</Text>
+            </View>
+          )}
         </View>
       </Page>
     </Document>

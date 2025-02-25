@@ -49,16 +49,19 @@ const brandOptions = [
     id: 'imagetravel',
     name: 'Image Travel',
     logo: '/images/brand/imagetravel.png',
+    footerImage: '/images/brand/imagetravel-footer.jpg',
   },
   {
     id: 'aucoeurvietnam',
     name: 'Au Coeur Vietnam',
     logo: '/images/brand/aucoeurvietnam.png',
+    footerImage: '/images/brand/aucoeurvietnam-footer.jpg',
   },
   {
     id: 'mekongvillages',
     name: 'Mekong Villages',
     logo: '/images/brand/mekongvillages.png',
+    footerImage: '/images/brand/mekongvillages-footer.jpg',
   },
 ];
 
@@ -122,6 +125,7 @@ export default function PublishTab() {
   });
   const [headerImage, setHeaderImage] = useState(null);
   const [headerImagePreview, setHeaderImagePreview] = useState(null);
+  const [footerImage, setFooterImage] = useState(null);
   const [validationError, setValidationError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [docExportType, setDocExportType] = useState('local');
@@ -187,6 +191,7 @@ export default function PublishTab() {
   };
 
   const handleBrandSelection = (brand) => {
+    console.log('Brand selected:', brand);
     setSelectedBrand(brand);
 
     // Set default colors based on brand
@@ -195,6 +200,10 @@ export default function PublishTab() {
       setTripTitleColors(brandColors.tripTitleColors);
       setDayTitleColors(brandColors.dayTitleColors);
     }
+
+    // Set footer image from brand options
+    console.log('Setting footer image:', brand.footerImage);
+    setFooterImage(brand.footerImage);
   };
 
   const handleCreatePDF = async () => {
@@ -243,6 +252,8 @@ export default function PublishTab() {
 
       // Xử lý header image nếu có
       let headerImageBase64 = null;
+      let footerImageBase64 = null;
+
       if (headerImage) {
         const reader = new FileReader();
         headerImageBase64 = await new Promise((resolve) => {
@@ -250,6 +261,31 @@ export default function PublishTab() {
           reader.readAsDataURL(headerImage);
         });
       }
+
+      // Handle footer image from brand
+      if (footerImage) {
+        console.log('Fetching footer image from:', footerImage);
+        const footerResponse = await fetch(footerImage);
+        console.log('Footer image response:', footerResponse);
+
+        if (!footerResponse.ok) {
+          throw new Error(`Failed to fetch footer image: ${footerResponse.status}`);
+        }
+
+        const footerBlob = await footerResponse.blob();
+        console.log('Footer image blob:', footerBlob);
+
+        footerImageBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            console.log('Footer image converted to base64');
+            resolve(reader.result);
+          };
+          reader.readAsDataURL(footerBlob);
+        });
+      }
+
+      console.log('Final footerImageBase64:', footerImageBase64 ? 'exists' : 'null');
 
       // Tạo PDF với base64 images
       const blob = await pdf(
@@ -261,6 +297,7 @@ export default function PublishTab() {
           tripTitleColors={tripTitleColors}
           dayTitleColors={dayTitleColors}
           headerImage={headerImageBase64}
+          footerImage={footerImageBase64}
         />
       ).toBlob();
 
@@ -269,6 +306,11 @@ export default function PublishTab() {
       setPdfUrl(url);
     } catch (error) {
       console.error('PDF generation error:', error);
+      console.error('Error details:', {
+        footerImage,
+        selectedBrand: selectedBrand?.id,
+        errorMessage: error.message,
+      });
       setValidationError(`Failed to generate PDF: ${error.message}`);
     } finally {
       setIsLoading(false);
