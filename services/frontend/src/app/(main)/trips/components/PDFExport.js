@@ -50,7 +50,6 @@ const formatHTMLToPDF = (htmlContent) => {
         .replace(/&#39;/g, "'");
 
       if (normalText) {
-        // Removed trim() to preserve spaces
         parts.push({
           type: 'normal',
           content: normalText,
@@ -68,7 +67,6 @@ const formatHTMLToPDF = (htmlContent) => {
       .replace(/&#39;/g, "'");
 
     if (formattedText) {
-      // Removed trim() to preserve spaces
       parts.push({
         type: match[1] === 'em' ? 'italic' : 'bold',
         content: formattedText,
@@ -90,7 +88,6 @@ const formatHTMLToPDF = (htmlContent) => {
       .replace(/&#39;/g, "'");
 
     if (remainingText) {
-      // Removed trim() to preserve spaces
       parts.push({
         type: 'normal',
         content: remainingText,
