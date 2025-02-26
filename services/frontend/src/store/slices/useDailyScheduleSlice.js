@@ -1,5 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  aggregatedLocation,
+  locationToTitle,
+  normalizedServices,
+} from '../../app/(main)/trips/components/DailySchedule/utils/formatters';
+
 const initialState = {
   settings: {
     globalPax: 1, // Số khách mặc định = guests.length
@@ -193,6 +199,10 @@ const useDailyScheduleSlice = createSlice({
         // Automatically update meals after adding service
         const meals = autoMealFromServiceFood(state.scheduleItems[day]);
         state.scheduleItems[day].meals = meals;
+        // Automatically update titleOfDay after adding service
+        state.scheduleItems[day].titleOfDay = locationToTitle(
+          aggregatedLocation(normalizedServices(state.scheduleItems[day]))
+        );
       }
     },
 
@@ -224,6 +234,10 @@ const useDailyScheduleSlice = createSlice({
       if (state.scheduleItems[day]) {
         const meals = autoMealFromServiceFood(state.scheduleItems[day]);
         state.scheduleItems[day].meals = meals;
+        // Automatically update titleOfDay after removing service
+        state.scheduleItems[day].titleOfDay = locationToTitle(
+          aggregatedLocation(normalizedServices(state.scheduleItems[day]))
+        );
       }
     },
 
@@ -258,6 +272,10 @@ const useDailyScheduleSlice = createSlice({
       if (state.scheduleItems[day]) {
         const meals = autoMealFromServiceFood(state.scheduleItems[day]);
         state.scheduleItems[day].meals = meals;
+        // Automatically update titleOfDay after reordering services
+        state.scheduleItems[day].titleOfDay = locationToTitle(
+          aggregatedLocation(normalizedServices(state.scheduleItems[day]))
+        );
       }
     },
 

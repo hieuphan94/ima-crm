@@ -5,7 +5,6 @@ import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { useDispatch } from 'react-redux';
 import { useDragDrop } from '../../states/useDragDrop';
-import { aggregatedLocation, normalizedServices } from '../../utils/formatters';
 import DayViewModal from './DayViewModal';
 import DeleteDayModal from './DeleteDayModal';
 
@@ -24,8 +23,7 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   } = useDragDrop();
 
   // Lấy titleOfDay từ daySchedule nếu có
-  const titleOfDay = daySchedule?.titleOfDay || '';
-  const locations = aggregatedLocation(normalizedServices(daySchedule));
+  const titleFromlocations = daySchedule?.titleOfDay || '';
 
   const handleDeleteDay = useCallback(() => {
     dispatch(removeDay({ dayId }));
@@ -47,14 +45,14 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
         onDrop={(e) => handleDayHeaderDrop(e, dayId, order)}
       >
         <h3
-          className={`font-medium text-[12px] cursor-move hover:text-blue-600 ${
-            titleOfDay ? 'text-green-600' : 'text-yellow-600'
+          className={`font-medium text-[12px] cursor-move max-w-[80px] truncate ${
+            titleFromlocations ? 'text-green-600' : 'text-yellow-600'
           }`}
         >
           {order}
-          {locations.firstLocation ? (
-            <span className="text-white text-[8px] lowercase rounded-full bg-black py-1 px-2 ml-1.5">
-              {locations.firstLocation}
+          {titleFromlocations ? (
+            <span className="text-white text-[8px] rounded-full bg-black py-1 px-2 ml-1.5">
+              {titleFromlocations}
             </span>
           ) : (
             ''

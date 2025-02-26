@@ -120,7 +120,10 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
     let servicesTotal = 0;
     servicesTotal += services.visit.reduce((sum, service) => sum + (service.price || 0), 0);
     servicesTotal += formulaFoodPriceByStarRating(services.food, starRating, paxCalculate);
-    servicesTotal += services.hotel.reduce((sum, service) => sum + (service.price || 0), 0);
+    servicesTotal += services.accommodation.reduce(
+      (sum, service) => sum + (service.rooms.price.fit_price || 0),
+      0
+    );
 
     const distancePrice = convertVNDtoUSD(handleDistancePrice(distance) || 0);
     const totalUSD = convertVNDtoUSD(servicesTotal) + distancePrice;
@@ -219,14 +222,13 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
         {/* Header & Title, Location and Guides */}
         <div className="p-2 border-b border-gray-200 flex items-center justify-between">
           <span className="font-medium text-md text-gray-900">Jour {order}</span>
-          {titleOfDay && <span className="text-sm font-sm text-gray-700">{titleOfDay}</span>}
           {location && (
             <span className="text-sm font-sm text-gray-700 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">
-              <span className="font-medium text-blue-600">📍 {locations.firstLocation}</span>
-              {locations.otherLocations.length > 0 && (
+              <span className="font-medium text-blue-600">📍 {locations[0]}</span>
+              {locations.slice(1).join(' - ').length > 0 && (
                 <>
                   <span className="text-gray-400 mx-1">-</span>
-                  <span className="text-gray-600">{locations.otherLocations.join(' - ')}</span>
+                  <span className="text-gray-600">{locations.slice(1).join(' - ')}</span>
                 </>
               )}
             </span>
@@ -383,6 +385,16 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
                     <div className="col-span-2 text-gray-600">{service.timeKey}</div>
                     <div className="col-span-6">{service.name}</div>
                     <div className="col-span-3 text-right">{convertVNDtoUSD(service.price)}</div>
+                  </div>
+                ))}
+                {services.accommodation.map((service, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-4 p-1.5 text-sm">
+                    <div className="col-span-1 text-gray-500">{index + 1}</div>
+                    <div className="col-span-2 text-gray-600">{service.timeKey}</div>
+                    <div className="col-span-6">{service.name}</div>
+                    <div className="col-span-3 text-right">
+                      {convertVNDtoUSD(service.rooms.price.fit_price)}
+                    </div>
                   </div>
                 ))}
               </div>

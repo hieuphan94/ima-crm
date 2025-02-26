@@ -45,19 +45,37 @@ export const timeKeysOnDaySchedule = (daySchedule) => {
     .sort();
 };
 
+export const locationToShortName = (location) => {
+  if (!location) return '';
+  const mainLocation = location.split(',')[0].trim();
+  const abbreviation = mainLocation
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase())
+    .join('');
+  return abbreviation;
+};
+
 export const aggregatedLocation = (normalizedServices) => {
-  const { visit } = normalizedServices;
-  const locations = new Set();
-  visit.forEach((service) => {
-    if (service.location) {
-      locations.add(service.location);
+  const { visit, accommodation } = normalizedServices;
+  // Combine all services with their locations and timeKeys
+  const servicesWithLocation = [...visit, ...accommodation]
+    .filter((service) => service.location)
+    .sort((a, b) => convertTimeToMinutes(a.timeKey) - convertTimeToMinutes(b.timeKey));
+
+  // Use Set to keep unique locations while maintaining order
+  const locations = [];
+  servicesWithLocation.forEach((service) => {
+    const shortName = locationToShortName(service.location);
+    if (!locations.includes(shortName)) {
+      locations.push(shortName);
     }
   });
 
-  return {
-    firstLocation: Array.from(locations)[0],
-    otherLocations: Array.from(locations).slice(1),
-  };
+  return locations;
+};
+
+export const locationToTitle = (locations) => {
+  return locations.join(' - ');
 };
 
 export const foodServices = (services) => {
@@ -75,9 +93,9 @@ export const visitServices = (services) => {
   return services.filter((service) => service.type === 'visit');
 };
 
-export const hotelServices = (services) => {
+export const accommodationServices = (services) => {
   if (!services) return [];
-  return services.filter((service) => service.type === 'hotel');
+  return services.filter((service) => service.type === 'accommodation');
 };
 
 export const normalizedServices = (daySchedule) => {
@@ -99,7 +117,7 @@ export const normalizedServices = (daySchedule) => {
   const servicesDivided = {
     food: foodServices(allServices),
     visit: visitServices(allServices),
-    hotel: hotelServices(allServices),
+    accommodation: accommodationServices(allServices),
     guide: guideServices(allServices),
   };
 
