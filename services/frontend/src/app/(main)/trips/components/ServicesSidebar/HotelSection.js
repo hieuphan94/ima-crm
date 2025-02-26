@@ -82,8 +82,9 @@ export default function HotelSection({
     try {
       setLoadingLocation(locationName);
 
+      const accommodationCacheKey = 'accommodation-' + normalizedLocation.toString();
       // Check cache first
-      const cachedServices = LocationCache.get('accommodation-' + normalizedLocation);
+      const cachedServices = LocationCache.get(accommodationCacheKey);
       if (cachedServices?.length > 0) {
         setSheetAccommodationServices(cachedServices);
         onLocationSelect(locationName);
@@ -100,7 +101,7 @@ export default function HotelSection({
       if (result.success) {
         if (result.data?.length > 0) {
           setSheetAccommodationServices(result.data);
-          LocationCache.set('accommodation-' + normalizedLocation, result.data);
+          LocationCache.set(accommodationCacheKey, result.data);
           onLocationSelect(locationName);
         } else {
           onLocationSelect(locationName);

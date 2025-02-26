@@ -82,8 +82,10 @@ export default function VisitSection({
     try {
       setLoadingLocation(locationName);
 
+      const visitCacheKey = 'visit-' + normalizedLocation.toString();
+
       // Check cache first
-      const cachedServices = LocationCache.get('visit-' + normalizedLocation);
+      const cachedServices = LocationCache.get(visitCacheKey);
       if (cachedServices?.length > 0) {
         setSheetServices(cachedServices);
         onLocationSelect(locationName);
@@ -98,7 +100,7 @@ export default function VisitSection({
       if (result.success) {
         if (result.data?.length > 0) {
           setSheetServices(result.data);
-          LocationCache.set('visit-' + normalizedLocation, result.data);
+          LocationCache.set(visitCacheKey, result.data);
           onLocationSelect(locationName);
         } else {
           onLocationSelect(locationName);
