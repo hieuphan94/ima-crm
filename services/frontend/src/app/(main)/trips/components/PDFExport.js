@@ -217,7 +217,7 @@ const formatMeal = (day) => {
 
 const formatGuide = (day) => {
   let guideString = '';
-  if (day.guides && day.guides.included === true) {
+  if (day.guide && day.guide.included === true) {
     guideString += ' Avec Guide | ';
   }
   return guideString;
@@ -257,6 +257,8 @@ const PDFDocument = ({
 
   // Lấy thông tin từ scheduleInfo và settings
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
+
+  console.log('scheduleItems2', scheduleItems);
 
   return (
     <Document>

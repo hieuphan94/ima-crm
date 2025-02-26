@@ -37,6 +37,8 @@ export default function NewTripPage() {
   const scheduleItems = useSelector((state) => state.dailySchedule.scheduleItems);
   const { title } = useSelector((state) => state.dailySchedule.scheduleInfo);
 
+  console.log('scheduleItems', scheduleItems);
+
   // Modal loading functions
   const loadResetModal = async () => {
     try {

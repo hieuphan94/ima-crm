@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import FoodSection from './FoodSection';
+import HotelSection from './HotelSection';
 import VisitSection from './VisitSection';
 
 export default function ServicesSidebar({ isOperator = false }) {
@@ -8,6 +9,7 @@ export default function ServicesSidebar({ isOperator = false }) {
   const [openCountry, setOpenCountry] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [sheetServices, setSheetServices] = useState([]);
+  const [sheetAccommodationServices, setSheetAccommodationServices] = useState([]);
 
   // Food section states
   const [openFood, setOpenFood] = useState(true);
@@ -33,6 +35,14 @@ export default function ServicesSidebar({ isOperator = false }) {
         />
 
         {!isOperator && <FoodSection openFood={openFood} setOpenFood={setOpenFood} />}
+        <HotelSection
+          openCountry={openCountry}
+          setOpenCountry={setOpenCountry}
+          selectedLocation={selectedLocation}
+          onLocationSelect={handleLocationSelect}
+          sheetAccommodationServices={sheetAccommodationServices}
+          setSheetAccommodationServices={setSheetAccommodationServices}
+        />
       </div>
     </div>
   );

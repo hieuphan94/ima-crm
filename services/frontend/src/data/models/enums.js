@@ -27,6 +27,7 @@ export const ServiceType = {
 };
 
 export const AccommodationType = {
+  LOCAL: 'local',
   HOTEL: 'hotel',
   RESORT: 'resort',
   HOMESTAY: 'homestay',

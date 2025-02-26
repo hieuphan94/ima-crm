@@ -1,6 +1,6 @@
 import { GoogleSheetService } from '@/api/credentials/googleSheet';
-import { ServiceLevel, ServiceStatus, ServiceType } from '@/data/models/enums';
-import { VisitService } from '@/data/models/Service';
+import { AccommodationType } from '@/data/models/enums';
+import { AccommodationService } from '@/data/models/services/AccommodationService';
 
 // Thay thế hàm normalizeText cũ bằng hàm mới
 const normalizeLocationName = (name) => {
@@ -47,7 +47,7 @@ export async function GET(request) {
     }
 
     // Cập nhật range để phù hợp với sheet mới
-    const data = await sheetService.getSheetData('Visit!A1:F254');
+    const data = await sheetService.getSheetData('Hotel!A2:K270');
 
     // Validate sheet data
     if (!Array.isArray(data) || data.length < 2) {
@@ -66,10 +66,15 @@ export async function GET(request) {
     const columnIndexes = {
       LOCATION: 0, // Cột A
       NAME: 1, // Cột B
-      PARAGRAPH: 2, // Cột C
-      MEAL: 3, // Cột D
-      PRICE: 4, // Cột E
-      GROUP: 5, // Cột F
+      CATEGORY: 2, // Cột C
+      ROOM: 3, // Cột D
+      FIT: 4, // Cột E
+      GIT: 5, // Cột F,
+      FOC: 6, // Cột G,
+      SUP: 7, // Cột H,
+      NOTE: 8, // Cột I,
+      WEBSITE: 9, // Cột J,
+      YEAR: 10, // Cột K,
     };
 
     // Lọc services theo location
@@ -77,6 +82,8 @@ export async function GET(request) {
       const rowLocation = normalizeLocationName(row[columnIndexes.LOCATION]);
       return rowLocation && rowLocation === normalizedLocation;
     });
+
+    // console.log('filteredServices', filteredServices);
 
     // Check if any services were found
     if (filteredServices.length === 0) {
@@ -91,25 +98,36 @@ export async function GET(request) {
       );
     }
 
+    const accommodationTypeCheck = (type) => {
+      if (type === 'local') return AccommodationType.LOCAL;
+      return AccommodationType.HOTEL;
+    };
+
+    const categoryCheck = (type) => {
+      if (type !== 'local') return type;
+      return 0;
+    };
+
     // Chuyển đổi dữ liệu theo cấu trúc mới
     const services = filteredServices
       .map((row) => {
-        return new VisitService({
-          id: `service-${Math.random().toString(36).substr(2, 9)}`,
-          name: row[columnIndexes.NAME] || '',
-          type: ServiceType.VISIT,
-          serviceLevel: ServiceLevel.TEMPLATE,
+        return new AccommodationService({
           location: row[columnIndexes.LOCATION] || '',
-          sentence: row[columnIndexes.PARAGRAPH] || '',
-          serviceStatus: ServiceStatus.ACTIVE,
-          mealOption: row[columnIndexes.MEAL] || '',
-          price: parseFloat(row[columnIndexes.PRICE]) || 0,
-          priceGroup: {
-            priceDefault2to3Pax: parseFloat(row[columnIndexes.GROUP]) || 0,
+          name: row[columnIndexes.NAME] || '',
+          rating: categoryCheck(row[columnIndexes.CATEGORY]),
+          rooms: {
+            roomName: row[columnIndexes.ROOM] || '',
+            price: {
+              fit_price: parseFloat(row[columnIndexes.FIT]) || 0,
+              git_price: parseFloat(row[columnIndexes.GIT]) || 0,
+              foc_price: parseFloat(row[columnIndexes.FOC]) || 0,
+              sup_price: parseFloat(row[columnIndexes.SUP]) || 0,
+            },
           },
-          ticketInfo: {},
-          openingHours: {},
-          highlights: [],
+          accommodationType: accommodationTypeCheck(row[columnIndexes.CATEGORY]),
+          note: row[columnIndexes.NOTE] || '',
+          website: row[columnIndexes.WEBSITE] || '',
+          year: row[columnIndexes.YEAR] || 2025,
         });
       })
       .filter((service) => service.name);
@@ -120,10 +138,7 @@ export async function GET(request) {
         success: true,
         status: 200,
         message: 'Services fetched successfully',
-        data: services.map((service) => ({
-          ...service,
-          locations: service.locations,
-        })),
+        data: services,
       },
       { status: 200 }
     );

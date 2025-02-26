@@ -1,5 +1,10 @@
 // 1. Routes công khai
-export const PUBLIC_ROUTES = ['/login', '/forgot-password', '/api/sheet'];
+export const PUBLIC_ROUTES = [
+  '/login',
+  '/forgot-password',
+  '/api/sheet',
+  '/api/sheet-accommodation',
+];
 // export const PUBLIC_ROUTES = ['/login', '/forgot-password', '/trips/new', '/api/sheet']; // THÊM VÀO SAU
 
 // 2. Tất cả routes trong hệ thống
@@ -8,6 +13,7 @@ export const ROUTES = {
   login: '/login',
   forgotPassword: '/forgot-password',
   sheetApi: '/api/sheet',
+  sheetAccommodationApi: '/api/sheet-accommodation',
 
   // Common routes
   dashboard: '/dashboard',

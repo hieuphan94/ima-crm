@@ -1,20 +1,20 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { useEffect, useState } from 'react';
 import { IoIosArrowDown, IoIosArrowForward, IoIosSearch } from 'react-icons/io';
+import HotelTooltip from './components/HotelTooltip';
 import LocationButton from './components/LocationButton';
 import SearchInput from './components/SearchInput';
-import ServiceTooltip from './components/ServiceTooltip';
 import { sectionColors, serviceItemStyles } from './constants/styles';
 import { formatPrice, removeVietnameseTones } from './utils/formatters';
 import { LocationCache } from './utils/locationCache';
 
-export default function VisitSection({
+export default function HotelSection({
   openCountry,
   setOpenCountry,
   selectedLocation,
   onLocationSelect,
-  sheetServices,
-  setSheetServices,
+  sheetAccommodationServices,
+  setSheetAccommodationServices,
 }) {
   const [serviceSearchTerm, setServiceSearchTerm] = useState('');
   const [currentServicePage, setCurrentServicePage] = useState(0);
@@ -40,7 +40,7 @@ export default function VisitSection({
 
     const startIndex = currentServicePage * servicesPerPage;
     const filteredServices =
-      sheetServices?.filter((service) => {
+      sheetAccommodationServices?.filter((service) => {
         const normalizedServiceLocation = normalizeLocationName(service.location);
         const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
         const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
@@ -83,22 +83,24 @@ export default function VisitSection({
       setLoadingLocation(locationName);
 
       // Check cache first
-      const cachedServices = LocationCache.get('visit-' + normalizedLocation);
+      const cachedServices = LocationCache.get('accommodation-' + normalizedLocation);
       if (cachedServices?.length > 0) {
-        setSheetServices(cachedServices);
+        setSheetAccommodationServices(cachedServices);
         onLocationSelect(locationName);
         return;
       }
 
       const normalizedLocation = normalizeLocationName(locationName);
-      const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
+      const response = await fetch(
+        `/api/sheet-accommodation?location=${encodeURIComponent(normalizedLocation)}`
+      );
       const result = await response.json();
 
       // Xử lý kết quả API tốt hơn
       if (result.success) {
         if (result.data?.length > 0) {
-          setSheetServices(result.data);
-          LocationCache.set('visit-' + normalizedLocation, result.data);
+          setSheetAccommodationServices(result.data);
+          LocationCache.set('accommodation-' + normalizedLocation, result.data);
           onLocationSelect(locationName);
         } else {
           onLocationSelect(locationName);
@@ -135,7 +137,7 @@ export default function VisitSection({
   };
 
   const filteredServices =
-    sheetServices?.filter((service) => {
+    sheetAccommodationServices?.filter((service) => {
       const normalizedServiceLocation = normalizeLocationName(service.location);
       const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
       const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
@@ -179,7 +181,7 @@ export default function VisitSection({
         className={`w-full flex items-center justify-between text-[10px] font-medium p-1 rounded 
           ${sectionColors.visit.bg} ${sectionColors.visit.text} ${sectionColors.visit.hover}`}
       >
-        <span>Việt Nam</span>
+        <span>Accommodation</span>
         {openCountry === 'Việt Nam' ? (
           <IoIosArrowDown className="h-2.5 w-2.5" />
         ) : (
@@ -260,7 +262,7 @@ export default function VisitSection({
               </div>
 
               <div className="mt-1 space-y-0.5">
-                {getPaginatedServices(sheetServices).map((service) => (
+                {getPaginatedServices(sheetAccommodationServices).map((service) => (
                   <div
                     key={service.id}
                     draggable
@@ -273,13 +275,13 @@ export default function VisitSection({
                     className={serviceItemStyles.container}
                   >
                     <div className="flex items-center gap-1 flex-1 min-w-0">
-                      <span className={serviceItemStyles.text.icon}>{service.icon || '🏛️'}</span>
+                      <span className={serviceItemStyles.text.icon}>{service.icon || '🏨'}</span>
                       <span className={`${serviceItemStyles.text.name} truncate`}>
                         {service.name}
                       </span>
                     </div>
                     <span className={`${serviceItemStyles.text.price} shrink-0`}>
-                      {formatPrice(service.price)}
+                      {formatPrice(service.rooms.price.fit_price)}
                     </span>
                   </div>
                 ))}
@@ -310,11 +312,7 @@ export default function VisitSection({
         </>
       )}
 
-      <ServiceTooltip
-        service={tooltipService}
-        visible={tooltipVisible}
-        position={tooltipPosition}
-      />
+      <HotelTooltip service={tooltipService} visible={tooltipVisible} position={tooltipPosition} />
     </div>
   );
 }

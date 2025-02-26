@@ -150,10 +150,12 @@ export default function PublishTab() {
         titleOfDay: dayData.titleOfDay || `Day ${dayData.order}`,
         distance: dayData.distance || 0,
         meals: dayData.meals || {},
+        guide: dayData.guide || {},
         paragraphDay: dayData.paragraphDay || {},
         services: Object.entries(dayData)
           .filter(
-            ([key]) => !['order', 'distance', 'titleOfDay', 'meals', 'paragraphDay'].includes(key)
+            ([key]) =>
+              !['order', 'distance', 'titleOfDay', 'meals', 'paragraphDay', 'guide'].includes(key)
           )
           .flatMap(([time, services]) =>
             Array.isArray(services)
