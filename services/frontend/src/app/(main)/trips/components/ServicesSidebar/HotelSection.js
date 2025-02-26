@@ -81,7 +81,7 @@ export default function HotelSection({
 
     try {
       setLoadingLocation(locationName);
-
+      const normalizedLocation = normalizeLocationName(locationName);
       const accommodationCacheKey = 'accommodation-' + normalizedLocation.toString();
       // Check cache first
       const cachedServices = LocationCache.get(accommodationCacheKey);
@@ -91,7 +91,6 @@ export default function HotelSection({
         return;
       }
 
-      const normalizedLocation = normalizeLocationName(locationName);
       const response = await fetch(
         `/api/sheet-accommodation?location=${encodeURIComponent(normalizedLocation)}`
       );

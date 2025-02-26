@@ -81,7 +81,7 @@ export default function VisitSection({
 
     try {
       setLoadingLocation(locationName);
-
+      const normalizedLocation = normalizeLocationName(locationName);
       const visitCacheKey = 'visit-' + normalizedLocation.toString();
 
       // Check cache first
@@ -92,7 +92,6 @@ export default function VisitSection({
         return;
       }
 
-      const normalizedLocation = normalizeLocationName(locationName);
       const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
       const result = await response.json();
 
