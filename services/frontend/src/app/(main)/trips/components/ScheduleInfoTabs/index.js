@@ -63,7 +63,7 @@ export default function ScheduleInfoTabs() {
   return (
     <div className="w-full">
       {/* Tabs */}
-      <div className="flex gap-4 mb-4 border-b border-gray-200">
+      <div className="flex gap-4 mb-2 border-b border-gray-200">
         {tabs.map((tab) => (
           <button
             key={tab.id}

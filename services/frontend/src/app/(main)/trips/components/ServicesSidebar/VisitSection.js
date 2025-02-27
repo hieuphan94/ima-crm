@@ -1,6 +1,6 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { useEffect, useState } from 'react';
-import { IoIosArrowDown, IoIosArrowForward, IoIosSearch } from 'react-icons/io';
+import { IoIosSearch } from 'react-icons/io';
 import LocationButton from './components/LocationButton';
 import SearchInput from './components/SearchInput';
 import ServiceTooltip from './components/ServiceTooltip';
@@ -46,7 +46,16 @@ export default function VisitSection({
         const normalizedServiceLocation = normalizeLocationName(service.location);
         const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
         const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
-        const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
+
+        // Chuẩn hóa cả tên dịch vụ và từ khóa tìm kiếm
+        const normalizedServiceName = removeVietnameseTones(service.name.toLowerCase());
+        const normalizedSearchTerm = removeVietnameseTones(serviceSearchTerm.toLowerCase());
+
+        // Kiểm tra cả có dấu và không dấu
+        const searchMatch =
+          service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase()) || // tìm có dấu
+          normalizedServiceName.includes(normalizedSearchTerm); // tìm không dấu
+
         return locationMatch && searchMatch;
       }) || [];
 
@@ -161,7 +170,16 @@ export default function VisitSection({
       const normalizedServiceLocation = normalizeLocationName(service.location);
       const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
       const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
-      const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
+
+      // Chuẩn hóa cả tên dịch vụ và từ khóa tìm kiếm
+      const normalizedServiceName = removeVietnameseTones(service.name.toLowerCase());
+      const normalizedSearchTerm = removeVietnameseTones(serviceSearchTerm.toLowerCase());
+
+      // Kiểm tra cả có dấu và không dấu
+      const searchMatch =
+        service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase()) || // tìm có dấu
+        normalizedServiceName.includes(normalizedSearchTerm); // tìm không dấu
+
       return locationMatch && searchMatch;
     }) || [];
 
@@ -187,44 +205,52 @@ export default function VisitSection({
 
   const filteredLocations = (locations) => {
     if (!locations) return [];
-    return locations.filter((location) =>
-      removeVietnameseTones(location.name.toLowerCase()).includes(
-        removeVietnameseTones(locationSearchTerm.toLowerCase())
-      )
-    );
+    const searchTerm = removeVietnameseTones(locationSearchTerm.toLowerCase());
+    return locations.filter((location) => {
+      const locationName = location.name.toLowerCase();
+      const normalizedLocationName = removeVietnameseTones(locationName);
+      const noSpaceLocationName = normalizedLocationName.replace(/\s+/g, '');
+      const noSpaceSearchTerm = searchTerm.replace(/\s+/g, '');
+
+      return (
+        locationName.includes(locationSearchTerm.toLowerCase()) ||
+        normalizedLocationName.includes(searchTerm) ||
+        noSpaceLocationName.includes(noSpaceSearchTerm) ||
+        normalizedLocationName.replace(/\s+/g, ' ').includes(searchTerm.replace(/\s+/g, ' '))
+      );
+    });
   };
 
   return (
-    <div className="pb-2 border-b-2 border-gray-300">
+    <div className="pb-0 bg-green-50">
       <button
-        onClick={() => setOpenCountry(openCountry === 'Việt Nam' ? null : 'Việt Nam')}
+        // onClick={() => setOpenCountry(openCountry === 'Việt Nam' ? null : 'Việt Nam')}
         className={`w-full flex items-center justify-between text-[10px] font-medium p-1 rounded 
           ${sectionColors.visit.bg} ${sectionColors.visit.text} ${sectionColors.visit.hover}`}
       >
         <span>Việt Nam</span>
-        {openCountry === 'Việt Nam' ? (
+        {/* {openCountry === 'Việt Nam' ? (
           <IoIosArrowDown className="h-2.5 w-2.5" />
         ) : (
           <IoIosArrowForward className="h-2.5 w-2.5" />
-        )}
+        )} */}
+        <div className="relative w-[100px]">
+          <input
+            type="text"
+            placeholder="Tìm địa điểm..."
+            value={locationSearchTerm}
+            onChange={(e) => {
+              setLocationSearchTerm(e.target.value);
+              setCurrentPage(0);
+            }}
+            className="w-full text-[9px] p-1 pr-6 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <IoIosSearch className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
+        </div>
       </button>
 
       {openCountry === 'Việt Nam' && (
         <>
-          <div className="relative mt-1 mb-1">
-            <input
-              type="text"
-              placeholder="Tìm địa điểm..."
-              value={locationSearchTerm}
-              onChange={(e) => {
-                setLocationSearchTerm(e.target.value);
-                setCurrentPage(0);
-              }}
-              className="w-full text-[9px] p-1 pr-6 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <IoIosSearch className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
-          </div>
-
           <div className="mt-1 relative">
             <div className="flex items-center">
               <button
@@ -268,7 +294,7 @@ export default function VisitSection({
           </div>
 
           {selectedLocation && (
-            <div className="mt-2">
+            <div className="mt-0.5">
               <div className="relative flex gap-1">
                 <SearchInput
                   value={serviceSearchTerm}
@@ -281,7 +307,7 @@ export default function VisitSection({
                 />
               </div>
 
-              <div className="mt-1 space-y-0.5">
+              <div className="mt-0.5">
                 {getPaginatedServices(sheetServices).map((service) => (
                   <div
                     key={service.id}
@@ -308,7 +334,7 @@ export default function VisitSection({
               </div>
 
               {totalPages >= 1 && (
-                <div className="flex justify-center gap-0.5 mt-2">
+                <div className="flex justify-center gap-0.5 mt-0.5">
                   {Array.from({ length: totalPages }, (_, i) => (
                     <button
                       key={i}

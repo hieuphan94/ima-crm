@@ -37,14 +37,13 @@ export default function ServicesSidebar({ isOperator = false }) {
           loadingLocation={loadingLocation}
           setLoadingLocation={setLoadingLocation}
         />
-
-        {!isOperator && <FoodSection openFood={openFood} setOpenFood={setOpenFood} />}
         <HotelSection
           openCountry={openCountry}
           setOpenCountry={setOpenCountry}
           selectedLocation={selectedLocation}
           sheetAccommodationServices={sheetAccommodationServices}
         />
+        {!isOperator && <FoodSection openFood={openFood} setOpenFood={setOpenFood} />}
       </div>
     </div>
   );

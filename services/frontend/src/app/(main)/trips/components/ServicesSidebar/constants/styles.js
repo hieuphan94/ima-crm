@@ -15,9 +15,14 @@ export const mealTypeColors = {
 // Màu sắc cho các section header
 export const sectionColors = {
   visit: {
-    bg: 'bg-emerald-50',
-    hover: 'hover:bg-emerald-100',
+    bg: 'bg-emerald-200',
+    hover: 'hover:bg-emerald-200',
     text: 'text-emerald-700',
+  },
+  hotel: {
+    bg: 'bg-gray-300',
+    hover: 'hover:bg-gray-300',
+    text: 'text-gray-700',
   },
   food: {
     bg: 'bg-orange-50',
@@ -69,7 +74,7 @@ export const inputStyles = {
 // Styles cho service items
 export const serviceItemStyles = {
   container:
-    'flex items-center justify-between p-1 rounded hover:bg-gray-50 cursor-move border border-gray-100',
+    'flex items-center justify-between p-0.5 rounded hover:bg-white cursor-move border border-gray-100',
   text: {
     icon: 'text-[11px]',
     name: 'text-[9px]',

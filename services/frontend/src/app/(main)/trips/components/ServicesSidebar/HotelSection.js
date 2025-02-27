@@ -1,10 +1,8 @@
-import { useState } from 'react';
-import { IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
+import { useEffect, useState } from 'react';
 import HotelTooltip from './components/HotelTooltip';
 import SearchInput from './components/SearchInput';
 import { sectionColors, serviceItemStyles } from './constants/styles';
 import { formatPrice, removeVietnameseTones } from './utils/formatters';
-
 export default function HotelSection({
   openCountry,
   setOpenCountry,
@@ -17,6 +15,11 @@ export default function HotelSection({
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipService, setTooltipService] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    setServiceSearchTerm('');
+    setCurrentServicePage(0);
+  }, [sheetAccommodationServices]);
 
   const normalizeLocationName = (name) => {
     if (!name) return '';
@@ -37,7 +40,16 @@ export default function HotelSection({
         const normalizedServiceLocation = normalizeLocationName(service.location);
         const normalizedSelectedLocation = normalizeLocationName(selectedLocation);
         const locationMatch = normalizedServiceLocation === normalizedSelectedLocation;
-        const searchMatch = service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase());
+
+        // Chuẩn hóa cả tên dịch vụ và từ khóa tìm kiếm
+        const normalizedServiceName = removeVietnameseTones(service.name.toLowerCase());
+        const normalizedSearchTerm = removeVietnameseTones(serviceSearchTerm.toLowerCase());
+
+        // Kiểm tra cả có dấu và không dấu
+        const searchMatch =
+          service.name.toLowerCase().includes(serviceSearchTerm.toLowerCase()) || // tìm có dấu
+          normalizedServiceName.includes(normalizedSearchTerm); // tìm không dấu
+
         return locationMatch && searchMatch;
       }) || [];
 
@@ -89,35 +101,34 @@ export default function HotelSection({
   };
 
   return (
-    <div className="pb-2 border-b-2 border-gray-300">
-      <button
-        onClick={() => setOpenCountry(openCountry === 'Việt Nam' ? null : 'Việt Nam')}
+    <div className="pb-0 bg-gray-100">
+      <div
+        // onClick={() => setOpenCountry(openCountry === 'Việt Nam' ? null : 'Việt Nam')}
         className={`w-full flex items-center justify-between text-[10px] font-medium p-1 rounded 
-          ${sectionColors.visit.bg} ${sectionColors.visit.text} ${sectionColors.visit.hover}`}
+          ${sectionColors.hotel.bg} ${sectionColors.hotel.text} ${sectionColors.hotel.hover}`}
       >
         <span>Accommodation</span>
-        {openCountry === 'Việt Nam' ? (
+        {/* {openCountry === 'Việt Nam' ? (
           <IoIosArrowDown className="h-2.5 w-2.5" />
         ) : (
           <IoIosArrowForward className="h-2.5 w-2.5" />
-        )}
-      </button>
+        )} */}
+        <div className="relative w-[100px]">
+          <SearchInput
+            value={serviceSearchTerm}
+            onChange={(e) => {
+              setServiceSearchTerm(e.target.value);
+              setCurrentServicePage(0);
+            }}
+            placeholder="Tìm kiếm hotel..."
+            className="bg-white"
+          />
+        </div>
+      </div>
 
       {openCountry === 'Việt Nam' && selectedLocation && (
-        <div className="mt-2">
-          <div className="relative flex gap-1">
-            <SearchInput
-              value={serviceSearchTerm}
-              onChange={(e) => {
-                setServiceSearchTerm(e.target.value);
-                setCurrentServicePage(0);
-              }}
-              placeholder="Tìm kiếm hotel..."
-              className="bg-white"
-            />
-          </div>
-
-          <div className="mt-1 space-y-0.5">
+        <div className="mt-0.5">
+          <div className="mt-0.5">
             {getPaginatedServices(sheetAccommodationServices).map((service) => (
               <div
                 key={service.id}
@@ -128,7 +139,7 @@ export default function HotelSection({
                 }}
                 onMouseEnter={(e) => handleServiceMouseEnter(e, service)}
                 onMouseLeave={handleServiceMouseLeave}
-                className={serviceItemStyles.container}
+                className={`${serviceItemStyles.container} border border-gray-200`}
               >
                 <div className="flex items-center gap-1 flex-1 min-w-0">
                   <span className={serviceItemStyles.text.icon}>{service.icon || '🏨'}</span>
@@ -142,7 +153,7 @@ export default function HotelSection({
           </div>
 
           {totalPages >= 1 && (
-            <div className="flex justify-center gap-0.5 mt-2">
+            <div className="flex justify-center gap-0.5 mt-0.5">
               {Array.from({ length: totalPages }, (_, i) => (
                 <button
                   key={i}
@@ -150,7 +161,7 @@ export default function HotelSection({
                   className={`text-[9px] w-5 h-4 rounded flex items-center justify-center transition-colors
                     ${
                       currentServicePage === i
-                        ? 'bg-emerald-100 text-emerald-700'
+                        ? sectionColors.hotel.bg
                         : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                 >
