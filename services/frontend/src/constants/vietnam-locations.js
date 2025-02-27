@@ -342,6 +342,211 @@ export const VIETNAM_LOCATIONS = [
   },
 ];
 
+// HA NOI, NINH BINH, HA LONG, SAPA, PU LUONG, MU CANG CHAI, NGHIA LO, THAC BA, YEN BAI, HA GIANG, ,CAO BANG,
+// MEO VAC, DONG VAN, BAC HA, SON LA, VINH, DONG HOI, HUE, HOI AN, KON TUM, BUON MA THUOT, NHA TRANG, PHAN THIET
+// VUNG TAU, DA LAT, HO CHI MINH, CAN THO, CHO LACH, VINH LONG, CAI BE, MY THO, LONG XUYEN, TRA VINH, SOC TRANG
+// CHAU DOC, PHU QUOC, CON DAO, NINH THUAN, QUY NHON
+
+export const VIETNAM_LOCATIONS_HOTEL = [
+  // Miền Bắc
+  {
+    id: 'hanoi',
+    name: 'Hà Nội',
+    region: 'north',
+    coordinates: { lat: 21.028511, lng: 105.804817 },
+  },
+  {
+    id: 'ninhbinh',
+    name: 'Ninh Bình',
+    region: 'north',
+    coordinates: { lat: 20.250225, lng: 105.974731 },
+  },
+  {
+    id: 'halong',
+    name: 'Hạ Long',
+    region: 'north',
+    coordinates: { lat: 20.959444, lng: 107.042778 },
+  },
+  {
+    id: 'sapa',
+    name: 'Sa Pa',
+    region: 'north',
+    coordinates: { lat: 22.336389, lng: 103.844167 },
+  },
+  {
+    id: 'mucangchai',
+    name: 'Mù Cang Chải',
+    region: 'north',
+    coordinates: { lat: 21.851389, lng: 104.150833 },
+  },
+  {
+    id: 'nghialo',
+    name: 'Nghĩa Lộ',
+    region: 'north',
+    coordinates: { lat: 21.595833, lng: 104.493056 },
+  },
+  {
+    id: 'thacba',
+    name: 'Thác Bà',
+    region: 'north',
+    coordinates: { lat: 21.977222, lng: 104.773333 },
+  },
+  {
+    id: 'hagiang',
+    name: 'Hà Giang',
+    region: 'north',
+    coordinates: { lat: 22.823752, lng: 104.983955 },
+  },
+  {
+    id: 'caobang',
+    name: 'Cao Bằng',
+    region: 'north',
+    coordinates: { lat: 22.665418, lng: 106.25861 },
+  },
+  {
+    id: 'meovac',
+    name: 'Mèo Vạc',
+    region: 'north',
+    coordinates: { lat: 23.156944, lng: 105.441944 },
+  },
+  {
+    id: 'dongvan',
+    name: 'Đồng Văn',
+    region: 'north',
+    coordinates: { lat: 23.272778, lng: 105.363056 },
+  },
+  {
+    id: 'bacha',
+    name: 'Bắc Hà',
+    region: 'north',
+    coordinates: { lat: 22.537778, lng: 104.290833 },
+  },
+  {
+    id: 'sonla',
+    name: 'Sơn La',
+    region: 'north',
+    coordinates: { lat: 21.327165, lng: 103.912308 },
+  },
+
+  // Miền Trung
+  {
+    id: 'vinh',
+    name: 'Vinh',
+    region: 'central',
+    coordinates: { lat: 18.679585, lng: 105.681335 },
+  },
+  {
+    id: 'hue',
+    name: 'Huế',
+    region: 'central',
+    coordinates: { lat: 16.463713, lng: 107.584474 },
+  },
+  {
+    id: 'hoian',
+    name: 'Hội An',
+    region: 'central',
+    coordinates: { lat: 15.880556, lng: 108.338333 },
+  },
+  {
+    id: 'kontum',
+    name: 'Kon Tum',
+    region: 'central',
+    coordinates: { lat: 14.354167, lng: 108.017778 },
+  },
+  {
+    id: 'buonmathuot',
+    name: 'Buôn Ma Thuột',
+    region: 'central',
+    coordinates: { lat: 12.666667, lng: 108.05 },
+  },
+  {
+    id: 'nhatrang',
+    name: 'Nha Trang',
+    region: 'central',
+    coordinates: { lat: 12.238791, lng: 109.196749 },
+  },
+  {
+    id: 'phanthiet',
+    name: 'Phan Thiết',
+    region: 'central',
+    coordinates: { lat: 10.933465, lng: 108.102493 },
+  },
+  {
+    id: 'dalat',
+    name: 'Đà Lạt',
+    region: 'central',
+    coordinates: { lat: 11.940419, lng: 108.458313 },
+  },
+  {
+    id: 'quynhon',
+    name: 'Quy Nhơn',
+    region: 'central',
+    coordinates: { lat: 13.775389, lng: 109.223889 },
+  },
+
+  // Miền Nam
+  {
+    id: 'hochiminh',
+    name: 'Hồ Chí Minh',
+    region: 'south',
+    coordinates: { lat: 10.762622, lng: 106.660172 },
+  },
+  {
+    id: 'cantho',
+    name: 'Cần Thơ',
+    region: 'south',
+    coordinates: { lat: 10.045162, lng: 105.746857 },
+  },
+  {
+    id: 'cholach',
+    name: 'Chợ Lách',
+    region: 'south',
+    coordinates: { lat: 10.221667, lng: 106.155556 },
+  },
+  {
+    id: 'caibe',
+    name: 'Cái Bè',
+    region: 'south',
+    coordinates: { lat: 10.406667, lng: 105.933333 },
+  },
+  {
+    id: 'mytho',
+    name: 'Mỹ Tho',
+    region: 'south',
+    coordinates: { lat: 10.360238, lng: 106.363181 },
+  },
+  {
+    id: 'longxuyen',
+    name: 'Long Xuyên',
+    region: 'south',
+    coordinates: { lat: 10.386184, lng: 105.438257 },
+  },
+  {
+    id: 'travinh',
+    name: 'Trà Vinh',
+    region: 'south',
+    coordinates: { lat: 9.934929, lng: 106.342475 },
+  },
+  {
+    id: 'soctrang',
+    name: 'Sóc Trăng',
+    region: 'south',
+    coordinates: { lat: 9.60318, lng: 105.973848 },
+  },
+  {
+    id: 'chaudoc',
+    name: 'Châu Đốc',
+    region: 'south',
+    coordinates: { lat: 10.706389, lng: 105.117778 },
+  },
+  {
+    id: 'vungtau',
+    name: 'Vũng Tàu',
+    region: 'south',
+    coordinates: { lat: 10.346577, lng: 107.084351 },
+  },
+];
+
 // Helper function để group locations theo region
 export const getLocationsByRegion = () => {
   return VIETNAM_LOCATIONS.reduce((acc, location) => {

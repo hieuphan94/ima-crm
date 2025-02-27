@@ -1,8 +1,7 @@
 import { VIETNAM_LOCATIONS } from '@/constants/vietnam-locations';
 import { useEffect, useState } from 'react';
-import { IoIosArrowDown, IoIosArrowForward, IoIosSearch } from 'react-icons/io';
+import { IoIosArrowDown, IoIosArrowForward } from 'react-icons/io';
 import HotelTooltip from './components/HotelTooltip';
-import LocationButton from './components/LocationButton';
 import SearchInput from './components/SearchInput';
 import { sectionColors, serviceItemStyles } from './constants/styles';
 import { formatPrice, removeVietnameseTones } from './utils/formatters';
@@ -191,7 +190,7 @@ export default function HotelSection({
 
       {openCountry === 'Việt Nam' && (
         <>
-          <div className="relative mt-1 mb-1">
+          {/* <div className="relative mt-1 mb-1">
             <input
               type="text"
               placeholder="Tìm địa điểm..."
@@ -203,11 +202,11 @@ export default function HotelSection({
               className="w-full text-[9px] p-1 pr-6 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <IoIosSearch className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 h-3 w-3" />
-          </div>
+          </div> */}
 
           <div className="mt-1 relative">
             <div className="flex items-center">
-              <button
+              {/* <button
                 onClick={() => handleScroll('left')}
                 className={`absolute left-0 z-10 bg-white/80 hover:bg-white hover:text-gray-800 rounded-full w-2 h-2 flex items-center justify-center shadow-sm ${
                   currentPage === 0 ? 'text-gray-300' : 'text-gray-600'
@@ -215,8 +214,8 @@ export default function HotelSection({
                 disabled={currentPage === 0}
               >
                 ‹
-              </button>
-              <div id="locations-container" className="mx-3 w-full">
+              </button> */}
+              {/* <div id="locations-container" className="mx-3 w-full">
                 <div className="grid grid-cols-4 gap-0.5 auto-rows-max overflow-hidden">
                   {getPaginatedLocations(filteredLocations(VIETNAM_LOCATIONS)).map((location) => (
                     <LocationButton
@@ -228,8 +227,8 @@ export default function HotelSection({
                     />
                   ))}
                 </div>
-              </div>
-              <button
+              </div> */}
+              {/* <button
                 onClick={() => handleScroll('right')}
                 className={`absolute right-0 z-10 bg-white/80 hover:bg-white hover:text-gray-800 rounded-full w-2 h-2 flex items-center justify-center shadow-sm ${
                   currentPage >=
@@ -243,7 +242,7 @@ export default function HotelSection({
                 }
               >
                 ›
-              </button>
+              </button> */}
             </div>
           </div>
 
@@ -256,7 +255,7 @@ export default function HotelSection({
                     setServiceSearchTerm(e.target.value);
                     setCurrentServicePage(0);
                   }}
-                  placeholder="Tìm kiếm visit..."
+                  placeholder="Tìm kiếm hotel..."
                   className="bg-white"
                 />
               </div>

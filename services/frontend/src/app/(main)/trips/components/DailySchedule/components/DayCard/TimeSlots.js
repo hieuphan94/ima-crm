@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useCallback } from 'react';
-import { SLOT_HEIGHT, TIME_GROUPS } from '../../utils/constants';
+import { HOTEL_SLOT_HEIGHT, SLOT_HEIGHT, TIME_GROUPS } from '../../utils/constants';
 
 const TimeSlots = memo(function TimeSlots({
   dayId,
@@ -25,17 +25,17 @@ const TimeSlots = memo(function TimeSlots({
   );
 
   // Chuyển sortServices thành useCallback
-  const sortServices = useCallback(
-    (services) => {
-      return [...services].sort((a, b) => {
-        if (a.type !== b.type) {
-          return a.type < b.type ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-      });
-    },
-    [daySchedule]
-  );
+  // const sortServices = useCallback(
+  //   (services) => {
+  //     return [...services].sort((a, b) => {
+  //       if (a.type !== b.type) {
+  //         return a.type < b.type ? -1 : 1;
+  //       }
+  //       return a.name.localeCompare(b.name);
+  //     });
+  //   },
+  //   [daySchedule]
+  // );
 
   return (
     <div>
@@ -44,11 +44,14 @@ const TimeSlots = memo(function TimeSlots({
           {group.slots.map((time) => {
             const services = getServices(time);
             const sortedServices = services;
+            const isHotel = time === '23:00';
             return (
               <div key={`${dayId}-${time}`} className="mb-1">
                 <div
-                  style={{ height: SLOT_HEIGHT }}
-                  className={`rounded px-2 relative ${group.bgColor} ${group.borderColor} border`}
+                  style={{ height: isHotel ? HOTEL_SLOT_HEIGHT : SLOT_HEIGHT }}
+                  className={`rounded px-2 relative ${
+                    isHotel ? group.bgColorHotel : group.bgColor
+                  } ${isHotel ? group.borderColorHotel : group.borderColor} border`}
                   onDragOver={onDragOver}
                   onDragLeave={onDragLeave}
                   onDrop={(e) => onDrop(day, time, e)}
@@ -100,7 +103,7 @@ const TimeSlots = memo(function TimeSlots({
                   )}
                 </div>
 
-                {expandedSlots[time] && (
+                {expandedSlots[time] && !isHotel && (
                   <div
                     style={{ height: SLOT_HEIGHT }}
                     className={`mt-1 rounded px-2 relative 

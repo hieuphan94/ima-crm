@@ -187,6 +187,19 @@ const useDailyScheduleSlice = createSlice({
       const { day, time, service } = action.payload;
       const currentPax = state.settings.globalPax;
 
+      // Kiểm tra nếu service là accommodation
+      if (service.type === 'accommodation') {
+        // Chỉ cho phép thêm accommodation vào time 6:00
+        if (time !== '23:00') {
+          return;
+        }
+      } else {
+        // Nếu không phải accommodation, không cho thêm vào time 6:00
+        if (time === '23:00') {
+          return;
+        }
+      }
+
       if (!state.scheduleItems[day]) {
         state.scheduleItems[day] = {};
       }

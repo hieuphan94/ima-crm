@@ -13,13 +13,17 @@ export const TIME_GROUPS = [
   },
   {
     label: 'evening',
-    slots: ['18:00', '19:00', '20:00', '21:00', '22:00'],
+    slots: ['18:00', '19:00', '20:00', '21:00', '22:00', '23:00'],
+    hotelIcon: '🏨',
+    bgColorHotel: 'bg-gray-200',
+    borderColorHotel: 'border-gray-700',
     bgColor: 'bg-purple-100',
     borderColor: 'border-purple-200',
   },
 ];
 
 export const SLOT_HEIGHT = 24; // px
+export const HOTEL_SLOT_HEIGHT = 40; // px
 export const SLOT_GAP = 2; // px
 export const GROUP_GAP = 8; // px
 
