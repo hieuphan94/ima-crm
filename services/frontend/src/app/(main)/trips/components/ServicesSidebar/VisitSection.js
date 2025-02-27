@@ -15,6 +15,9 @@ export default function VisitSection({
   onLocationSelect,
   sheetServices,
   setSheetServices,
+  setSheetAccommodationServices,
+  loadingLocation,
+  setLoadingLocation,
 }) {
   const [serviceSearchTerm, setServiceSearchTerm] = useState('');
   const [currentServicePage, setCurrentServicePage] = useState(0);
@@ -22,7 +25,6 @@ export default function VisitSection({
   const [currentPage, setCurrentPage] = useState(0);
   const locationsPerPage = 8;
   const servicesPerPage = 7;
-  const [loadingLocation, setLoadingLocation] = useState(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipService, setTooltipService] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -76,45 +78,64 @@ export default function VisitSection({
   const handleLocationClick = async (locationName) => {
     if (selectedLocation === locationName) {
       onLocationSelect(null);
+      setSheetServices([]);
+      setSheetAccommodationServices([]);
       return;
     }
 
     try {
       setLoadingLocation(locationName);
       const normalizedLocation = normalizeLocationName(locationName);
-      const visitCacheKey = 'visit-' + normalizedLocation.toString();
 
-      // Check cache first
-      const cachedServices = LocationCache.get(visitCacheKey);
-      if (cachedServices?.length > 0) {
-        setSheetServices(cachedServices);
-        onLocationSelect(locationName);
-        return;
+      // Fetch both visit and accommodation data in parallel
+      const visitCacheKey = 'visit-' + normalizedLocation;
+      const accommodationCacheKey = 'accommodation-' + normalizedLocation;
+
+      // Check caches first
+      const cachedVisitServices = LocationCache.get(visitCacheKey);
+      const cachedAccommodationServices = LocationCache.get(accommodationCacheKey);
+
+      // Prepare fetch promises
+      const promises = [];
+      let visitPromise, accommodationPromise;
+
+      if (!cachedVisitServices) {
+        visitPromise = fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`).then(
+          (res) => res.json()
+        );
+        promises.push(visitPromise);
       }
 
-      const response = await fetch(`/api/sheet?location=${encodeURIComponent(normalizedLocation)}`);
-      const result = await response.json();
-
-      // Xử lý kết quả API tốt hơn
-      if (result.success) {
-        if (result.data?.length > 0) {
-          setSheetServices(result.data);
-          LocationCache.set(visitCacheKey, result.data);
-          onLocationSelect(locationName);
-        } else {
-          onLocationSelect(locationName);
-        }
-      } else {
-        // API trả về lỗi
-        console.error('API Error:', result.message);
-        // Không set empty array, giữ nguyên state cũ
-        onLocationSelect(locationName);
+      if (!cachedAccommodationServices) {
+        accommodationPromise = fetch(
+          `/api/sheet-accommodation?location=${encodeURIComponent(normalizedLocation)}`
+        ).then((res) => res.json());
+        promises.push(accommodationPromise);
       }
-    } catch (error) {
-      // Network/parsing error
-      console.error('Request failed:', error);
-      // Không set empty array, giữ nguyên state cũ
+
+      // Execute API calls in parallel
+      const results = await Promise.all(promises);
+
+      // Handle visit services
+      if (cachedVisitServices) {
+        setSheetServices(cachedVisitServices);
+      } else if (results[0]?.success) {
+        setSheetServices(results[0].data || []);
+        LocationCache.set(visitCacheKey, results[0].data);
+      }
+
+      // Handle accommodation services
+      if (cachedAccommodationServices) {
+        setSheetAccommodationServices(cachedAccommodationServices);
+      } else if (accommodationPromise && results[promises.indexOf(accommodationPromise)]?.success) {
+        const accommodationData = results[promises.indexOf(accommodationPromise)].data;
+        setSheetAccommodationServices(accommodationData || []);
+        LocationCache.set(accommodationCacheKey, accommodationData);
+      }
+
       onLocationSelect(locationName);
+    } catch (error) {
+      console.error('Error fetching services:', error);
     } finally {
       setLoadingLocation(null);
     }

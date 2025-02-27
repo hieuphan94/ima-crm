@@ -10,13 +10,14 @@ export default function ServicesSidebar({ isOperator = false }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [sheetServices, setSheetServices] = useState([]);
   const [sheetAccommodationServices, setSheetAccommodationServices] = useState([]);
-
-  // Food section states
   const [openFood, setOpenFood] = useState(true);
+  const [loadingLocation, setLoadingLocation] = useState(null);
 
   const handleLocationSelect = async (locationName) => {
     if (selectedLocation === locationName) {
       setSelectedLocation(null);
+      setSheetServices([]);
+      setSheetAccommodationServices([]);
       return;
     }
     setSelectedLocation(locationName);
@@ -32,6 +33,9 @@ export default function ServicesSidebar({ isOperator = false }) {
           onLocationSelect={handleLocationSelect}
           sheetServices={sheetServices}
           setSheetServices={setSheetServices}
+          setSheetAccommodationServices={setSheetAccommodationServices}
+          loadingLocation={loadingLocation}
+          setLoadingLocation={setLoadingLocation}
         />
 
         {!isOperator && <FoodSection openFood={openFood} setOpenFood={setOpenFood} />}
@@ -39,9 +43,7 @@ export default function ServicesSidebar({ isOperator = false }) {
           openCountry={openCountry}
           setOpenCountry={setOpenCountry}
           selectedLocation={selectedLocation}
-          onLocationSelect={handleLocationSelect}
           sheetAccommodationServices={sheetAccommodationServices}
-          setSheetAccommodationServices={setSheetAccommodationServices}
         />
       </div>
     </div>
