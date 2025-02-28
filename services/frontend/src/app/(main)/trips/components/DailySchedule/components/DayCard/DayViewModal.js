@@ -14,8 +14,8 @@ import { FiCheck, FiEdit2, FiX } from 'react-icons/fi';
 import { useDispatch, useSelector } from 'react-redux';
 import { calculatePrice } from '../../utils/calculations';
 import {
-  aggregatedLocation,
   convertVNDtoUSD,
+  formatMeal,
   formulaFoodPriceByStarRating,
   normalizedServices,
 } from '../../utils/formatters';
@@ -101,9 +101,6 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
 
   // Services contain visit, food, hotel
   const services = normalizedServices(daySchedule);
-
-  // Location show in the day
-  const locations = aggregatedLocation(services);
 
   // Pax calculate
   const paxCalculate = paxChangeOfDay !== undefined ? paxChangeOfDay : globalPax;
@@ -401,22 +398,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
             {/* Meals from daySchedule.meals */}
             <div className="grid grid-cols-12 p-1.5 text-sm border-t border-gray-200">
               <div className="col-span-12">
-                <span className="font-medium mb-2">Repas:</span>
-                {daySchedule.meals.breakfast.included && (
-                  <span className="m-1 p-1 bg-gray-200 rounded">
-                    PD {daySchedule.meals.breakfast.type},{' '}
-                  </span>
-                )}
-                {daySchedule.meals.lunch.included && (
-                  <span className="m-1 p-1 bg-gray-200 rounded">
-                    DJ: {daySchedule.meals.lunch.type},{' '}
-                  </span>
-                )}
-                {daySchedule.meals.dinner.included && (
-                  <span className="m-1 p-1 bg-gray-200 rounded">
-                    DI: {daySchedule.meals.dinner.type}
-                  </span>
-                )}
+                <span className="font-medium mb-2">Repas: {formatMeal(daySchedule)}</span>
               </div>
             </div>
 

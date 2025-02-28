@@ -188,3 +188,38 @@ export const updateAllDayTitles = (scheduleItems) => {
     }
   });
 };
+
+export const updateMealFromMealOption = (daySchedule) => {
+  if (!daySchedule) return '';
+
+  const services = normalizedServices(daySchedule);
+  const visitServices = services.visit;
+
+  if (visitServices.length > 0) {
+    visitServices.forEach((service) => {
+      if (service.mealOption.includes('B')) {
+        daySchedule.meals.breakfast.included = true;
+      }
+      if (service.mealOption.includes('L')) {
+        daySchedule.meals.lunch.included = true;
+      }
+      if (service.mealOption.includes('D')) {
+        daySchedule.meals.dinner.included = true;
+      }
+    });
+  }
+};
+
+export const formatMeal = (daySchedule) => {
+  let mealStrings = [];
+  if (daySchedule.meals.breakfast.included === true) {
+    mealStrings.push('Pdj');
+  }
+  if (daySchedule.meals.lunch.included === true) {
+    mealStrings.push('Dej');
+  }
+  if (daySchedule.meals.dinner.included === true) {
+    mealStrings.push('Din');
+  }
+  return mealStrings.join(' - ');
+};

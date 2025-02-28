@@ -72,14 +72,14 @@ export const generateDescription = (daySchedule) => {
 
   // Phân loại visit services theo thời gian
   const timeKeys = Object.keys(daySchedule).filter((key) => /^\d/.test(key));
-  const visitServices = [];
 
-  // Chỉ lấy visit services
+  // // Chỉ lấy visit services
+  const visitServices = [];
   timeKeys.forEach((timeKey) => {
     const items = daySchedule[timeKey] || [];
     items.forEach((item) => {
       const hour = parseInt(timeKey.split(':')[0]);
-      if (item.type !== 'food') {
+      if (item.type !== 'food' && item.type !== 'accommodation') {
         visitServices.push({
           ...item,
           hour,
@@ -89,16 +89,17 @@ export const generateDescription = (daySchedule) => {
     });
   });
 
+  console.log('visitServices', visitServices);
   // Phân loại visit theo thời gian
   const periods = {
     morning: visitServices
-      .filter((s) => s.hour >= 6 && s.hour < 12)
+      .filter((s) => s.hour >= 7 && s.hour <= 12)
       .sort((a, b) => a.hour - b.hour),
     afternoon: visitServices
-      .filter((s) => s.hour >= 12 && s.hour < 17)
+      .filter((s) => s.hour > 12 && s.hour <= 17)
       .sort((a, b) => a.hour - b.hour),
     evening: visitServices
-      .filter((s) => s.hour >= 17 && s.hour < 21)
+      .filter((s) => s.hour > 17 && s.hour <= 22)
       .sort((a, b) => a.hour - b.hour),
   };
 
@@ -107,7 +108,9 @@ export const generateDescription = (daySchedule) => {
 
   // Thêm bữa sáng nếu có
   if (meals?.breakfast?.included) {
-    description += `<p>Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.</p>`;
+    if (meals.breakfast.type) {
+      description += `<p>Petit déjeuner ${formatVenuePhrase(meals.breakfast.type)}.</p>`;
+    }
   }
 
   // Morning section
@@ -135,7 +138,9 @@ export const generateDescription = (daySchedule) => {
 
   // Thêm bữa trưa nếu có
   if (meals?.lunch?.included) {
-    description += `<p>Déjeuner ${formatVenuePhrase(meals.lunch.type)}.</p>`;
+    if (meals.lunch.type) {
+      description += `<p>Déjeuner ${formatVenuePhrase(meals.lunch.type)}.</p>`;
+    }
   }
 
   // Afternoon section
@@ -184,7 +189,9 @@ export const generateDescription = (daySchedule) => {
 
   // Thêm bữa tối nếu có
   if (meals?.dinner?.included) {
-    description += `<p>Dîner ${formatVenuePhrase(meals.dinner.type)}.</p>`;
+    if (meals.dinner.type) {
+      description += `<p>Dîner ${formatVenuePhrase(meals.dinner.type)}.</p>`;
+    }
   }
 
   return {

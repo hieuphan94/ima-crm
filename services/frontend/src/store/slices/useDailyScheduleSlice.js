@@ -6,6 +6,7 @@ import {
   locationToTitle,
   normalizedServices,
   updateAllDayTitles,
+  updateMealFromMealOption,
 } from '../../app/(main)/trips/components/DailySchedule/utils/formatters';
 
 const initialState = {
@@ -222,10 +223,10 @@ const useDailyScheduleSlice = createSlice({
           state.scheduleItems[day].finalLocation = lastLocation || '';
         }
 
-        console.log('lastLocation', lastLocation);
-
         // Update all day titles
         updateAllDayTitles(state.scheduleItems);
+        // Update meal from meal option
+        updateMealFromMealOption(state.scheduleItems[day]);
       }
     },
 

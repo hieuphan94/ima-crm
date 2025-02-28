@@ -202,17 +202,17 @@ const styles = StyleSheet.create({
 });
 
 const formatMeal = (day) => {
-  let mealString = '';
+  let mealStrings = [];
   if (day.meals.breakfast.included === true) {
-    mealString += 'Pdj';
+    mealStrings.push('Pdj');
   }
   if (day.meals.lunch.included === true) {
-    mealString += '- Dej';
+    mealStrings.push('Dej');
   }
   if (day.meals.dinner.included === true) {
-    mealString += '- Din |';
+    mealStrings.push('Din');
   }
-  return mealString;
+  return mealStrings.join(' - ');
 };
 
 const formatGuide = (day) => {
