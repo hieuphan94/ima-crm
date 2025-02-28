@@ -87,13 +87,30 @@ export const aggregatedLocation = (normalizedServices) => {
   // Use Set to keep unique locations while maintaining order
   const locations = [];
   servicesWithLocation.forEach((service) => {
-    const shortName = locationToShortName(service.location);
-    if (!locations.includes(shortName)) {
-      locations.push(shortName);
+    if (!locations.includes(service.location)) {
+      locations.push(service.location);
     }
   });
 
   return locations;
+};
+
+export const formatTitleToShortName = (title) => {
+  if (!title) return '';
+  if (title.includes('Bonjour')) {
+    title = locationToShortName(title.split('Bonjour')[1]);
+    return 'Bonjour ' + title;
+  }
+
+  if (title.includes('undefined')) {
+    title = locationToShortName(title.split('undefined')[1]);
+    return title;
+  }
+
+  return title
+    .split(' - ')
+    .map((location) => locationToShortName(location))
+    .join(' - ');
 };
 
 export const locationToTitle = (locations) => {
@@ -156,9 +173,7 @@ export const updateAllDayTitles = (scheduleItems) => {
 
     if (index > 0) {
       const previousDay = allDays[index - 1];
-      const previousLocation = locationToShortName(
-        getLastLocationOfDay(scheduleItems[previousDay])
-      );
+      const previousLocation = getLastLocationOfDay(scheduleItems[previousDay]);
       const currentFirstLocation = currentDayLocations[0];
 
       scheduleItems[dayId].titleOfDay =

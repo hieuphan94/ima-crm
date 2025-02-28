@@ -222,6 +222,8 @@ const useDailyScheduleSlice = createSlice({
           state.scheduleItems[day].finalLocation = lastLocation || '';
         }
 
+        console.log('lastLocation', lastLocation);
+
         // Update all day titles
         updateAllDayTitles(state.scheduleItems);
       }

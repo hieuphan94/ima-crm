@@ -6,9 +6,9 @@ import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { IoMdAdd } from 'react-icons/io';
 import { useDispatch } from 'react-redux';
 import { useDragDrop } from '../../states/useDragDrop';
+import { formatTitleToShortName } from '../../utils/formatters';
 import DayViewModal from './DayViewModal';
 import DeleteDayModal from './DeleteDayModal';
-
 const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -24,7 +24,7 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   } = useDragDrop();
 
   // Lấy titleOfDay từ daySchedule nếu có
-  const titleFromlocations = daySchedule?.titleOfDay || '';
+  const titleFromlocations = formatTitleToShortName(daySchedule?.titleOfDay || '');
 
   const handleDeleteDay = useCallback(() => {
     dispatch(removeDay({ dayId }));
