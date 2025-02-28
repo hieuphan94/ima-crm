@@ -1,8 +1,9 @@
 'use client';
 
-import { removeDay } from '@/store/slices/useDailyScheduleSlice';
+import { addOneDay, removeDay } from '@/store/slices/useDailyScheduleSlice';
 import { memo, useCallback, useState } from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
+import { IoMdAdd } from 'react-icons/io';
 import { useDispatch } from 'react-redux';
 import { useDragDrop } from '../../states/useDragDrop';
 import DayViewModal from './DayViewModal';
@@ -28,6 +29,14 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
   const handleDeleteDay = useCallback(() => {
     dispatch(removeDay({ dayId }));
     setIsDeleteModalOpen(false);
+  }, [dayId, dispatch]);
+
+  const handleAddOneDay = useCallback(() => {
+    try {
+      dispatch(addOneDay({ dayId }));
+    } catch (error) {
+      console.error('Error adding new day:', error);
+    }
   }, [dayId, dispatch]);
 
   return (
@@ -58,18 +67,15 @@ const DayHeader = memo(function DayHeader({ dayId, order, daySchedule }) {
             ''
           )}
         </h3>
-        <div className="flex gap-1">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="p-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200"
-          >
-            <FiEye size={14} />
+        <div className="flex gap-0.5">
+          <button onClick={() => setIsModalOpen(true)} className="text-black">
+            <FiEye size={12} />
           </button>
-          <button
-            onClick={() => setIsDeleteModalOpen(true)}
-            className="p-1 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
-          >
-            <FiTrash2 size={14} />
+          <button onClick={() => setIsDeleteModalOpen(true)} className="text-red-600 ml-1">
+            <FiTrash2 size={12} />
+          </button>
+          <button onClick={handleAddOneDay} className="text-blue-600 ml-1 p-1 bg-blue-200 rounded">
+            <IoMdAdd size={13} />
           </button>
         </div>
       </div>

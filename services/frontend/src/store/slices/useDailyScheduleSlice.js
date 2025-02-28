@@ -392,6 +392,42 @@ const useDailyScheduleSlice = createSlice({
       updateAllDayTitles(state.scheduleItems);
     },
 
+    addOneDay: (state, action) => {
+      const { dayId } = action.payload;
+      const newDayId = uuidv4();
+      const currentOrder = state.scheduleItems[dayId]?.order || 0;
+
+      // Increment order of all days after the current day
+      Object.entries(state.scheduleItems).forEach(([id, day]) => {
+        if (day.order > currentOrder) {
+          state.scheduleItems[id].order += 1;
+        }
+      });
+
+      // Add new day with default values
+      state.scheduleItems[newDayId] = {
+        order: currentOrder + 1,
+        distance: 0,
+        titleOfDay: '',
+        meals: {
+          breakfast: { included: false, type: '', price: 0 },
+          lunch: { included: false, type: '', price: 0 },
+          dinner: { included: false, type: '', price: 0 },
+        },
+        paragraphDay: {
+          paragraphFromLocation: '',
+          paragraphTotal: '',
+        },
+        guide: { included: true },
+      };
+
+      // Update numberOfDays in settings
+      state.settings.numberOfDays += 1;
+
+      // Update all day titles
+      updateAllDayTitles(state.scheduleItems);
+    },
+
     // Cập nhật lại action reorderDays
     reorderDays: (state, action) => {
       const { sourceDayId, targetDayId, sourceOrder, targetOrder } = action.payload;
@@ -600,6 +636,7 @@ export const {
   setDistance,
   initializeDays,
   removeDay,
+  addOneDay,
   reorderDays,
   setPaxChangeOfDay,
   resetDays,
