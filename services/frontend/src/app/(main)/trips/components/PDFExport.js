@@ -1,5 +1,5 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-
+import { normalizedServices } from './DailySchedule/utils/formatters';
 // Register Font - Noto Sans Vietnamese từ local
 Font.register({
   family: 'NotoSansVietnamese',
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   logoHeader: {
-    marginBottom: 10,
+    marginBottom: 0,
     justifyContent: 'center',
     width: '100%',
   },
@@ -143,23 +143,24 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   daySection: {
-    marginBottom: 10,
+    marginBottom: 0,
   },
   dayTitleContainer: {
     padding: 3,
   },
   dayTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'NotoSansVietnamese',
     fontWeight: 'bold',
     textAlign: 'center',
   },
   paragraph: {
-    marginVertical: 8,
+    marginVertical: 3,
     padding: 3,
+    marginBottom: 0,
   },
   text: {
-    fontSize: 11,
+    fontSize: 9,
     lineHeight: 1.5,
     fontFamily: 'NotoSansVietnamese',
   },
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontFamily: 'NotoSansVietnamese',
-    fontSize: 16,
+    fontSize: 12,
     padding: 3,
     textTransform: 'uppercase',
   },
@@ -212,23 +213,35 @@ const formatMeal = (day) => {
   if (day.meals.dinner.included === true) {
     mealStrings.push('Din');
   }
-  return mealStrings.join(' - ');
+  return 'Repas: ' + mealStrings.join(' - ');
 };
 
 const formatGuide = (day) => {
   let guideString = '';
   if (day.guide && day.guide.included === true) {
-    guideString += ' Avec Guide | ';
+    guideString += 'Avec Guide';
+  } else {
+    guideString += 'Son Guide';
   }
   return guideString;
 };
 
 const formatHotel = (day) => {
   let hotelString = '';
-  if (day.hotels && day.hotels.included === true) {
-    hotelString += ' Avec Hotel |';
+  const accomodationServices = normalizedServices(day).accommodation;
+  console.log('accomodationServices', accomodationServices);
+  if (accomodationServices.length > 0) {
+    hotelString += 'Hotel: ' + accomodationServices[0].name;
   }
   return hotelString;
+};
+
+const subDayString = (day) => {
+  let subDayString = [];
+  subDayString.push(formatMeal(day));
+  subDayString.push(formatGuide(day));
+  subDayString.push(formatHotel(day));
+  return subDayString.join(' | ');
 };
 
 const PDFDocument = ({
@@ -257,8 +270,6 @@ const PDFDocument = ({
 
   // Lấy thông tin từ scheduleInfo và settings
   const tripTitle = scheduleInfo?.title || 'Trip Schedule';
-
-  console.log('scheduleItems2', scheduleItems);
 
   return (
     <Document>
@@ -315,10 +326,7 @@ const PDFDocument = ({
                 </Text>
               </View>
               <View style={{ backgroundColor: '#FFDAB9', fontSize: 11, padding: 3 }}>
-                <Text>
-                  Repas: {`${formatMeal(day)}`} | Guide: {`${formatGuide(day)}`} | Hotel:{' '}
-                  {`${formatHotel(day)}`}
-                </Text>
+                <Text>{subDayString(day)}</Text>
               </View>
               {day.paragraphDay.paragraphTotal && (
                 <View style={styles.paragraph}>
