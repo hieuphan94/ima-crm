@@ -1,5 +1,4 @@
 import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
-import { normalizedServices } from './DailySchedule/utils/formatters';
 // Register Font - Noto Sans Vietnamese từ local
 Font.register({
   family: 'NotoSansVietnamese',
@@ -228,12 +227,22 @@ const formatGuide = (day) => {
 
 const formatHotel = (day) => {
   let hotelString = '';
-  const accomodationServices = normalizedServices(day).accommodation;
-  console.log('accomodationServices', accomodationServices);
-  if (accomodationServices.length > 0) {
-    hotelString += 'Hotel: ' + accomodationServices[0].name;
+  if (!day) return '';
+  if (day.services) {
+    day.services.forEach((service) => {
+      if (service.type === 'accommodation') {
+        return (hotelString += 'Hotel: ' + service.name);
+      }
+    });
   }
   return hotelString;
+
+  // const accomodationServices = normalizedServices(day).accommodation;
+
+  // if (accomodationServices.length > 0) {
+  //   hotelString += 'Hotel: ' + accomodationServices[0].name;
+  // }
+  // return hotelString;
 };
 
 const subDayString = (day) => {

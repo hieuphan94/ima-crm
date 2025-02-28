@@ -139,6 +139,7 @@ export const accommodationServices = (services) => {
 
 export const normalizedServices = (daySchedule) => {
   const timeKeys = timeKeysOnDaySchedule(daySchedule);
+  console.log('timeKeys', timeKeys);
 
   // Tạo mảng chứa tất cả services từ daySchedule
   const allServices = [];
