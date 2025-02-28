@@ -1,5 +1,12 @@
 // src/store/middleware/paragraph/index.js
 import { debounce } from 'lodash';
+import {
+  aggregatedLocation,
+  getLastLocationOfDay,
+  locationToShortName,
+  locationToTitle,
+  normalizedServices,
+} from '../../../app/(main)/trips/components/DailySchedule/utils/formatters';
 import { updateDayParagraph } from '../../slices/useDailyScheduleSlice';
 import { paragraphCache } from './cache';
 import { generateDescription } from './generator';
@@ -29,6 +36,27 @@ const TRACKED_ACTIONS = [
 
 // Map để track pending updates
 const pendingUpdates = new Map();
+
+// Thêm helper function mới
+const generateDayTitle = (scheduleItems, currentDayId) => {
+  const allDays = Object.keys(scheduleItems);
+  const currentDayIndex = allDays.indexOf(currentDayId);
+  const currentDayLocations = aggregatedLocation(normalizedServices(scheduleItems[currentDayId]));
+
+  if (currentDayIndex > 0) {
+    const previousDay = allDays[currentDayIndex - 1];
+    const previousLocation = locationToShortName(getLastLocationOfDay(scheduleItems[previousDay]));
+    const currentFirstLocation = currentDayLocations[0];
+
+    return previousLocation !== currentFirstLocation
+      ? `${previousLocation} - ${locationToTitle(currentDayLocations)}`
+      : locationToTitle(currentDayLocations);
+  }
+
+  return currentDayLocations.length === 1
+    ? `Bonjour ${locationToTitle(currentDayLocations)}`
+    : locationToTitle(currentDayLocations);
+};
 
 // Xử lý batch updates với debounce
 const processBatchUpdates = debounce((store) => {

@@ -2,8 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 import { v4 as uuidv4 } from 'uuid';
 import {
   aggregatedLocation,
+  getLastLocationOfDay,
   locationToTitle,
   normalizedServices,
+  updateAllDayTitles,
 } from '../../app/(main)/trips/components/DailySchedule/utils/formatters';
 
 const initialState = {
@@ -209,13 +211,19 @@ const useDailyScheduleSlice = createSlice({
 
       if (!state.scheduleItems[day][time].some((s) => s.id === service.id)) {
         state.scheduleItems[day][time].push(service);
+
         // Automatically update meals after adding service
         const meals = autoMealFromServiceFood(state.scheduleItems[day]);
         state.scheduleItems[day].meals = meals;
-        // Automatically update titleOfDay after adding service
-        state.scheduleItems[day].titleOfDay = locationToTitle(
-          aggregatedLocation(normalizedServices(state.scheduleItems[day]))
-        );
+
+        // Automatically update finalLocation after adding service
+        const lastLocation = getLastLocationOfDay(state.scheduleItems[day]);
+        if (lastLocation) {
+          state.scheduleItems[day].finalLocation = lastLocation || '';
+        }
+
+        // Update all day titles
+        updateAllDayTitles(state.scheduleItems);
       }
     },
 
@@ -252,6 +260,15 @@ const useDailyScheduleSlice = createSlice({
           aggregatedLocation(normalizedServices(state.scheduleItems[day]))
         );
       }
+
+      // Automatically update finalLocation after adding service
+      const lastLocation = getLastLocationOfDay(state.scheduleItems[day]);
+      if (lastLocation) {
+        state.scheduleItems[day].finalLocation = lastLocation || '';
+      }
+
+      // Update all day titles
+      updateAllDayTitles(state.scheduleItems);
     },
 
     reorderServices: (state, action) => {
@@ -290,6 +307,15 @@ const useDailyScheduleSlice = createSlice({
           aggregatedLocation(normalizedServices(state.scheduleItems[day]))
         );
       }
+
+      // Automatically update finalLocation after adding service
+      const lastLocation = getLastLocationOfDay(state.scheduleItems[day]);
+      if (lastLocation) {
+        state.scheduleItems[day].finalLocation = lastLocation || '';
+      }
+
+      // Update all day titles
+      updateAllDayTitles(state.scheduleItems);
     },
 
     // Modal
@@ -361,6 +387,9 @@ const useDailyScheduleSlice = createSlice({
 
       // Cập nhật numberOfDays trong settings
       state.settings.numberOfDays = remainingDays.length;
+
+      // Update all day titles
+      updateAllDayTitles(state.scheduleItems);
     },
 
     // Cập nhật lại action reorderDays
@@ -392,6 +421,8 @@ const useDailyScheduleSlice = createSlice({
           }
         }
       });
+      // Update all day titles
+      updateAllDayTitles(state.scheduleItems);
     },
 
     // Thêm action để cập nhật paxChangeOfDay
@@ -624,3 +655,5 @@ const autoMealFromServiceFood = (dayData) => {
 
   return meals;
 };
+
+// Thêm helper function mới

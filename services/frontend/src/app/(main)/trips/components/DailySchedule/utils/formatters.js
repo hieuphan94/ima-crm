@@ -45,6 +45,28 @@ export const timeKeysOnDaySchedule = (daySchedule) => {
     .sort();
 };
 
+export const getLastLocationOfDay = (dayServices) => {
+  if (!dayServices) return '';
+  const timeKeys = timeKeysOnDaySchedule(dayServices);
+  if (timeKeys && timeKeys.length > 0) {
+    if (timeKeys.length === 1) return dayServices[timeKeys[0]][0]?.location;
+    const lastTimeKey = timeKeys[timeKeys.length - 1];
+    const lastService = dayServices[lastTimeKey][dayServices[lastTimeKey].length - 1];
+    return lastService.location || '';
+  }
+};
+
+export const getFirstLocationOfDay = (dayServices) => {
+  if (!dayServices) return '';
+  const timeKeys = timeKeysOnDaySchedule(dayServices);
+  if (timeKeys && timeKeys.length > 0) {
+    if (timeKeys.length === 1) return dayServices[timeKeys[0]][0]?.location;
+    const firstTimeKey = timeKeys[0];
+    const firstService = dayServices[firstTimeKey][0];
+    return firstService.location || '';
+  }
+};
+
 export const locationToShortName = (location) => {
   if (!location) return '';
   const mainLocation = location.split(',')[0].trim();
@@ -122,4 +144,32 @@ export const normalizedServices = (daySchedule) => {
   };
 
   return servicesDivided;
+};
+
+export const updateAllDayTitles = (scheduleItems) => {
+  const allDays = Object.keys(scheduleItems).sort(
+    (a, b) => scheduleItems[a].order - scheduleItems[b].order
+  );
+
+  allDays.forEach((dayId, index) => {
+    const currentDayLocations = aggregatedLocation(normalizedServices(scheduleItems[dayId]));
+
+    if (index > 0) {
+      const previousDay = allDays[index - 1];
+      const previousLocation = locationToShortName(
+        getLastLocationOfDay(scheduleItems[previousDay])
+      );
+      const currentFirstLocation = currentDayLocations[0];
+
+      scheduleItems[dayId].titleOfDay =
+        previousLocation !== currentFirstLocation
+          ? `${previousLocation} - ${locationToTitle(currentDayLocations)}`
+          : locationToTitle(currentDayLocations);
+    } else {
+      scheduleItems[dayId].titleOfDay =
+        currentDayLocations.length === 1
+          ? `Bonjour ${locationToTitle(currentDayLocations)}`
+          : locationToTitle(currentDayLocations);
+    }
+  });
 };

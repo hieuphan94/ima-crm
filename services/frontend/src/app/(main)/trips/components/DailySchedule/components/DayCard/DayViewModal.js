@@ -222,17 +222,7 @@ function DayViewModal({ isOpen, onClose, order, dayId }) {
         {/* Header & Title, Location and Guides */}
         <div className="p-2 border-b border-gray-200 flex items-center justify-between">
           <span className="font-medium text-md text-gray-900">Jour {order}</span>
-          {location && (
-            <span className="text-sm font-sm text-gray-700 bg-gray-100 px-2 py-1 rounded flex items-center gap-1">
-              <span className="font-medium text-blue-600">📍 {locations[0]}</span>
-              {locations.slice(1).join(' - ').length > 0 && (
-                <>
-                  <span className="text-gray-400 mx-1">-</span>
-                  <span className="text-gray-600">{locations.slice(1).join(' - ')}</span>
-                </>
-              )}
-            </span>
-          )}
+          <span className="font-medium text-blue-600">📍 {titleOfDay}</span>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-xl transition-colors duration-200"
